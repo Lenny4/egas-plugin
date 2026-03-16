@@ -6,12 +6,12 @@ import { FormTabInterface } from "../../../interface/InputInterface";
 import { TOKEN } from "../../../token";
 
 type State = {
-  tabs: FormTabInterface;
+  formTab: FormTabInterface;
 };
 
-export const TabsComponent = ({ tabs }: State) => {
+export const TabsComponent = ({ formTab }: State) => {
   const [tabValue, setValue] = React.useState(
-    Number(tabs.tabProps?.defaultValue ?? 0),
+    Number(formTab.tabProps?.defaultValue ?? 0),
   );
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -22,30 +22,35 @@ export const TabsComponent = ({ tabs }: State) => {
     const handler = (e: any) => {
       setValue(Number(e.detail));
     };
-    window.addEventListener(`${TOKEN}-tabpanel-${tabs.id}`, handler);
+    window.addEventListener(`${TOKEN}-tabpanel-${formTab.id}`, handler);
     return () => {
-      window.removeEventListener(`${TOKEN}-tabpanel-${tabs.id}`, handler);
+      window.removeEventListener(`${TOKEN}-tabpanel-${formTab.id}`, handler);
     };
-  }, [tabs.id]);
+  }, [formTab.id]);
 
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
-          {...tabs.tabProps}
+          {...formTab.tabProps}
           value={tabValue}
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
-          aria-label="scrollable auto tabs"
+          aria-label="scrollable auto formTab"
         >
-          {tabs.tabs.map((tab, index) => (
+          {formTab.tabs.map((tab, index) => (
             <Tab label={tab.label} key={index} />
           ))}
         </Tabs>
       </Box>
-      {tabs.tabs.map((tab, index) => (
-        <CustomTabPanel value={tabValue} index={index} key={index} id={tabs.id}>
+      {formTab.tabs.map((tab, index) => (
+        <CustomTabPanel
+          value={tabValue}
+          index={index}
+          key={index}
+          id={formTab.id}
+        >
           {tab.dom}
         </CustomTabPanel>
       ))}

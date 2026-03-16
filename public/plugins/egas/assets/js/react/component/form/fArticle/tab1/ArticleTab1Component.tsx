@@ -325,7 +325,7 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
             props: {
               size: { xs: 12 },
             },
-            tabs: {
+            formTab: {
               id: "tab1-sub",
               tabs: [
                 {

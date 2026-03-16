@@ -19,7 +19,7 @@ export const FormContentComponent: React.FC<State> = ({
   content,
   transPrefix,
 }) => {
-  let { Container, props, Dom, fields, children, table, tabs } = content;
+  let { Container, props, Dom, fields, children, table, formTab } = content;
   Container = Container ?? defaultContainer;
   props = props ?? defaultProps;
 
@@ -48,7 +48,7 @@ export const FormContentComponent: React.FC<State> = ({
             ))}
           </>
         )}
-        {tabs && <TabsComponent tabs={tabs} />}
+        {formTab && <TabsComponent formTab={formTab} />}
       </Container>
     </>
   );

@@ -219,8 +219,8 @@ export const handleFormIsValid = async (
       }
     }
   }
-  if (formContent.tabs?.tabs) {
-    for (const [index, tab] of formContent.tabs.tabs.entries()) {
+  if (formContent.formTab?.tabs) {
+    for (const [index, tab] of formContent.formTab.tabs.entries()) {
       _mergeFormValidResult(result, await _validateTab(tab));
     }
   }

@@ -59,7 +59,7 @@ export interface FormContentInterface {
   fields?: FieldInterface[];
   children?: FormContentInterface[];
   table?: TableInterface;
-  tabs?: FormTabInterface; // todo change name to formTab
+  formTab?: FormTabInterface;
 }
 
 export interface TabFormValidInterface {

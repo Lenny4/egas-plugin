@@ -39,7 +39,7 @@ export const ArticleComponent = React.forwardRef((props, ref) => {
             props: {
               size: { xs: 12 },
             },
-            tabs: {
+            formTab: {
               id: "main-article",
               tabs: [
                 {
