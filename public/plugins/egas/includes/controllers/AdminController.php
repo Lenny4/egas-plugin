@@ -193,7 +193,7 @@ class AdminController
                     ],
                     [
                         'id' => $resource->getEntityName() . '_perPage',
-                        'label' => __('Nombre d\'élément par défaut par page', Sage::TOKEN),
+                        'label' => __("Nombre d'élément par défaut par page", Sage::TOKEN),
                         'description' => __('Veuillez sélectionner le nombre de lignes à afficher sur le tableau.', Sage::TOKEN),
                         'type' => 'select',
                         'options' => array_combine(Sage::$paginationRange, Sage::$paginationRange),
