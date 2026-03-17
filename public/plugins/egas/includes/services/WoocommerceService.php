@@ -175,6 +175,7 @@ class WoocommerceService
             getLivraison: true,
             getLotSerie: true,
             extended: true,
+            getFDocregls: true,
         );
         if (!is_array($extendedFDocentetes)) {
             return [null, null, $extendedFDocentetes, 0];
@@ -223,6 +224,7 @@ class WoocommerceService
         bool              $getTaxesChanges = false,
         bool              $getSerialChanges = false,
         bool              $getUserChanges = false,
+        bool              $getPaymentChanges = false,
     ): array
     {
         $result = [
@@ -242,6 +244,7 @@ class WoocommerceService
         $getTaxesChanges = $allChanges || $getTaxesChanges;
         $getSerialChanges = $allChanges || $getSerialChanges;
         $getUserChanges = $allChanges || $getUserChanges;
+        $getPaymentChanges = $allChanges || $getPaymentChanges;
         $sageService = SageService::getInstance();
         $fDoclignes = $sageService->getFDoclignes($extendedFDocentetes);
         $fDoclignes = array_values(array_filter($fDoclignes, fn(StdClass $fDocligne): bool => empty($fDocligne->canImport)));
@@ -275,6 +278,10 @@ class WoocommerceService
         if ($getUserChanges) {
             $userChanges = $sageService->getTasksSynchronizeOrder_User($order, $mainFDocentete);
             $result['syncChanges'] = [...$result['syncChanges'], ...$userChanges];
+        }
+        if ($getPaymentChanges) {
+            $paymentChanges = $sageService->getTasksSynchronizeOrder_Payment($order, $mainFDocentete);
+            $result['syncChanges'] = [...$result['syncChanges'], ...$paymentChanges];
         }
 
         $result['allProductsExistInWordpress'] = array_filter($fDoclignes, static fn(stdClass $fDocligne): bool => is_null($fDocligne->postId)) === [];
@@ -316,7 +323,6 @@ class WoocommerceService
         }
         // endregion
 
-
         foreach ($tasksSynchronizeOrder["syncChanges"] as $syncChange) {
             foreach ($syncChange['changes'] as $change) {
                 // todo use $order->add_order_note ?
@@ -337,6 +343,7 @@ class WoocommerceService
                     OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE, OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE => $message .= $this->updateUserMetas($order, $syncChange["new"]),
                     OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE => $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::BILLING_ADDRESS_TYPE),
                     OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE => $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::SHIPPING_ADDRESS_TYPE),
+                    OrderUtils::CHANGE_PAYMENT_ACTION => $message .= $this->changePaymentsOrder($order, $syncChange["new"]),
                     default => $message .= "<div class='notice notice-error is-dismissible'>
                     <p>" . __('Aucune action défini pour', Sage::TOKEN) . ": " . print_r($syncChange['changes'], true) . "</p>
                     </div>",
@@ -912,6 +919,14 @@ WHERE {$wpdb->posts}.post_type = 'product'
                 $coupon->delete();
             }
         }
+        return $message;
+    }
+
+    private function changePaymentsOrder(WC_Order $order, string $new): string
+    {
+        $message = '';
+        $order->update_meta_data('_' . Sage::TOKEN . '_fDocregls', $new);
+        $order->save_meta_data();
         return $message;
     }
 

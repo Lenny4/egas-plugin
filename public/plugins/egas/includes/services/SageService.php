@@ -435,6 +435,23 @@ WHERE user_login LIKE %s
         return $taxesChanges;
     }
 
+    public function getTasksSynchronizeOrder_Payment(WC_Order $order, stdClass $fDocentete): array
+    {
+        $paymentChanges = [];
+        $old = $order->get_meta('_' . Sage::TOKEN . '_fDocregls');
+        $new = json_encode($fDocentete->fDocregls, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+        if ($old !== $new) {
+            $paymentChanges[] = [
+                'old' => $old,
+                'new' => $new,
+                'changes' => [
+                    OrderUtils::CHANGE_PAYMENT_ACTION
+                ],
+            ];
+        }
+        return $paymentChanges;
+    }
+
     public function getTasksSynchronizeOrder_User(WC_Order $order, stdClass $fDocentete): array
     {
         $userChanges = [];

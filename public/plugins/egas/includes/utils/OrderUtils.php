@@ -27,6 +27,8 @@ final class OrderUtils
 
     public const CHANGE_ORDER_ADDRESS_TYPE_ACTION = 'change_order_address_type_action';
 
+    public const CHANGE_PAYMENT_ACTION = 'change_payment_action';
+
     public const BILLING_ADDRESS_TYPE = 'billing';
     public const SHIPPING_ADDRESS_TYPE = 'shipping';
     public const ALL_ADDRESS_TYPE = [

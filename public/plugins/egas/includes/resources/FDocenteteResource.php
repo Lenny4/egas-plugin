@@ -2,6 +2,7 @@
 
 namespace App\resources;
 
+use App\class\SageEntityMetadata;
 use App\enum\Sage\DomaineTypeEnum;
 use App\Sage;
 use App\services\GraphqlService;
@@ -46,51 +47,98 @@ class FDocenteteResource extends Resource
         ];
         $this->filterType = self::FILTER_TYPE;
         $this->transDomain = SageTranslationUtils::TRANS_FDOCENTETES;
-        $this->options = fn(): array => [
-            [
-                'id' => 'sage_create_new_' . self::ENTITY_NAME,
-                'label' => __("Créer le document de vente dans Sage.", Sage::TOKEN),
-                'description' => __("Créer le document de vente dans Sage lorsqu'une nouveaulle commande Wordpress est crée.", Sage::TOKEN),
-                'type' => 'checkbox',
-                'default' => 'off',
-            ],
-            [
-                'id' => 'sage_create_old_' . self::ENTITY_NAME,
-                'label' => __('Importe les anciennes commandes.', Sage::TOKEN),
-                'description' => __("Importe les anciennes commandes Woocommerce dans Sage.", Sage::TOKEN),
-                'type' => 'checkbox',
-                'default' => 'off',
-            ],
-            [
-                'id' => 'sage_update_' . self::ENTITY_NAME,
-                'label' => __("Met à jour le document de vente Sage.", Sage::TOKEN),
-                'description' => __("Met à jour le document de vente Sage lorsque la commande WooCommerce qui lui est lié est modifiée.", Sage::TOKEN),
-                'type' => 'checkbox',
-                'default' => 'off',
-            ],
-            [
-                'id' => 'website_create_new_' . self::ENTITY_NAME,
-                'label' => __("Créer la commande dans Woocommerce.", Sage::TOKEN),
-                'description' => __("Créer la commande dans Woocommerce lorsqu'un nouveau document de vente Sage est crée.", Sage::TOKEN),
-                'type' => 'resource',
-                'default' => '',
-            ],
-            [
-                'id' => 'website_create_old_' . self::ENTITY_NAME,
-                'label' => __("Importe les anciens documents de vente Sage.", Sage::TOKEN),
-                'description' => __("Importe les anciens documents de vente Sage dans WooCommerce.", Sage::TOKEN),
-                'type' => 'resource',
-                'default' => '',
-            ],
-            [
-                'id' => 'website_update_' . self::ENTITY_NAME,
-                'label' => __("Met à jour la commande Woocommerce.", Sage::TOKEN),
-                'description' => __("Met à jour la commande Woocommerce lorsque le document de vente Sage qui lui est lié est modifié.", Sage::TOKEN),
-                'type' => 'checkbox',
-                'default' => 'off',
-            ],
-        ];
+        $this->options = function (): array {
+            // region journal
+            $fJournauxs = GraphqlService::getInstance()->getFJournauxs();
+            $fJournauxsOptions = [];
+            $defaultFJournaux = "";
+            if (!empty($fJournauxs)) {
+                $defaultFJournaux = $fJournauxs[0]->joNum;
+                foreach ($fJournauxs as $fJournaux) {
+                    $fJournauxsOptions[$fJournaux->joNum] = "[$fJournaux->joNum] $fJournaux->joIntitule";
+                }
+            }
+            // endregion
+            // region pReglements
+            $pReglements = GraphqlService::getInstance()->getPReglements();
+            usort($pReglements, function (stdClass $a, stdClass $b) {
+                $word = 'carte';
+                similar_text($a->rIntitule, $word, $percA);
+                similar_text($b->rIntitule, $word, $percB);
+                return $percB <=> $percA;
+            });
+            $pReglementsOptions = [];
+            $defaultPReglement = "";
+            if (!empty($pReglements)) {
+                $defaultPReglement = $pReglements[0]->cbIndice;
+                foreach ($pReglements as $pReglement) {
+                    $pReglementsOptions[$pReglement->cbIndice] = "$pReglement->rIntitule";
+                }
+            }
+            // endregion
+            return [
+                [
+                    'id' => 'sage_create_new_' . self::ENTITY_NAME,
+                    'label' => __("Créer le document de vente dans Sage.", Sage::TOKEN),
+                    'description' => __("Créer le document de vente dans Sage lorsqu'une nouveaulle commande Wordpress est crée.", Sage::TOKEN),
+                    'type' => 'checkbox',
+                    'default' => 'off',
+                ],
+                [
+                    'id' => 'sage_create_old_' . self::ENTITY_NAME,
+                    'label' => __('Importe les anciennes commandes.', Sage::TOKEN),
+                    'description' => __("Importe les anciennes commandes Woocommerce dans Sage.", Sage::TOKEN),
+                    'type' => 'checkbox',
+                    'default' => 'off',
+                ],
+                [
+                    'id' => 'sage_update_' . self::ENTITY_NAME,
+                    'label' => __("Met à jour le document de vente Sage.", Sage::TOKEN),
+                    'description' => __("Met à jour le document de vente Sage lorsque la commande WooCommerce qui lui est lié est modifiée.", Sage::TOKEN),
+                    'type' => 'checkbox',
+                    'default' => 'off',
+                ],
+                [
+                    'id' => 'website_create_new_' . self::ENTITY_NAME,
+                    'label' => __("Créer la commande dans Woocommerce.", Sage::TOKEN),
+                    'description' => __("Créer la commande dans Woocommerce lorsqu'un nouveau document de vente Sage est crée.", Sage::TOKEN),
+                    'type' => 'resource',
+                    'default' => '',
+                ],
+                [
+                    'id' => 'website_create_old_' . self::ENTITY_NAME,
+                    'label' => __("Importe les anciens documents de vente Sage.", Sage::TOKEN),
+                    'description' => __("Importe les anciens documents de vente Sage dans WooCommerce.", Sage::TOKEN),
+                    'type' => 'resource',
+                    'default' => '',
+                ],
+                [
+                    'id' => 'website_update_' . self::ENTITY_NAME,
+                    'label' => __("Met à jour la commande Woocommerce.", Sage::TOKEN),
+                    'description' => __("Met à jour la commande Woocommerce lorsque le document de vente Sage qui lui est lié est modifié.", Sage::TOKEN),
+                    'type' => 'checkbox',
+                    'default' => 'off',
+                ],
+                [
+                    'id' => 'journal_payment_' . self::ENTITY_NAME,
+                    'label' => __("Journal comptable", Sage::TOKEN),
+                    'description' => __('Journal comptable dans lequel il faut écrire les paiements.', Sage::TOKEN),
+                    'type' => 'select',
+                    'options' => $fJournauxsOptions,
+                    'default' => $defaultFJournaux,
+                ],
+                [
+                    'id' => 'reglement_payment_' . self::ENTITY_NAME,
+                    'label' => __("Type de règlement", Sage::TOKEN),
+                    'description' => __('Type de règlement pour les paiements sur le site.', Sage::TOKEN),
+                    'type' => 'select',
+                    'options' => $pReglementsOptions,
+                    'default' => $defaultPReglement,
+                ],
+            ];
+        };
         $this->metadata = function (?stdClass $obj = null): array {
+            // /!\ attention pour les documents cette fonction n'est pas utilisé pour cela on utilise function applyTasksSynchronizeOrder
             $result = [
                 ...$this->getMandatoryMetadata(),
             ];
