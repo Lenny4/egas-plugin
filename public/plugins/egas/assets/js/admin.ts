@@ -523,4 +523,20 @@ $(() => {
   // region tooltip
   applyTippy();
   // endregion
+
+  // region remove readonly Refund amount
+  const observer = new MutationObserver(function (mutations, obs) {
+    const el = document.querySelector('[name="refund_amount"]');
+
+    if (el) {
+      el.removeAttribute("readonly");
+      obs.disconnect();
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+  // endregion
 });
