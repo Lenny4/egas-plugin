@@ -4,7 +4,7 @@ services:
     container_name: windows
     environment:
       VERSION: "10"
-      DISK_SIZE: "304G"
+      DISK_SIZE: "354G"
       RAM_SIZE: "12G"
       CPU_CORES: "10"
       USERNAME: "alex"
