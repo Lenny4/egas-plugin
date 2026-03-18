@@ -61,7 +61,7 @@ class FDocenteteResource extends Resource
             // endregion
             // region pReglements
             $pReglements = GraphqlService::getInstance()->getPReglements();
-            usort($pReglements, function (stdClass $a, stdClass $b) {
+            usort($pReglements, function (stdClass $a, stdClass $b): int {
                 $word = 'carte';
                 similar_text($a->rIntitule, $word, $percA);
                 similar_text($b->rIntitule, $word, $percB);

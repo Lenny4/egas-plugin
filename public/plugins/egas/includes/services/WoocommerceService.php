@@ -396,9 +396,7 @@ class WoocommerceService
             // which extends
             // woocommerce/includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
             $postArticle = $article;
-            $postArticle["categories"] = array_map(function (int $categoryId) {
-                return ['id' => $categoryId];
-            }, $postArticle["categories"]);
+            $postArticle["categories"] = array_map(fn(int $categoryId): array => ['id' => $categoryId], $postArticle["categories"]);
             [$response, $responseError] = SageService::getInstance()->createResource(
                 '/wc/v3/products',
                 'POST',
@@ -487,9 +485,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
         // https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
         $result = [
             'name' => $fArticle->arDesign,
-            'categories' => array_map(function (stdClass $fCatalogue) {
-                return $fCatalogue->websiteId;
-            }, $fCatalogues),
+            'categories' => array_map(fn(stdClass $fCatalogue) => $fCatalogue->websiteId, $fCatalogues),
             'meta_data' => [],
         ];
         foreach ($resource->getMetadata()($fArticle) as $metadata) {
