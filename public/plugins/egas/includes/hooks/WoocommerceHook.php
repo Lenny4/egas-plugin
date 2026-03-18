@@ -58,15 +58,15 @@ class WoocommerceHook
         }, accepted_args: 2);
         // endregion
         // todo woocommerce_payment_complete
-//        add_action('woocommerce_payment_complete', function ($null, $transactionId): void {
-//        }, accepted_args: 2);
-        add_filter('woocommerce_orders_table_query_sql', function (string $sql, OrdersTableQuery $table, array $args) {
-            return preg_replace(
-                "/IN\s*\(\s*('_billing_address_index'\s*,\s*'_shipping_address_index')\s*\)/",
-                "IN ($1, '_" . Sage::TOKEN . "_doPiece')",
-                $sql
-            );
-        }, accepted_args: 3);;
+        add_action('woocommerce_payment_complete', function (int $orderId): void {
+            $order = wc_get_order($orderId);
+            GraphqlService::getInstance()->addPayment($order);
+        });
+        add_filter('woocommerce_orders_table_query_sql', fn(string $sql, OrdersTableQuery $table, array $args): string|array|null => preg_replace(
+            "/IN\s*\(\s*('_billing_address_index'\s*,\s*'_shipping_address_index')\s*\)/",
+            "IN ($1, '_" . Sage::TOKEN . "_doPiece')",
+            $sql
+        ), accepted_args: 3);;
 
         add_filter('woocommerce_shipping_rate_cost', static fn(string $cost, WC_Shipping_Rate $wcShippingRate): string => (string)(WoocommerceService::getInstance()->getShippingRateCosts(WC()->cart, $wcShippingRate) ?? $cost), accepted_args: 2);
         add_filter('woocommerce_shipping_rate_label', static function (string $label, WC_Shipping_Rate $wcShippingRate): string {
@@ -296,7 +296,7 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
         }, 10, 2);
         // endregion
 
-        add_filter('woocommerce_order_item_display_meta_key', fn(string $key): string|array => SageTranslationUtils::trans($this->trans, 'words', $key));
+        add_filter('woocommerce_order_item_display_meta_key', fn(string $key): string|array => str_replace(' ', ' ', SageTranslationUtils::trans($this->trans, 'words', $key)));
         add_filter('woocommerce_order_item_display_meta_value', function (string $value, WC_Meta_Data $wcMetaData) {
             $data = $wcMetaData->get_data();
             if ($data['key'] === '_' . Sage::TOKEN . '_fLotseriesOut' && $data['value'] !== 'null') {
@@ -308,12 +308,12 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
             return $value;
         }, accepted_args: 3);
 
-        add_filter('manage_edit-product_cat_columns', function ($columns) {
+        add_filter('manage_edit-product_cat_columns', function (array $columns) {
             // Ajouter la colonne 'Egas' après le nom
             $columns[Sage::TOKEN] = __("Sage", Sage::TOKEN);
             return $columns;
         });
-        add_action('manage_product_cat_custom_column', function ($content, $column_name, $term_id) {
+        add_action('manage_product_cat_custom_column', function (string $content, string $column_name, int $term_id): void {
             if (Sage::TOKEN === $column_name) {
                 $clNo = get_term_meta($term_id, '_' . Sage::TOKEN . '_clNo', true);
                 echo $clNo ?

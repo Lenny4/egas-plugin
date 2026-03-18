@@ -4,6 +4,7 @@ namespace App\services;
 
 use App\class\dto\ArgumentSelectionSetDto;
 use App\controllers\AdminController;
+use App\enum\Sage\DomaineTypeEnum;
 use App\enum\Sage\JournalTypeEnum;
 use App\enum\WebsiteEnum;
 use App\resources\CbSyslibreResource;
@@ -40,6 +41,7 @@ use ReflectionMethod;
 use RuntimeException;
 use stdClass;
 use Throwable;
+use WC_Order;
 
 class GraphqlService
 {
@@ -146,6 +148,77 @@ class GraphqlService
         }
     }
 
+    public function addPayment(
+        WC_Order $order,
+        ?float   $amount = null,
+        string   $transactionId = '',
+        string   $paymentMethod = '',
+        bool     $getError = false,
+    ): StdClass|null|string
+    {
+        $fDocenteteIdentifier = WoocommerceService::getInstance()->getFDocenteteIdentifierFromOrder($order);
+        if (is_null($fDocenteteIdentifier)) {
+            return null;
+        }
+        if (is_null($amount)) {
+            $transactionId = $order->get_transaction_id();
+            $paymentMethod = $order->get_payment_method_title();
+            $total = $order->get_total();
+            $refunded = (float)$order->get_total_refunded();
+            $amount = $total - $refunded;
+        }
+        if (empty($amount)) {
+            return null;
+        }
+        $extendedFDocentetes = $this->getFDocentetes(
+            $fDocenteteIdentifier["doPiece"],
+            [$fDocenteteIdentifier["doType"]],
+        );
+        if (empty($extendedFDocentetes)) {
+            return null;
+        }
+        usort($extendedFDocentetes, function (stdClass $a, stdClass $b) use ($fDocenteteIdentifier) {
+            if ($a->doPiece === $fDocenteteIdentifier["doPiece"] && $a->doType === $fDocenteteIdentifier["doType"]) {
+                return -1;
+            }
+            if ($b->doPiece === $fDocenteteIdentifier["doPiece"] && $b->doType === $fDocenteteIdentifier["doType"]) {
+                return 1;
+            }
+            return $b->doType <=> $a->doType;
+        });
+        $extendedFDocentetes = array_values($extendedFDocentetes);
+        $mutation = (new Mutation('createUpdateFDocentete'))
+            ->setVariables([new Variable('fDocenteteCreateUpdateDto', 'FDocenteteCreateUpdateDtoInput', true)])
+            ->setArguments(['fDocenteteCreateUpdateDto' => '$fDocenteteCreateUpdateDto'])
+            ->setSelectionSet(
+                [
+                    'doPiece',
+                    'doType',
+                ]
+            );
+        $variables = [
+            'fDocenteteCreateUpdateDto' => [
+                'doDomaine' => DomaineTypeEnum::DomaineTypeVente,
+                'fDocenteteDestinationDto' => [
+                    'new' => false,
+                    'doPiece' => $extendedFDocentetes[0]->doPiece,
+                    'doType' => $extendedFDocentetes[0]->doType,
+                ],
+                'fReglementDtos' => [
+                    [
+                        'joNum' => get_option(Sage::TOKEN . '_journal_payment_' . FDocenteteResource::ENTITY_NAME),
+                        'rgReference' => substr($transactionId, 0, 17),
+                        'rgLibelle' => substr($paymentMethod, 0, 17),
+                        'rgMontant' => $amount,
+                        'cbIndicePReglement' => (int)get_option(Sage::TOKEN . '_reglement_payment_' . FDocenteteResource::ENTITY_NAME) ?: null,
+                        'removePieceAcompte' => !filter_var(get_option(Sage::TOKEN . '_document_acompte_payment' . FDocenteteResource::ENTITY_NAME, true), FILTER_VALIDATE_BOOLEAN),
+                    ]
+                ]
+            ],
+        ];
+        return $this->runQuery($mutation, $getError, $variables);
+    }
+
     public function createUpdateWebsite(
         string $username,
         string $password,
@@ -201,6 +274,7 @@ class GraphqlService
                 'pluginVersion' => get_plugin_data(Sage::getInstance()->file)['Version'],
                 'paymentJoNum' => get_option(Sage::TOKEN . '_journal_payment_' . FDocenteteResource::ENTITY_NAME),
                 'paymentPReglementCbIndice' => (int)get_option(Sage::TOKEN . '_reglement_payment_' . FDocenteteResource::ENTITY_NAME) ?: null,
+                'createAcompteDocument' => filter_var(get_option(Sage::TOKEN . '_document_acompte_payment' . FDocenteteResource::ENTITY_NAME, true), FILTER_VALIDATE_BOOLEAN),
 
                 'nbThreads' => (int)get_option(Sage::TOKEN . '_nb_threads', null),
                 'sageCreateNewFComptet' => filter_var(get_option(Sage::TOKEN . '_sage_create_new_' . FComptetResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),

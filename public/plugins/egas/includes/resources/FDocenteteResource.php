@@ -135,6 +135,13 @@ class FDocenteteResource extends Resource
                     'options' => $pReglementsOptions,
                     'default' => $defaultPReglement,
                 ],
+                [
+                    'id' => 'document_acompte_payment' . self::ENTITY_NAME,
+                    'label' => __("Créer un document d'acompte pour les paiements et remboursements.", Sage::TOKEN),
+                    'description' => __("Lorsqu’un paiement est effectué sur le site pour une commande associée à un document de vente dans Sage, et que ce document est à un stade antérieur à celui de facture, un document d’acompte est alors créé dans Sage afin de refléter le paiement ou le remboursement.", Sage::TOKEN),
+                    'type' => 'checkbox',
+                    'default' => 'on',
+                ],
             ];
         };
         $this->metadata = function (?stdClass $obj = null): array {
