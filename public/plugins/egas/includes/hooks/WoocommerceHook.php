@@ -14,6 +14,7 @@ use App\services\TwigService;
 use App\services\WoocommerceService;
 use App\utils\SageTranslationUtils;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
+use DateTime;
 use stdClass;
 use WC_Meta_Data;
 use WC_Order;
@@ -57,10 +58,16 @@ class WoocommerceHook
             WoocommerceService::getInstance()->afterCreateOrEditOrder($order, true);
         }, accepted_args: 2);
         // endregion
-        // todo woocommerce_payment_complete
-        add_action('woocommerce_payment_complete', function (int $orderId): void {
+        $updateApiOrder = function (int $orderId): void {
             $order = wc_get_order($orderId);
-            GraphqlService::getInstance()->addPayment($order);
+            $order->update_meta_data('_' . Sage::TOKEN . '_updateApi', (new DateTime())->format('Y-m-d H:i:s'));
+            $order->save();
+        };
+        add_action('woocommerce_payment_complete', function (int $orderId) use ($updateApiOrder): void {
+            $updateApiOrder($orderId);
+        });
+        add_action('woocommerce_order_refunded', function (int $orderId) use ($updateApiOrder): void {
+            $updateApiOrder($orderId);
         });
         add_filter('woocommerce_orders_table_query_sql', fn(string $sql, OrdersTableQuery $table, array $args): string|array|null => preg_replace(
             "/IN\s*\(\s*('_billing_address_index'\s*,\s*'_shipping_address_index')\s*\)/",
