@@ -15,6 +15,7 @@ use App\resources\Resource;
 use App\Sage;
 use App\utils\OrderUtils;
 use App\utils\TaxeUtils;
+use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;
 use WC_Cart;
@@ -26,6 +27,7 @@ use WC_Product;
 use WC_Product_Simple;
 use WC_Shipping_Rate;
 use WC_Tax;
+use WP_Error;
 use WP_Term;
 use WP_User;
 
@@ -918,14 +920,6 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    private function changePaymentsOrder(WC_Order $order, string $new): string
-    {
-        $message = '';
-        $order->update_meta_data('_' . Sage::TOKEN . '_fDocregls', $new);
-        $order->save_meta_data();
-        return $message;
-    }
-
     private function changeCustomerOrder(WC_Order $order, stdClass $new): string
     {
         $message = '';
@@ -998,6 +992,50 @@ WHERE {$wpdb->posts}.post_type = 'product'
             $order->{'set_' . $addressType . '_' . $key}($value ?? ''); // doesn't accept null value
         }
         $order->save();
+        return $message;
+    }
+
+    private function changePaymentsOrder(WC_Order $order, array $new): string
+    {
+        $message = "";
+        $isPaid = !is_null($order->get_date_paid());
+        $refunds = $order->get_refunds();
+        $currentRefunds = array_map(fn(OrderRefund $refund): array => [
+            'id' => $refund->get_id(),
+            'amount' => round((float)$refund->get_total(), 2),
+        ], $refunds);
+        $currentRefundIds = array_map(static fn(array $refund): int => $refund['id'], $currentRefunds);
+        $newRefundIds = array_values(array_filter(array_map(static fn(array $refund): ?int => $refund['id'], $new["refunds"])));
+
+        $refundToRemove = array_values(array_diff($newRefundIds, $currentRefundIds));
+        foreach ($currentRefunds as $refundArray) {
+            if (in_array($refundArray["id"], $refundToRemove)) {
+                /** @var OrderRefund $refund */
+                $refund = current(array_filter($refunds, fn(OrderRefund $refund) => $refund->get_id() === $refundArray["id"]));
+                $refund->delete();
+            }
+        }
+        foreach ($new["refunds"] as $refundArray) {
+            if (!is_null($refundArray['id'])) {
+                continue;
+            }
+            $refund = wc_create_refund([
+                'amount' => (string)abs($refundArray['amount']),
+                'reason' => '',
+                'order_id' => $order->get_id(),
+                'line_items' => [],
+                'refund_payment' => false,
+                'restock_items' => false,
+            ]);
+            if ($refund instanceof WP_Error) {
+                $message .= "<div class='notice notice-error is-dismissible'>
+                    <p>" . $refund->get_error_message() . "</p>
+                    </div>";
+            }
+        }
+        if ($new["isPaid"] && $new["isPaid"] !== $isPaid) {
+            $order->payment_complete();
+        }
         return $message;
     }
 

@@ -14,7 +14,6 @@ use App\services\TwigService;
 use App\services\WoocommerceService;
 use App\utils\SageTranslationUtils;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
-use DateTime;
 use stdClass;
 use WC_Meta_Data;
 use WC_Order;
@@ -73,7 +72,7 @@ class WoocommerceHook
             "/IN\s*\(\s*('_billing_address_index'\s*,\s*'_shipping_address_index')\s*\)/",
             "IN ($1, '_" . Sage::TOKEN . "_doPiece')",
             $sql
-        ), accepted_args: 3);;
+        ), accepted_args: 3);
 
         add_filter('woocommerce_shipping_rate_cost', static fn(string $cost, WC_Shipping_Rate $wcShippingRate): string => (string)(WoocommerceService::getInstance()->getShippingRateCosts(WC()->cart, $wcShippingRate) ?? $cost), accepted_args: 2);
         add_filter('woocommerce_shipping_rate_label', static function (string $label, WC_Shipping_Rate $wcShippingRate): string {

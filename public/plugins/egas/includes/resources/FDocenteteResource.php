@@ -2,7 +2,6 @@
 
 namespace App\resources;
 
-use App\class\SageEntityMetadata;
 use App\enum\Sage\DomaineTypeEnum;
 use App\Sage;
 use App\services\GraphqlService;

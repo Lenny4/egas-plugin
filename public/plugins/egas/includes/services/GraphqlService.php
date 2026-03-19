@@ -4,7 +4,6 @@ namespace App\services;
 
 use App\class\dto\ArgumentSelectionSetDto;
 use App\controllers\AdminController;
-use App\enum\Sage\DomaineTypeEnum;
 use App\enum\Sage\JournalTypeEnum;
 use App\enum\WebsiteEnum;
 use App\resources\CbSyslibreResource;
@@ -41,7 +40,6 @@ use ReflectionMethod;
 use RuntimeException;
 use stdClass;
 use Throwable;
-use WC_Order;
 
 class GraphqlService
 {
@@ -727,107 +725,6 @@ class GraphqlService
         return $this->pExpeditions;
     }
 
-    public function _getFJournauxsSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'joNum',
-                'joIntitule',
-                'joType',
-            ]),
-        ];
-    }
-
-    public function _getPReglementSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'rIntitule',
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'cbIndice',
-            ]),
-        ];
-    }
-
-    public function getFJournauxs(
-        bool  $useCache = true,
-        ?bool $getFromSage = null,
-        bool  $getError = false,
-    ): array|null|string
-    {
-        if (!is_null($this->fJournauxs) && $getFromSage !== true) {
-            return $this->fJournauxs;
-        }
-        $entityName = FJournauxsResource::ENTITY_NAME;
-        $cacheName = $useCache ? Sage::TOKEN . '_' . $entityName : null;
-        $queryParams = [
-            "filter" => [
-                'condition' => 'and',
-                'values' => [
-                    [
-                        'field' => 'joType',
-                        'condition' => 'eq',
-                        'value' => JournalTypeEnum::JournalTypeTresorerie,
-                    ]
-                ],
-            ],
-            "sort" => '{"joNum": "asc"}',
-            "paged" => "1",
-            "per_page" => "50"
-        ];
-        $selectionSets = $this->_getFJournauxsSelectionSet();
-        $fJournauxs = $this->getEntitiesAndSaveInOption(
-            $cacheName,
-            $getFromSage,
-            $entityName,
-            $queryParams,
-            $selectionSets,
-            $getError,
-        );
-        $this->fJournauxs = $fJournauxs;
-        return $this->fJournauxs;
-    }
-
-    public function getPReglements(
-        bool  $useCache = true,
-        ?bool $getFromSage = null,
-        bool  $getError = false,
-    ): array|null|string
-    {
-        if (!is_null($this->pReglements) && $getFromSage !== true) {
-            return $this->pReglements;
-        }
-        $entityName = PReglementResource::ENTITY_NAME;
-        $cacheName = $useCache ? Sage::TOKEN . '_' . $entityName : null;
-        $queryParams = [
-            "filter" => [
-                'condition' => 'and',
-                'values' => [
-                    [
-                        'field' => 'rIntitule',
-                        'condition' => 'neq',
-                        'value' => '',
-                    ]
-                ],
-            ],
-            "sort" => '{"cbIndice": "asc"}',
-            "paged" => "1",
-            "per_page" => "50"
-        ];
-        $selectionSets = $this->_getPReglementSelectionSet();
-        $pReglements = $this->getEntitiesAndSaveInOption(
-            $cacheName,
-            $getFromSage,
-            $entityName,
-            $queryParams,
-            $selectionSets,
-            $getError,
-        );
-        $this->pReglements = $pReglements;
-        return $this->pReglements;
-    }
-
     public function _getPExpeditionSelectionSet(): array
     {
         return [
@@ -1073,6 +970,107 @@ class GraphqlService
             ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
                 'egBorne',
                 'egFrais',
+            ]),
+        ];
+    }
+
+    public function getFJournauxs(
+        bool  $useCache = true,
+        ?bool $getFromSage = null,
+        bool  $getError = false,
+    ): array|null|string
+    {
+        if (!is_null($this->fJournauxs) && $getFromSage !== true) {
+            return $this->fJournauxs;
+        }
+        $entityName = FJournauxsResource::ENTITY_NAME;
+        $cacheName = $useCache ? Sage::TOKEN . '_' . $entityName : null;
+        $queryParams = [
+            "filter" => [
+                'condition' => 'and',
+                'values' => [
+                    [
+                        'field' => 'joType',
+                        'condition' => 'eq',
+                        'value' => JournalTypeEnum::JournalTypeTresorerie,
+                    ]
+                ],
+            ],
+            "sort" => '{"joNum": "asc"}',
+            "paged" => "1",
+            "per_page" => "50"
+        ];
+        $selectionSets = $this->_getFJournauxsSelectionSet();
+        $fJournauxs = $this->getEntitiesAndSaveInOption(
+            $cacheName,
+            $getFromSage,
+            $entityName,
+            $queryParams,
+            $selectionSets,
+            $getError,
+        );
+        $this->fJournauxs = $fJournauxs;
+        return $this->fJournauxs;
+    }
+
+    public function _getFJournauxsSelectionSet(): array
+    {
+        return [
+            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
+                'joNum',
+                'joIntitule',
+                'joType',
+            ]),
+        ];
+    }
+
+    public function getPReglements(
+        bool  $useCache = true,
+        ?bool $getFromSage = null,
+        bool  $getError = false,
+    ): array|null|string
+    {
+        if (!is_null($this->pReglements) && $getFromSage !== true) {
+            return $this->pReglements;
+        }
+        $entityName = PReglementResource::ENTITY_NAME;
+        $cacheName = $useCache ? Sage::TOKEN . '_' . $entityName : null;
+        $queryParams = [
+            "filter" => [
+                'condition' => 'and',
+                'values' => [
+                    [
+                        'field' => 'rIntitule',
+                        'condition' => 'neq',
+                        'value' => '',
+                    ]
+                ],
+            ],
+            "sort" => '{"cbIndice": "asc"}',
+            "paged" => "1",
+            "per_page" => "50"
+        ];
+        $selectionSets = $this->_getPReglementSelectionSet();
+        $pReglements = $this->getEntitiesAndSaveInOption(
+            $cacheName,
+            $getFromSage,
+            $entityName,
+            $queryParams,
+            $selectionSets,
+            $getError,
+        );
+        $this->pReglements = $pReglements;
+        return $this->pReglements;
+    }
+
+    public function _getPReglementSelectionSet(): array
+    {
+        return [
+            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
+                'rIntitule',
+            ]),
+            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
+                'cbIndice',
             ]),
         ];
     }
@@ -1430,49 +1428,6 @@ WHERE meta_key = %s
         return $result;
     }
 
-    public function _getFDocreglSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'drNo',
-            ]),
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'drMontant',
-            ]),
-            'fRegleches' => $this->_getFReglecheSelectionSet(),
-        ];
-    }
-
-    public function _getFReglecheSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'rcMontant',
-            ]),
-            'fCreglement' => $this->_getFCreglementSelectionSet(),
-        ];
-    }
-
-    public function _getFCreglementSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'rgNo',
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'ctNumPayeur',
-                'rgDate',
-                'rgReference',
-                'rgLibelle',
-                'joNum',
-                'cgNum',
-            ]),
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'rgMontant',
-            ]),
-        ];
-    }
-
     public function _getFraisExpeditionSelectionSet(): array
     {
         return [
@@ -1572,6 +1527,49 @@ WHERE meta_key = %s
                 'liEmail',
                 'liAdresseFact',
                 'liCodeRegion',
+            ]),
+        ];
+    }
+
+    public function _getFDocreglSelectionSet(): array
+    {
+        return [
+            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
+                'drNo',
+            ]),
+            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
+                'drMontant',
+            ]),
+            'fRegleches' => $this->_getFReglecheSelectionSet(),
+        ];
+    }
+
+    public function _getFReglecheSelectionSet(): array
+    {
+        return [
+            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
+                'rcMontant',
+            ]),
+            'fCreglement' => $this->_getFCreglementSelectionSet(),
+        ];
+    }
+
+    public function _getFCreglementSelectionSet(): array
+    {
+        return [
+            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
+                'rgNo',
+            ]),
+            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
+                'ctNumPayeur',
+                'rgDate',
+                'rgReference',
+                'rgLibelle',
+                'joNum',
+                'cgNum',
+            ]),
+            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
+                'rgMontant',
             ]),
         ];
     }

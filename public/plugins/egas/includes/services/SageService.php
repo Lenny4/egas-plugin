@@ -14,6 +14,7 @@ use App\utils\OrderUtils;
 use App\utils\PathUtils;
 use App\utils\RoundUtils;
 use App\utils\SageTranslationUtils;
+use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use Exception;
 use StdClass;
 use Swaggest\JsonDiff\JsonDiff;
@@ -437,10 +438,60 @@ WHERE user_login LIKE %s
 
     public function getTasksSynchronizeOrder_Payment(WC_Order $order, stdClass $fDocentete): array
     {
+        $fCreglements = array_values(array_filter(array_map(
+            fn($fRegleche) => $fRegleche->fCreglement ?? null,
+            array_merge(...array_map(
+                fn($fDocregl) => $fDocregl->fRegleches ?? [],
+                $fDocentete->fDocregls
+            ))
+        )));
+        $refunds = $order->get_refunds();
+        $old = [
+            'refunds' => array_map(fn(OrderRefund $refund): array => [
+                'id' => $refund->get_id(),
+                'amount' => round((float)$refund->get_total(), 2),
+            ], $refunds),
+            'isPaid' => !is_null($order->get_date_paid()),
+        ];
+        $new = [
+            'refunds' => [],
+            'isPaid' => array_sum(array_map(
+                    fn(stdClass $fCreglement): float => round((float)$fCreglement->rgMontant, 2),
+                    array_filter($fCreglements, fn(stdClass $fCreglement): bool => $fCreglement->rgMontant > 0)
+                )) >= round((float)$order->get_total(), 2),
+        ];
+        foreach ($fCreglements as $fCreglement) {
+            if ($fCreglement->rgMontant >= 0) {
+                continue;
+            }
+            $refundIndex = key(array_filter(
+                $refunds,
+                fn($refund): bool => round((float)$refund->get_total(), 2) === round((float)$fCreglement->rgMontant, 2)
+            ));
+            if ($refundIndex >= 0 && !is_null($refundIndex)) {
+                $new['refunds'][] = [
+                    'id' => $refunds[$refundIndex]->get_id(),
+                    'amount' => round((float)$refunds[$refundIndex]->get_total(), 2),
+                ];
+                unset($refunds[$refundIndex]);
+            } else {
+                $new['refunds'][] = [
+                    'id' => null,
+                    'amount' => round((float)$fCreglement->rgMontant, 2),
+                ];
+            }
+        }
+        $sortRefund = fn(array $a, array $b): int => [$a['id'], $a['amount']] <=> [$b['id'], $b['amount']];
+        usort($old["refunds"], $sortRefund);
+        usort($new["refunds"], $sortRefund);
+        $old["refunds"] = array_values($old["refunds"]);
+        $new["refunds"] = array_values($new["refunds"]);
+
         $paymentChanges = [];
-        $old = $order->get_meta('_' . Sage::TOKEN . '_fDocregls');
-        $new = json_encode($fDocentete->fDocregls, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-        if ($old !== $new) {
+        if (
+            json_encode($new, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) !==
+            json_encode($old, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)
+        ) {
             $paymentChanges[] = [
                 'old' => $old,
                 'new' => $new,
@@ -712,6 +763,15 @@ WHERE user_login LIKE %s
         return [true, null, $showSuccessMessage ? "<div class='notice notice-success is-dismissible'>
                         " . __('L\'utilisateur a été créé', Sage::TOKEN) . $url . "
                                 </div>" : "", $userId];
+    }
+
+    public function getEmailFromFComptet(stdClass $fComptet): string
+    {
+        $email = explode(';', $fComptet->ctEmail ?? '')[0];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $email = $fComptet->ctNum . '@nomail.com';
+        }
+        return strtolower($email);
     }
 
     public function getFieldsForEntity(
@@ -993,14 +1053,5 @@ ORDER BY {$metaTable2}.meta_key = '{$metaKeyIdentifier}' DESC
             $hasChanges,
             $changeTypes
         ];
-    }
-
-    public function getEmailFromFComptet(stdClass $fComptet): string
-    {
-        $email = explode(';', $fComptet->ctEmail ?? '')[0];
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $email = $fComptet->ctNum . '@nomail.com';
-        }
-        return strtolower($email);
     }
 }
