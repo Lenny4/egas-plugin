@@ -328,27 +328,65 @@ class WoocommerceService
         foreach ($tasksSynchronizeOrder["syncChanges"] as $syncChange) {
             foreach ($syncChange['changes'] as $change) {
                 // todo use $order->add_order_note ?
-                match ($change) {
-                    OrderUtils::ADD_PRODUCT_ACTION => $message .= $this->addProductToOrder($order, $syncChange["new"]->postId, $syncChange["new"]->quantity, $syncChange["new"], $alreadyAddedTaxes),
-                    OrderUtils::CHANGE_PRICE_PRODUCT_ACTION => $message .= $this->changePriceProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->linePriceHt),
-                    OrderUtils::CHANGE_TAXES_PRODUCT_ACTION => $message .= $this->changeTaxesProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->taxes, $alreadyAddedTaxes),
-                    OrderUtils::CHANGE_SERIAL_PRODUCT_OUT_ACTION => $message .= $this->changeSerialOutProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->fLotseriesOut),
-                    OrderUtils::REPLACE_PRODUCT_ACTION => $message .= $this->replaceProductToOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->postId, $syncChange["new"], $alreadyAddedTaxes),
-                    OrderUtils::ADD_SHIPPING_ACTION => $message .= $this->addShippingToOrder($order, $syncChange["new"], $alreadyAddedTaxes),
-                    OrderUtils::REMOVE_SHIPPING_ACTION => $message .= $this->removeShippingToOrder($order, $syncChange["old"]->id),
-                    OrderUtils::UPDATE_WC_ORDER_ITEM_TAX_ACTION => $message .= $this->updateWcOrderItemTaxToOrder($order, $syncChange["new"], $alreadyAddedTaxes),
-                    OrderUtils::REMOVE_PRODUCT_ACTION => $message .= $this->removeProductOrder($order, $syncChange["old"]->itemId),
-                    OrderUtils::CHANGE_QUANTITY_PRODUCT_ACTION => $message .= $this->changeQuantityProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->quantity),
-                    OrderUtils::REMOVE_FEE_ACTION => $message .= $this->removeFeeOrder($order, $syncChange["old"]->id),
-                    OrderUtils::REMOVE_COUPON_ACTION => $message .= $this->removeCouponOrder($order, $syncChange["old"]->id),
-                    OrderUtils::CHANGE_CUSTOMER_ACTION => $message .= $this->changeCustomerOrder($order, $syncChange["new"]),
-                    OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE, OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE => $message .= $this->updateUserMetas($order, $syncChange["new"]),
-                    OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE => $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::BILLING_ADDRESS_TYPE),
-                    OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE => $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::SHIPPING_ADDRESS_TYPE),
-                    OrderUtils::CHANGE_PAYMENT_ACTION => $message .= $this->changePaymentsOrder($order, $syncChange["new"]),
-                    default => $message .= "<div class='notice notice-error is-dismissible'>
-                    <p>" . __('Aucune action défini pour', Sage::TOKEN) . ": " . print_r($syncChange['changes'], true) . "</p>
-                    </div>",
+                switch ($change) {
+                    case OrderUtils::ADD_PRODUCT_ACTION:
+                        $message .= $this->addProductToOrder($order, $syncChange["new"]->postId, $syncChange["new"]->quantity, $syncChange["new"], $alreadyAddedTaxes);
+                        break;
+                    case OrderUtils::CHANGE_PRICE_PRODUCT_ACTION:
+                        $message .= $this->changePriceProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->linePriceHt);
+                        break;
+                    case OrderUtils::CHANGE_TAXES_PRODUCT_ACTION:
+                        $message .= $this->changeTaxesProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->taxes, $alreadyAddedTaxes);
+                        break;
+                    case OrderUtils::CHANGE_SERIAL_PRODUCT_OUT_ACTION:
+                        $message .= $this->changeSerialOutProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->fLotseriesOut);
+                        break;
+                    case OrderUtils::REPLACE_PRODUCT_ACTION:
+                        $message .= $this->replaceProductToOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->postId, $syncChange["new"], $alreadyAddedTaxes);
+                        break;
+                    case OrderUtils::ADD_SHIPPING_ACTION:
+                        $message .= $this->addShippingToOrder($order, $syncChange["new"], $alreadyAddedTaxes);
+                        break;
+                    case OrderUtils::REMOVE_SHIPPING_ACTION:
+                        $message .= $this->removeShippingToOrder($order, $syncChange["old"]->id);
+                        break;
+                    case OrderUtils::UPDATE_WC_ORDER_ITEM_TAX_ACTION:
+                        $message .= $this->updateWcOrderItemTaxToOrder($order, $syncChange["new"], $alreadyAddedTaxes);
+                        break;
+                    case OrderUtils::REMOVE_PRODUCT_ACTION:
+                        $message .= $this->removeProductOrder($order, $syncChange["old"]->itemId);
+                        break;
+                    case OrderUtils::CHANGE_QUANTITY_PRODUCT_ACTION:
+                        $message .= $this->changeQuantityProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->quantity);
+                        break;
+                    case OrderUtils::REMOVE_FEE_ACTION:
+                        $message .= $this->removeFeeOrder($order, $syncChange["old"]->id);
+                        break;
+                    case OrderUtils::REMOVE_COUPON_ACTION:
+                        $message .= $this->removeCouponOrder($order, $syncChange["old"]->id);
+                        break;
+                    case OrderUtils::CHANGE_CUSTOMER_ACTION:
+                        $message .= $this->changeCustomerOrder($order, $syncChange["new"]);
+                        break;
+                    case OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE:
+                    case OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE:
+                        $message .= $this->updateUserMetas($order, $syncChange["new"]);
+                        break;
+                    case OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE:
+                        $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::BILLING_ADDRESS_TYPE);
+                        break;
+                    case OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE:
+                        $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::SHIPPING_ADDRESS_TYPE);
+                        break;
+                    case OrderUtils::CHANGE_PAYMENT_ACTION:
+                        [$order, $message2] = $this->changePaymentsOrder($order, $syncChange["new"]);
+                        $message .= $message2;
+                        break;
+                    default:
+                        $message .= "<div class='notice notice-error is-dismissible'>
+            <p>" . __('Aucune action défini pour', Sage::TOKEN) . ": " . print_r($syncChange['changes'], true) . "</p>
+        </div>";
+                        break;
                 };
             }
         }
@@ -995,7 +1033,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    private function changePaymentsOrder(WC_Order $order, array $new): string
+    private function changePaymentsOrder(WC_Order $order, array $new): array
     {
         $message = "";
         $isPaid = !is_null($order->get_date_paid());
@@ -1036,7 +1074,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
         if ($new["isPaid"] && $new["isPaid"] !== $isPaid) {
             $order->payment_complete();
         }
-        return $message;
+        return [wc_get_order($order->get_id()), $message];
     }
 
     private function removeDuplicateWcOrderItemTaxToOrder(WC_Order $order): string
