@@ -87,7 +87,7 @@ export const ArRefInput = React.forwardRef(
     const _isValid = async () => {
       const errorArRef = await stringValidator({
         value: values.arRef.value,
-        maxLength: 17,
+        maxLength: 18,
         canBeEmpty: true,
         canHaveSpace: false,
       });

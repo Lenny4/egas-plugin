@@ -85,6 +85,8 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', sprintf('%s/%s/', __DIR__, env('WP_DIR', 'wordpress')));
 }
 
+//define('JWT_AUTH_SECRET_KEY', 'C0q7SK7XE1o-,!n8lzjMq(H>E9FiY!|SBl[yV}IJX-u+Gqa$SmA4rwIxEXDYi%`w');
+
 // Set the database table prefix.
 $table_prefix = env('DB_TABLE_PREFIX', 'wp_');
 

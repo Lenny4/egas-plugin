@@ -136,7 +136,7 @@ export const ArticleTab2Component = React.forwardRef((props, ref) => {
                   validator: {
                     functionName: stringValidator,
                     params: {
-                      maxLength: 45,
+                      maxLength: 44,
                       isReference: true,
                     },
                   },
@@ -174,7 +174,7 @@ export const ArticleTab2Component = React.forwardRef((props, ref) => {
                   validator: {
                     functionName: stringValidator,
                     params: {
-                      maxLength: 7,
+                      maxLength: 6,
                       isReference: true,
                     },
                   },

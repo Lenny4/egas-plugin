@@ -264,7 +264,7 @@ const UserComponent = () => {
     ) {
       ctNumError = await stringValidator({
         value: values.ctNum.value,
-        maxLength: 19,
+        maxLength: 17,
         canBeEmpty: false,
         canHaveSpace: false,
       });

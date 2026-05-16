@@ -117,7 +117,7 @@ export const ArticleFournisseursComponent = React.forwardRef((props, ref) => {
                             validator: {
                               functionName: stringValidator,
                               params: {
-                                maxLength: 19,
+                                maxLength: 18,
                                 isReference: true,
                               },
                             },
