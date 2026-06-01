@@ -20,7 +20,7 @@ jobs:
       - name: Read version from composer.json
         id: version
         run: |
-          VERSION=$(jq -r '.version' /var/www/html/public/plugins/egas/composer.json)
+          VERSION=$(jq -r '.version' public/plugins/egas/composer.json)
 
           if [ "$VERSION" = "null" ] || [ -z "$VERSION" ]; then
             echo "No version found in composer.json"
@@ -56,18 +56,30 @@ jobs:
 
       - name: Build Docker image
         run: |
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+
           docker build \
-            -t ${{ steps.image.outputs.name }}:${{ steps.version.outputs.version }} \
-            -t ${{ steps.image.outputs.name }}:latest \
+            -t ghcr.io/$IMAGE_NAME:${{ steps.version.outputs.version }} \
+            -t ghcr.io/$IMAGE_NAME:latest \
             .
+
+      - name: Extract plugin from Docker image
+        run: |
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          CONTAINER_ID=$(docker create ghcr.io/$IMAGE_NAME:${{ steps.version.outputs.version }})
+
+          mkdir -p plugin_extract
+          docker cp $CONTAINER_ID:/var/www/html/public/plugins/egas plugin_extract/egas
+
+          docker rm $CONTAINER_ID
 
       - name: Create plugin package (zip)
         run: |
-          cd /var/www/html/public/plugins
+          cd plugin_extract
           zip -r egas-${{ steps.version.outputs.version }}.zip egas
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
           name: egas-plugin-${{ steps.version.outputs.version }}
-          path: /var/www/html/public/plugins/egas-${{ steps.version.outputs.version }}.zip
+          path: plugin_extract/egas-${{ steps.version.outputs.version }}.zip
