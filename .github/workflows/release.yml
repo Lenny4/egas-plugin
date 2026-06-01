@@ -5,7 +5,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   release:
@@ -33,7 +32,7 @@ jobs:
         run: |
           TAG="v${{ steps.version.outputs.version }}"
 
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
+          if git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
             echo "Tag $TAG already exists"
             exit 1
           fi
@@ -78,8 +77,11 @@ jobs:
           git tag "$TAG"
           git push origin "$TAG"
 
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: egas-plugin-${{ steps.version.outputs.version }}
-          path: plugin_extract/egas-${{ steps.version.outputs.version }}.zip
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          files: plugin_extract/egas-${{ steps.version.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
