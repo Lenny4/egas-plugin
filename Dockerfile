@@ -7,7 +7,7 @@ ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/relea
 
 WORKDIR /var/www/html/
 
-COPY --link ./public ./
+COPY --link ./ ./
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY --link ./docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY --link ./docker/Caddyfile /etc/caddy/Caddyfile
@@ -22,8 +22,8 @@ RUN apt-get update -y && \
     apt-get install -y nodejs && \
     npm install --global yarn && \
     yarn add -D webpack-cli && \
-    composer install  && \
-    composer install --working-dir=/var/www/html/public/plugins/egas  && \
+    composer install && \
+    composer install --working-dir=/var/www/html/public/plugins/egas && \
     yarn --cwd /var/www/html/public/plugins/egas install && \
     yarn --cwd /var/www/html/public/plugins/egas build
 
