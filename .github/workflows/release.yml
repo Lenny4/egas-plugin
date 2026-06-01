@@ -38,16 +38,6 @@ jobs:
             exit 1
           fi
 
-      - name: Create git tag
-        run: |
-          TAG="v${{ steps.version.outputs.version }}"
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git tag "$TAG"
-          git push origin "$TAG"
-
       - name: Extract image name
         id: image
         run: |
@@ -77,6 +67,16 @@ jobs:
         run: |
           cd plugin_extract
           zip -r egas-${{ steps.version.outputs.version }}.zip egas
+
+      - name: Create git tag
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag "$TAG"
+          git push origin "$TAG"
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
