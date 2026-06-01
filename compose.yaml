@@ -15,6 +15,7 @@ services:
       PHP_IDE_CONFIG: serverName=xdebug-sage-wp-plugin
       XDEBUG_MODE: debug
       XDEBUG_SESSION: PHPSTORM
+      WP_ENVIRONMENT_TYPE: local
     depends_on:
       - db
     ports:

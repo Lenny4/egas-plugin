@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from composer.json
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' /var/www/html/public/plugins/egas/composer.json)
+
+          if [ "$VERSION" = "null" ] || [ -z "$VERSION" ]; then
+            echo "No version found in composer.json"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag already exists
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists"
+            exit 1
+          fi
+
+      - name: Create git tag
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Extract image name
+        id: image
+        run: |
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "name=ghcr.io/$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ steps.image.outputs.name }}:${{ steps.version.outputs.version }} \
+            -t ${{ steps.image.outputs.name }}:latest \
+            .
+
+      - name: Create plugin package (zip)
+        run: |
+          cd /var/www/html/public/plugins
+          zip -r egas-${{ steps.version.outputs.version }}.zip egas
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: egas-plugin-${{ steps.version.outputs.version }}
+          path: /var/www/html/public/plugins/egas-${{ steps.version.outputs.version }}.zip

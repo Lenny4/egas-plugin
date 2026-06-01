@@ -21,7 +21,11 @@ RUN apt-get update -y && \
     curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     npm install --global yarn && \
-    yarn add -D webpack-cli
+    yarn add -D webpack-cli && \
+    composer install  && \
+    composer install --working-dir=/var/www/html/public/plugins/egas  && \
+    yarn --cwd /var/www/html/public/plugins/egas install && \
+    yarn --cwd /var/www/html/public/plugins/egas build
 
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
