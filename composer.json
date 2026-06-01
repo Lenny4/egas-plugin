@@ -1,7 +1,6 @@
 {
     "name": "lenny4/egas-plugin",
     "description": "Wordpress plugin for Egas",
-    "version": "1.0.0",
     "license": "GPL-2.0-or-later",
     "type": "project",
     "keywords": [
