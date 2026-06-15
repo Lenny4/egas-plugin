@@ -85,7 +85,7 @@ class AdminController
                         [
                             'id' => 'api_key',
                             'label' => __('Api key', Sage::TOKEN),
-                            'description' => __('Can be found here.', Sage::TOKEN),
+                            'description' => __('Ouvrez votre application **Sage API Manager** et renseignez la clé API que vous trouverez dans le détail de la configuration.', Sage::TOKEN),
                             'type' => 'text',
                             'default' => '',
                             'placeholder' => __('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', Sage::TOKEN)
@@ -93,7 +93,7 @@ class AdminController
                         [
                             'id' => 'api_host_url',
                             'label' => __('Api host url', Sage::TOKEN),
-                            'description' => __('Can be found here.', Sage::TOKEN),
+                            'description' => __("Renseignez le nom de domaine (si configuré) ou l’adresse de votre API Sage.", Sage::TOKEN),
                             'type' => 'text',
                             'default' => '',
                             'placeholder' => __('https://192.168.0.1', Sage::TOKEN)
