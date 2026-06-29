@@ -1,7 +1,7 @@
 {
     "type": "project",
     "name": "lenny4/egas-plugin",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "license": "GPL-2.0-or-later",
     "description": "Use Sage with your Wordpress website.",
     "keywords": [

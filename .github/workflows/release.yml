@@ -71,12 +71,12 @@ jobs:
           rm -rf staging1/egas/utils
           rm -f  staging1/egas/runc
           rm -f  staging1/egas/.gitignore
-          (cd staging1 && zip -r ../egas-${{ steps.version.outputs.version }}.zip egas)
+          (cd staging1 && zip -r ../egas-${{ steps.version.outputs.version }}-with-dependencies.zip egas)
 
           cp -r staging1 staging2
           rm -rf staging2/egas/node_modules
           rm -rf staging2/egas/vendor
-          (cd staging2 && zip -r ../egas-${{ steps.version.outputs.version }}-light.zip egas)
+          (cd staging2 && zip -r ../egas-${{ steps.version.outputs.version }}-no-dependencies.zip egas)
 
       - name: Create git tag
         run: |
