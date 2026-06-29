@@ -84,78 +84,79 @@ class AdminController
                     'fields' => [
                         [
                             'id' => 'api_key',
-                            'label' => __('Api key', Sage::TOKEN),
-                            'description' => __('Ouvrez votre application **Sage API Manager** et renseignez la clé API que vous trouverez dans le détail de la configuration.', Sage::TOKEN),
+                            'label' => __('Clé API', Sage::TOKEN),
+                            'description' => __('Ouvrez l’application Sage API Manager et renseignez la clé API disponible dans le détail de votre configuration.', Sage::TOKEN),
                             'type' => 'text',
                             'default' => '',
                             'placeholder' => __('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', Sage::TOKEN)
                         ],
                         [
                             'id' => 'api_host_url',
-                            'label' => __('Api host url', Sage::TOKEN),
-                            'description' => __("Renseignez le nom de domaine (si configuré) ou l’adresse de votre API Sage.", Sage::TOKEN),
+                            'label' => __("Adresse de l'API Sage", Sage::TOKEN),
+                            'description' => __("Renseignez le nom de domaine (s'il est configuré) ou l'adresse de votre API Sage.", Sage::TOKEN),
                             'type' => 'text',
                             'default' => '',
-                            'placeholder' => __('https://192.168.0.1', Sage::TOKEN)
+                            'placeholder' => __('https://monsite-exemple.fr', Sage::TOKEN),
+                            // https://192.168.0.1
                         ],
                         [
                             'id' => 'activate_https_verification_api',
-                            'label' => __('Activer Https Api', Sage::TOKEN),
-                            'description' => __("Décochez cette case si vous avez l'erreur: cURL error 60: SSL certificate problem: self-signed certificate.", Sage::TOKEN),
+                            'label' => __('Vérifier le certificat HTTPS de l’API', Sage::TOKEN),
+                            'description' => __("Décochez cette case si vous obtenez l'erreur : « cURL error 60: SSL certificate problem: self-signed certificate ». ", Sage::TOKEN),
                             'type' => 'checkbox',
                             'default' => 'on'
                         ],
                         [
                             'id' => 'wordpress_host_url',
-                            'label' => __('Wordpress host url', Sage::TOKEN),
-                            'description' => __('Renseigner l\'url à laquelle l\'API Sage peut contacter l\'API de Wordpress. Modifier C:\Windows\System32\drivers\etc\hosts si nécessaire sur le serveur de l\'API Sage.', Sage::TOKEN),
+                            'label' => __('Adresse de WordPress', Sage::TOKEN),
+                            'description' => __("Renseignez l'adresse à laquelle l'API Sage peut joindre l'API WordPress. Si nécessaire, modifiez le fichier C:\\Windows\\System32\\drivers\\etc\\hosts sur le serveur hébergeant l'API Sage.", Sage::TOKEN),
                             'type' => 'text',
                             'default' => $defaultWordpressUrl,
                             'placeholder' => __($defaultWordpressUrl, Sage::TOKEN)
                         ],
                         [
                             'id' => 'activate_https_verification_wordpress',
-                            'label' => __('Activer Https Wordpress', Sage::TOKEN),
-                            'description' => __("Décochez cette case si vous avez l'erreur: <br>The SSL connection could not be established, see inner exception.", Sage::TOKEN),
+                            'label' => __('Vérifier le certificat HTTPS de WordPress', Sage::TOKEN),
+                            'description' => __("Décochez cette case si vous obtenez l'erreur : « The SSL connection could not be established, see inner exception ». ", Sage::TOKEN),
                             'type' => 'checkbox',
                             'default' => 'on'
                         ],
                         [
                             'id' => 'wordpress_db_host',
-                            'label' => __('Wordpress db host', Sage::TOKEN),
-                            'description' => __('Renseigner l\'IP à laquelle l\'API Sage peut contacter la base de données de wordpress.', Sage::TOKEN),
+                            'label' => __('Adresse du serveur de base de données WordPress', Sage::TOKEN),
+                            'description' => __("Renseignez l'adresse IP ou le nom d'hôte permettant à l'API Sage d'accéder à la base de données WordPress.", Sage::TOKEN),
                             'type' => 'text',
                             'default' => $wpdb->dbhost,
                             'placeholder' => __($wpdb->dbhost, Sage::TOKEN)
                         ],
                         [
                             'id' => 'wordpress_db_name',
-                            'label' => __('Wordpress database name', Sage::TOKEN),
-                            'description' => __('Renseigner le nom de la base de données de wordpress.', Sage::TOKEN),
+                            'label' => __('Nom de la base de données WordPress', Sage::TOKEN),
+                            'description' => __('Renseignez le nom de la base de données WordPress.', Sage::TOKEN),
                             'type' => 'text',
                             'default' => $wpdb->dbname,
                             'placeholder' => __($wpdb->dbname, Sage::TOKEN)
                         ],
                         [
                             'id' => 'wordpress_db_username',
-                            'label' => __('Wordpress database username', Sage::TOKEN),
-                            'description' => __('Renseigner le nom de l\'utilisateur de la base de données de wordpress.', Sage::TOKEN),
+                            'label' => __("Nom d'utilisateur de la base de données WordPress", Sage::TOKEN),
+                            'description' => __("Renseignez le nom d'utilisateur utilisé pour accéder à la base de données WordPress.", Sage::TOKEN),
                             'type' => 'text',
                             'default' => $wpdb->dbuser,
                             'placeholder' => __($wpdb->dbuser, Sage::TOKEN)
                         ],
                         [
                             'id' => 'wordpress_db_password',
-                            'label' => __('Wordpress database password', Sage::TOKEN),
-                            'description' => __('Renseigner le mot de passe de la base de données de wordpress.', Sage::TOKEN),
+                            'label' => __('Mot de passe de la base de données WordPress', Sage::TOKEN),
+                            'description' => __('Renseignez le mot de passe utilisé pour accéder à la base de données WordPress.', Sage::TOKEN),
                             'type' => 'text',
                             'default' => $wpdb->dbpassword,
                             'placeholder' => __($wpdb->dbpassword, Sage::TOKEN)
                         ],
                         [
                             'id' => 'nb_threads',
-                            'label' => __("Nombre de d'opérations simultanées (nb threads)", Sage::TOKEN),
-                            'description' => '',
+                            'label' => __("Nombre d'opérations simultanées", Sage::TOKEN),
+                            'description' => __("Définissez le nombre maximal d'opérations exécutées en parallèle. Augmentez cette valeur uniquement si votre serveur dispose de ressources suffisantes.", Sage::TOKEN),
                             'type' => 'number',
                             'default' => '1',
                             'placeholder' => __('1', Sage::TOKEN)
