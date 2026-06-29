@@ -65,7 +65,18 @@ jobs:
       - name: Create plugin package (zip)
         run: |
           cd plugin_extract
-          zip -r egas-${{ steps.version.outputs.version }}.zip egas
+
+          mkdir -p staging1/egas
+          cp -r egas/. staging1/egas/
+          rm -rf staging1/egas/utils
+          rm -f  staging1/egas/runc
+          rm -f  staging1/egas/.gitignore
+          (cd staging1 && zip -r ../egas-${{ steps.version.outputs.version }}.zip egas)
+
+          cp -r staging1 staging2
+          rm -rf staging2/egas/node_modules
+          rm -rf staging2/egas/vendor
+          (cd staging2 && zip -r ../egas-${{ steps.version.outputs.version }}-light.zip egas)
 
       - name: Create git tag
         run: |
@@ -82,6 +93,8 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
-          files: plugin_extract/egas-${{ steps.version.outputs.version }}.zip
+          files: |
+            plugin_extract/egas-${{ steps.version.outputs.version }}.zip
+            plugin_extract/egas-${{ steps.version.outputs.version }}-no-dependencies.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
