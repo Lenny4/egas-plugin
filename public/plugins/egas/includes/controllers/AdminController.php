@@ -77,6 +77,43 @@ class AdminController
             $url = parse_url(get_site_url());
             $defaultWordpressUrl = $url["scheme"] . '://' . $url["host"];
             global $wpdb;
+            $devFields = [];
+            if (WP_DEBUG) {
+                $devFields = [
+                    [
+                        'id' => 'wordpress_db_host',
+                        'label' => __('Adresse du serveur de base de données WordPress', Sage::TOKEN),
+                        'description' => __("Renseignez l'adresse IP ou le nom d'hôte permettant à l'API Sage d'accéder à la base de données WordPress.", Sage::TOKEN),
+                        'type' => 'text',
+                        'default' => $wpdb->dbhost,
+                        'placeholder' => __($wpdb->dbhost, Sage::TOKEN)
+                    ],
+                    [
+                        'id' => 'wordpress_db_name',
+                        'label' => __('Nom de la base de données WordPress', Sage::TOKEN),
+                        'description' => __('Renseignez le nom de la base de données WordPress.', Sage::TOKEN),
+                        'type' => 'text',
+                        'default' => $wpdb->dbname,
+                        'placeholder' => __($wpdb->dbname, Sage::TOKEN)
+                    ],
+                    [
+                        'id' => 'wordpress_db_username',
+                        'label' => __("Nom d'utilisateur de la base de données WordPress", Sage::TOKEN),
+                        'description' => __("Renseignez le nom d'utilisateur utilisé pour accéder à la base de données WordPress.", Sage::TOKEN),
+                        'type' => 'text',
+                        'default' => $wpdb->dbuser,
+                        'placeholder' => __($wpdb->dbuser, Sage::TOKEN)
+                    ],
+                    [
+                        'id' => 'wordpress_db_password',
+                        'label' => __('Mot de passe de la base de données WordPress', Sage::TOKEN),
+                        'description' => __('Renseignez le mot de passe utilisé pour accéder à la base de données WordPress.', Sage::TOKEN),
+                        'type' => 'text',
+                        'default' => $wpdb->dbpassword,
+                        'placeholder' => __($wpdb->dbpassword, Sage::TOKEN)
+                    ],
+                ];
+            }
             $settings = [
                 'api' => [
                     'title' => __('Api', Sage::TOKEN),
@@ -97,10 +134,10 @@ class AdminController
                             'type' => 'text',
                             'default' => '',
                             'placeholder' => __('https://monsite-exemple.fr', Sage::TOKEN),
-                            // https://192.168.0.1
+                            // https://windows
                         ],
                         [
-                            'id' => 'activate_https_verification_api',
+                            'id' => 'activate_https_verification_graphql',
                             'label' => __('Vérifier le certificat HTTPS de l’API', Sage::TOKEN),
                             'description' => __("Décochez cette case si vous obtenez l'erreur : « cURL error 60: SSL certificate problem: self-signed certificate ». ", Sage::TOKEN),
                             'type' => 'checkbox',
@@ -109,7 +146,7 @@ class AdminController
                         [
                             'id' => 'wordpress_host_url',
                             'label' => __('Adresse de WordPress', Sage::TOKEN),
-                            'description' => __("Renseignez l'adresse à laquelle l'API Sage peut joindre l'API WordPress. Si nécessaire, modifiez le fichier C:\\Windows\\System32\\drivers\\etc\\hosts sur le serveur hébergeant l'API Sage.", Sage::TOKEN),
+                            'description' => __("Renseignez l'adresse à laquelle l'API Sage peut joindre WordPress.", Sage::TOKEN),
                             'type' => 'text',
                             'default' => $defaultWordpressUrl,
                             'placeholder' => __($defaultWordpressUrl, Sage::TOKEN)
@@ -121,38 +158,7 @@ class AdminController
                             'type' => 'checkbox',
                             'default' => 'on'
                         ],
-                        [
-                            'id' => 'wordpress_db_host',
-                            'label' => __('Adresse du serveur de base de données WordPress', Sage::TOKEN),
-                            'description' => __("Renseignez l'adresse IP ou le nom d'hôte permettant à l'API Sage d'accéder à la base de données WordPress.", Sage::TOKEN),
-                            'type' => 'text',
-                            'default' => $wpdb->dbhost,
-                            'placeholder' => __($wpdb->dbhost, Sage::TOKEN)
-                        ],
-                        [
-                            'id' => 'wordpress_db_name',
-                            'label' => __('Nom de la base de données WordPress', Sage::TOKEN),
-                            'description' => __('Renseignez le nom de la base de données WordPress.', Sage::TOKEN),
-                            'type' => 'text',
-                            'default' => $wpdb->dbname,
-                            'placeholder' => __($wpdb->dbname, Sage::TOKEN)
-                        ],
-                        [
-                            'id' => 'wordpress_db_username',
-                            'label' => __("Nom d'utilisateur de la base de données WordPress", Sage::TOKEN),
-                            'description' => __("Renseignez le nom d'utilisateur utilisé pour accéder à la base de données WordPress.", Sage::TOKEN),
-                            'type' => 'text',
-                            'default' => $wpdb->dbuser,
-                            'placeholder' => __($wpdb->dbuser, Sage::TOKEN)
-                        ],
-                        [
-                            'id' => 'wordpress_db_password',
-                            'label' => __('Mot de passe de la base de données WordPress', Sage::TOKEN),
-                            'description' => __('Renseignez le mot de passe utilisé pour accéder à la base de données WordPress.', Sage::TOKEN),
-                            'type' => 'text',
-                            'default' => $wpdb->dbpassword,
-                            'placeholder' => __($wpdb->dbpassword, Sage::TOKEN)
-                        ],
+                        ...$devFields,
                         [
                             'id' => 'nb_threads',
                             'label' => __("Nombre d'opérations simultanées", Sage::TOKEN),
@@ -476,7 +482,7 @@ class AdminController
                     'capability' => 'manage_options',
                     'menu_slug' => Sage::TOKEN . '_settings',
                     'function' => null,
-                    'icon_url' => 'dashicons-rest-api',
+                    'icon_url' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents(__DIR__ . '/../../dist/images/icon.svg')),
                     'position' => 55.5,
                 ],
                 [

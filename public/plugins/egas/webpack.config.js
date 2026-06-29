@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = (env, argv) => {
   const isDevelopment = argv.mode === "development";
@@ -19,6 +20,16 @@ module.exports = (env, argv) => {
       new webpack.DefinePlugin({
         SOCKET_PORT: JSON.stringify(isDevelopment ? 4433 : undefined),
       }),
+      // ✅ Ajout du plugin pour copier toutes les images
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, "assets/images"),
+            to: path.resolve(__dirname, "dist/images"),
+            noErrorOnMissing: true, // Ne pas planter si le dossier n'existe pas
+          },
+        ],
+      }),
     ],
     module: {
       rules: [
@@ -28,8 +39,6 @@ module.exports = (env, argv) => {
           exclude: /node_modules/,
         },
         {
-          // If you enable `experiments.css` or `experiments.futureDefaults`, please uncomment line below
-          // type: "javascript/auto",
           test: /\.(sa|sc|c)ss$/,
           use: [
             MiniCssExtractPlugin.loader,
@@ -37,6 +46,14 @@ module.exports = (env, argv) => {
             "postcss-loader",
             "sass-loader",
           ],
+        },
+        // Cette règle reste utile si tu veux importer des images dans le JS
+        {
+          test: /\.(png|jpe?g|gif|svg|webp|ico)$/i,
+          type: 'asset/resource',
+          generator: {
+            filename: 'images/[name][ext]'
+          }
         },
       ],
     },
@@ -46,6 +63,7 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: "[name].js",
+      clean: true,
     },
   };
 };

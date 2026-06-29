@@ -199,7 +199,7 @@ class GraphqlService
                 'tablePrefix' => $wpdb->prefix,
                 'dbName' => get_option(Sage::TOKEN . '_wordpress_db_name'),
                 'pluginVersion' => get_plugin_data(Sage::getInstance()->file)['Version'],
-                'paymentJoNum' => get_option(Sage::TOKEN . '_journal_payment_' . FDocenteteResource::ENTITY_NAME),
+                'paymentJoNum' => get_option(Sage::TOKEN . '_journal_payment_' . FDocenteteResource::ENTITY_NAME) ?: null,
                 'paymentPReglementCbIndice' => (int)get_option(Sage::TOKEN . '_reglement_payment_' . FDocenteteResource::ENTITY_NAME) ?: null,
                 'createAcompteDocument' => filter_var(get_option(Sage::TOKEN . '_document_acompte_payment' . FDocenteteResource::ENTITY_NAME, true), FILTER_VALIDATE_BOOLEAN),
 
@@ -292,18 +292,16 @@ class GraphqlService
         try {
             return $client->runQuery($gql, variables: $variables)->getResults();
         } catch (Throwable $throwable) {
-            // todo store logs
             $message = $throwable->getMessage();
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                $array = [
-                    'message' => $message,
-                    'stackTrace' => $throwable->getTraceAsString(),
-                ];
-                if (method_exists($throwable, 'getErrorDetails')) {
-                    $array["errorDetails"] = $throwable->getErrorDetails();
-                }
-                $message = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+            $array = [
+                'message' => $message,
+                'stackTrace' => $throwable->getTraceAsString(),
+            ];
+            if (method_exists($throwable, 'getErrorDetails')) {
+                $array["errorDetails"] = $throwable->getErrorDetails();
             }
+            $message = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+            error_log($message);
             if ($getError) {
                 return $message;
             }

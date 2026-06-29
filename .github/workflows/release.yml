@@ -68,6 +68,7 @@ jobs:
 
           mkdir -p staging1/egas
           cp -r egas/. staging1/egas/
+          rm -rf staging1/egas/assets
           rm -rf staging1/egas/utils
           rm -f  staging1/egas/runc
           rm -f  staging1/egas/.gitignore
