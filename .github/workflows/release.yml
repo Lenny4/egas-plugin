@@ -16,13 +16,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read version from composer.json
+      - name: Read version from egas.php
         id: version
         run: |
-          VERSION=$(jq -r '.version' public/plugins/egas/composer.json)
+          VERSION=$(grep -i "^ \* Version:" public/plugins/egas/egas.php | sed 's/.*Version: *//')
 
-          if [ "$VERSION" = "null" ] || [ -z "$VERSION" ]; then
-            echo "No version found in composer.json"
+          if [ -z "$VERSION" ]; then
+            echo "No version found in egas.php"
             exit 1
           fi
 
@@ -71,12 +71,13 @@ jobs:
           rm -rf staging1/egas/utils
           rm -f  staging1/egas/runc
           rm -f  staging1/egas/.gitignore
-          (cd staging1 && zip -r ../egas-${{ steps.version.outputs.version }}-with-dependencies.zip egas)
-
-          cp -r staging1 staging2
-          rm -rf staging2/egas/node_modules
-          rm -rf staging2/egas/vendor
-          (cd staging2 && zip -r ../egas-${{ steps.version.outputs.version }}-no-dependencies.zip egas)
+          rm -f  staging1/egas/node_modules
+          rm -f  staging1/egas/webpack.config.js
+          rm -f  staging1/egas/tsconfig.json
+          rm -f  staging1/egas/package.json
+          rm -f  staging1/egas/yarn.lock
+          rm -f  staging1/egas/rector.php
+          (cd staging1 && zip -r ../egas-${{ steps.version.outputs.version }}.zip egas)
 
       - name: Create git tag
         run: |
@@ -94,7 +95,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
           files: |
-            plugin_extract/egas-${{ steps.version.outputs.version }}-with-dependencies.zip
-            plugin_extract/egas-${{ steps.version.outputs.version }}-no-dependencies.zip
+            plugin_extract/egas-${{ steps.version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

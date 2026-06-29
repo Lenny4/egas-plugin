@@ -23,7 +23,7 @@ RUN apt-get update -y && \
     npm install --global yarn && \
     yarn add -D webpack-cli && \
     composer install && \
-    composer install --working-dir=/var/www/html/public/plugins/egas && \
+    composer install --working-dir=/var/www/html/public/plugins/egas --no-dev --optimize-autoloader && \
     yarn --cwd /var/www/html/public/plugins/egas install && \
     yarn --cwd /var/www/html/public/plugins/egas build
 
