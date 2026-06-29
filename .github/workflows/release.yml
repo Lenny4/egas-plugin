@@ -71,7 +71,7 @@ jobs:
           rm -rf staging1/egas/utils
           rm -f  staging1/egas/runc
           rm -f  staging1/egas/.gitignore
-          rm -f  staging1/egas/node_modules
+          rm -rf  staging1/egas/node_modules
           rm -f  staging1/egas/webpack.config.js
           rm -f  staging1/egas/tsconfig.json
           rm -f  staging1/egas/package.json
