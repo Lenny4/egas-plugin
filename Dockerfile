@@ -19,11 +19,11 @@ RUN install-php-extensions xdebug-stable
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
+    apt-get install -y nodejs procps && \
     npm install --global yarn && \
     yarn add -D webpack-cli && \
-    composer install && \
-    composer install --working-dir=/var/www/html/public/plugins/egas --no-dev --optimize-autoloader && \
+    XDEBUG_MODE=off composer install && \
+    XDEBUG_MODE=off composer install --working-dir=/var/www/html/public/plugins/egas --no-dev --optimize-autoloader && \
     yarn --cwd /var/www/html/public/plugins/egas install && \
     yarn --cwd /var/www/html/public/plugins/egas build
 

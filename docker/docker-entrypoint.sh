@@ -1,12 +1,18 @@
 #!/bin/sh
 set -e
 
+echo "WP_ENVIRONMENT_TYPE ${WP_ENVIRONMENT_TYPE}";
 # Vérifier si l'environnement n'est PAS production
 if [ "${WP_ENVIRONMENT_TYPE}" != "production" ]; then
-  composer install
-  composer install --working-dir=/var/www/html/public/plugins/egas
+  echo "composer install ...";
+  XDEBUG_MODE=off composer install
+  echo "composer install --working-dir=/var/www/html/public/plugins/egas ...";
+  XDEBUG_MODE=off composer install --working-dir=/var/www/html/public/plugins/egas
+  echo "yarn --cwd /var/www/html/public/plugins/egas install ...";
   yarn --cwd /var/www/html/public/plugins/egas install
+  echo "--cwd /var/www/html/public/plugins/egas watch & ...";
   yarn --cwd /var/www/html/public/plugins/egas watch &
+  echo "--cwd /var/www/html/public/plugins/egas watch done";
 fi
 
 exec "$@"
