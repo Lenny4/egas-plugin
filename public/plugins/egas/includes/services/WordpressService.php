@@ -41,7 +41,7 @@ class WordpressService
         $this->applyDefaultResourceOptions();
         $this->addWebsiteSageApi(true);
         if (!term_exists(Sage::TOKEN, 'product_type')) {
-            wp_insert_term(__(Sage::TOKEN, Sage::TOKEN), 'product_type', ['slug' => Sage::TOKEN]);
+            wp_insert_term(Sage::TOKEN, 'product_type', ['slug' => Sage::TOKEN]);
         }
 
         // $this->init() is called during activation and add_action init because sometimes add_action init could fail when plugin is installed
@@ -150,7 +150,7 @@ class WordpressService
         $this->updateShippingMethodsWithSage();
         AdminController::adminNotices("
 <div class='notice notice-success is-dismissible'>
-    <p>" . __('Connexion réussie à l\'API. Les paramètres ont été mis à jour.', Sage::TOKEN) . "</p>
+    <p>" . __('Connexion réussie à l\'API. Les paramètres ont été mis à jour.', 'egas') . "</p>
 </div>
 ");
         return true;
@@ -167,7 +167,7 @@ class WordpressService
             if ($showMessage && $taxeChanges !== []) {
                 ?>
                 <div class="notice notice-success is-dismissible">
-                    <p><strong><?= __("Les taxes Sage ont été mises à jour.", Sage::TOKEN) ?></strong></p>
+                    <p><strong><?= __("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
                 </div>
                 <?php
             }

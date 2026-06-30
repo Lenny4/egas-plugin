@@ -21,7 +21,7 @@ class WoocommerceController
 {
     public static function addColumn(array $columns): array
     {
-        $columns[Sage::TOKEN] = __('Sage', Sage::TOKEN);
+        $columns[Sage::TOKEN] = __('Sage', 'egas');
         return $columns;
     }
 

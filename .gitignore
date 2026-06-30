@@ -17,3 +17,4 @@ auth.json
 !public/plugins/egas
 public/themes
 cache
+public/object-cache.php

@@ -190,7 +190,7 @@ class TwigHook
     private function registerFilter(): void
     {
         $twig = TwigService::getInstance()->twig;
-        $twig->addFilter(new TwigFilter('trans', static fn(string $string) => __($string, Sage::TOKEN)));
+        $twig->addFilter(new TwigFilter('trans', static fn(string $string): string => $string));
         $twig->addFilter(new TwigFilter('esc_attr', static fn(string $string) => esc_attr($string)));
         $twig->addFilter(new TwigFilter('wp_create_nonce', static fn(string $action) => wp_create_nonce($action)));
         $twig->addFilter(new TwigFilter('gettype', static fn(mixed $value): string => gettype($value)));

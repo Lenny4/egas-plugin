@@ -22,8 +22,8 @@ class FComptetResource extends Resource
     {
         parent::__construct();
         global $wpdb;
-        $this->title = __("Clients", Sage::TOKEN);
-        $this->description = __("Gestion des clients.", Sage::TOKEN);
+        $this->title = __("Clients", 'egas');
+        $this->description = __("Gestion des clients.", 'egas');
         $this->entityName = self::ENTITY_NAME;
         $this->typeModel = self::TYPE_MODEL;
         $this->defaultSortField = self::DEFAULT_SORT;
@@ -43,50 +43,50 @@ class FComptetResource extends Resource
         $this->options = fn(): array => [
             [
                 'id' => 'sage_create_new_' . self::ENTITY_NAME,
-                'label' => __("Créer le compte dans Sage.", Sage::TOKEN),
-                'description' => __("Créer le compte dans Sage lorsqu'un nouveau utilisateur Wordpress est crée.", Sage::TOKEN),
+                'label' => __("Créer le compte dans Sage.", 'egas'),
+                'description' => __("Créer le compte dans Sage lorsqu'un nouveau utilisateur Wordpress est crée.", 'egas'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
             [
                 'id' => 'sage_create_old_' . self::ENTITY_NAME,
-                'label' => __("Importe les anciens utilisateurs.", Sage::TOKEN),
-                'description' => __("Importe les anciens utilisateurs Woocommerce dans Sage.", Sage::TOKEN),
+                'label' => __("Importe les anciens utilisateurs.", 'egas'),
+                'description' => __("Importe les anciens utilisateurs Woocommerce dans Sage.", 'egas'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
             [
                 'id' => 'sage_update_' . self::ENTITY_NAME,
-                'label' => __("Met à jour le compte Sage.", Sage::TOKEN),
-                'description' => __("Met à jour le compte Sage lorsque l'utilisateur WooCommerce qui lui est lié est modifié.", Sage::TOKEN),
+                'label' => __("Met à jour le compte Sage.", 'egas'),
+                'description' => __("Met à jour le compte Sage lorsque l'utilisateur WooCommerce qui lui est lié est modifié.", 'egas'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
             [
                 'id' => 'website_create_new_' . self::ENTITY_NAME,
-                'label' => __("Créer l'utilisateur dans Woocommerce.", Sage::TOKEN),
-                'description' => __("Créer l'utilisateur dans Woocommerce lorsqu'un nouveau compte Sage est crée.", Sage::TOKEN),
+                'label' => __("Créer l'utilisateur dans Woocommerce.", 'egas'),
+                'description' => __("Créer l'utilisateur dans Woocommerce lorsqu'un nouveau compte Sage est crée.", 'egas'),
                 'type' => 'resource',
                 'default' => '',
             ],
             [
                 'id' => 'website_create_old_' . self::ENTITY_NAME,
-                'label' => __("Importe les anciens comptes Sage.", Sage::TOKEN),
-                'description' => __("Importe les anciens comptes Sage dans Woocommerce.", Sage::TOKEN),
+                'label' => __("Importe les anciens comptes Sage.", 'egas'),
+                'description' => __("Importe les anciens comptes Sage dans Woocommerce.", 'egas'),
                 'type' => 'resource',
                 'default' => '',
             ],
             [
                 'id' => 'website_update_' . self::ENTITY_NAME,
-                'label' => __("Met à jour l'utilisateur Woocommerce.", Sage::TOKEN),
-                'description' => __("Met à jour l'utilisateur Woocommerce lorsque le compte Sage qui lui est lié est modifié.", Sage::TOKEN),
+                'label' => __("Met à jour l'utilisateur Woocommerce.", 'egas'),
+                'description' => __("Met à jour l'utilisateur Woocommerce lorsque le compte Sage qui lui est lié est modifié.", 'egas'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
             [
                 'id' => 'mail_website_create_new_' . self::ENTITY_NAME,
-                'label' => __('Envoyer automatiquement le mail pour définir le mot de passe', self::ENTITY_NAME),
-                'description' => __("Lorsqu'un compte Wordpress est créé à partir d'un compte Sage, un mail pour définir le mot de passe du compte Wordpress est automatiquement envoyé à l'utilisateur.", Sage::TOKEN),
+                'label' => __('Envoyer automatiquement le mail pour définir le mot de passe', 'fComptets'),
+                'description' => __("Lorsqu'un compte Wordpress est créé à partir d'un compte Sage, un mail pour définir le mot de passe du compte Wordpress est automatiquement envoyé à l'utilisateur.", 'egas'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
@@ -118,7 +118,7 @@ class FComptetResource extends Resource
                 field: 'ctType',
                 value: TiersTypeEnum::TiersTypeClient->value,
                 condition: 'eq',
-                message: fn(array $fComptet): string => __("Le compte n'est pas un compte client.", Sage::TOKEN) . ' [' . $fComptet["ctNum"] . ']'),
+                message: fn(array $fComptet): string => __("Le compte n'est pas un compte client.", 'egas') . ' [' . $fComptet["ctNum"] . ']'),
         ];
         $this->import = static function (string $identifier) {
             [$response, $responseError, $message, $userId] = SageService::getInstance()->importFComptetFromSage($identifier);

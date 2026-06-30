@@ -81,11 +81,11 @@ class GraphqlService
         }
         $hostUrl = get_option(Sage::TOKEN . '_api_host_url');
         $message = null;
-        $link = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "admin.php?page=" . Sage::TOKEN . "_settings'>" . __("Modifier", Sage::TOKEN) . "</a></span></strong>";
+        $link = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "admin.php?page=" . Sage::TOKEN . "_settings'>" . __("Modifier", 'egas') . "</a></span></strong>";
         if (!is_string($hostUrl) || ($hostUrl === '' || $hostUrl === '0')) {
-            $message = __("Veuillez renseigner l'host du serveur Sage. ", Sage::TOKEN) . $link;
+            $message = __("Veuillez renseigner l'host du serveur Sage. ", 'egas') . $link;
         } elseif (filter_var($hostUrl, FILTER_VALIDATE_URL) === false) {
-            $message = __("L'host du serveur Sage n'est pas une url valide. ", Sage::TOKEN) . $link;
+            $message = __("L'host du serveur Sage n'est pas une url valide. ", 'egas') . $link;
         }
         if (!is_null($message)) {
             AdminController::adminNotices("
@@ -137,10 +137,10 @@ class GraphqlService
         if (!$this->pingApi) {
             AdminController::adminNotices(
                 "<div id='" . Sage::TOKEN . "_join_api' class='error'><p>" .
-                __("L'API Sage n'est pas joignable. Avez-vous lancé le serveur ?", Sage::TOKEN)
+                __("L'API Sage n'est pas joignable. Avez-vous lancé le serveur ?", 'egas')
                 . (is_null($errorMsg)
                     ? ""
-                    : "<br>" . __('Error', Sage::TOKEN) . ": " . $errorMsg
+                    : "<br>" . __('Error', 'egas') . ": " . $errorMsg
                 ) .
                 "</p></div>");
         }
@@ -158,7 +158,7 @@ class GraphqlService
         if (!array_key_exists("scheme", $wordpressHostUrl)) {
             AdminController::adminNotices("
 <div class='error'>
-    <p>" . __("Wordpress host url doit commencer par 'http://' ou 'https://'", Sage::TOKEN) . "</p>
+    <p>" . __("Wordpress host url doit commencer par 'http://' ou 'https://'", 'egas') . "</p>
 </div>
 ");
             $hasError = true;
@@ -167,7 +167,7 @@ class GraphqlService
         if (!array_key_exists("scheme", $apiHostUrl)) {
             AdminController::adminNotices("
 <div class='error'>
-    <p>" . __("Api host url doit commencer par 'http://' ou 'https://'", Sage::TOKEN) . "</p>
+    <p>" . __("Api host url doit commencer par 'http://' ou 'https://'", 'egas') . "</p>
 </div>
 ");
             $hasError = true;

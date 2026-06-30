@@ -27,8 +27,8 @@ class FDocenteteResource extends Resource
     {
         parent::__construct();
         global $wpdb;
-        $this->title = __("Documents", Sage::TOKEN);
-        $this->description = __("Gestion Commerciale / Menu Traitement / Documents des ventes, des achats, des stocks et internes / Fenêtre Document", Sage::TOKEN);
+        $this->title = __("Documents", 'egas');
+        $this->description = __("Gestion Commerciale / Menu Traitement / Documents des ventes, des achats, des stocks et internes / Fenêtre Document", 'egas');
         $this->entityName = self::ENTITY_NAME;
         $this->typeModel = self::TYPE_MODEL;
         $this->defaultSortField = self::DEFAULT_SORT;
@@ -80,66 +80,66 @@ class FDocenteteResource extends Resource
             return [
                 [
                     'id' => 'sage_create_new_' . self::ENTITY_NAME,
-                    'label' => __("Créer le document de vente dans Sage.", Sage::TOKEN),
-                    'description' => __("Créer le document de vente dans Sage lorsqu'une nouveaulle commande Wordpress est crée.", Sage::TOKEN),
+                    'label' => __("Créer le document de vente dans Sage.", 'egas'),
+                    'description' => __("Créer le document de vente dans Sage lorsqu'une nouveaulle commande Wordpress est crée.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
                 [
                     'id' => 'sage_create_old_' . self::ENTITY_NAME,
-                    'label' => __('Importe les anciennes commandes.', Sage::TOKEN),
-                    'description' => __("Importe les anciennes commandes Woocommerce dans Sage.", Sage::TOKEN),
+                    'label' => __('Importe les anciennes commandes.', 'egas'),
+                    'description' => __("Importe les anciennes commandes Woocommerce dans Sage.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
                 [
                     'id' => 'sage_update_' . self::ENTITY_NAME,
-                    'label' => __("Met à jour le document de vente Sage.", Sage::TOKEN),
-                    'description' => __("Met à jour le document de vente Sage lorsque la commande WooCommerce qui lui est lié est modifiée.", Sage::TOKEN),
+                    'label' => __("Met à jour le document de vente Sage.", 'egas'),
+                    'description' => __("Met à jour le document de vente Sage lorsque la commande WooCommerce qui lui est lié est modifiée.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
                 [
                     'id' => 'website_create_new_' . self::ENTITY_NAME,
-                    'label' => __("Créer la commande dans Woocommerce.", Sage::TOKEN),
-                    'description' => __("Créer la commande dans Woocommerce lorsqu'un nouveau document de vente Sage est crée.", Sage::TOKEN),
+                    'label' => __("Créer la commande dans Woocommerce.", 'egas'),
+                    'description' => __("Créer la commande dans Woocommerce lorsqu'un nouveau document de vente Sage est crée.", 'egas'),
                     'type' => 'resource',
                     'default' => '',
                 ],
                 [
                     'id' => 'website_create_old_' . self::ENTITY_NAME,
-                    'label' => __("Importe les anciens documents de vente Sage.", Sage::TOKEN),
-                    'description' => __("Importe les anciens documents de vente Sage dans WooCommerce.", Sage::TOKEN),
+                    'label' => __("Importe les anciens documents de vente Sage.", 'egas'),
+                    'description' => __("Importe les anciens documents de vente Sage dans WooCommerce.", 'egas'),
                     'type' => 'resource',
                     'default' => '',
                 ],
                 [
                     'id' => 'website_update_' . self::ENTITY_NAME,
-                    'label' => __("Met à jour la commande Woocommerce.", Sage::TOKEN),
-                    'description' => __("Met à jour la commande Woocommerce lorsque le document de vente Sage qui lui est lié est modifié.", Sage::TOKEN),
+                    'label' => __("Met à jour la commande Woocommerce.", 'egas'),
+                    'description' => __("Met à jour la commande Woocommerce lorsque le document de vente Sage qui lui est lié est modifié.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
                 [
                     'id' => 'journal_payment_' . self::ENTITY_NAME,
-                    'label' => __("Journal comptable", Sage::TOKEN),
-                    'description' => __('Journal comptable dans lequel il faut écrire les paiements.', Sage::TOKEN),
+                    'label' => __("Journal comptable", 'egas'),
+                    'description' => __('Journal comptable dans lequel il faut écrire les paiements.', 'egas'),
                     'type' => 'select',
                     'options' => $fJournauxsOptions,
                     'default' => $defaultFJournaux,
                 ],
                 [
                     'id' => 'reglement_payment_' . self::ENTITY_NAME,
-                    'label' => __("Type de règlement", Sage::TOKEN),
-                    'description' => __('Type de règlement pour les paiements sur le site.', Sage::TOKEN),
+                    'label' => __("Type de règlement", 'egas'),
+                    'description' => __('Type de règlement pour les paiements sur le site.', 'egas'),
                     'type' => 'select',
                     'options' => $pReglementsOptions,
                     'default' => $defaultPReglement,
                 ],
                 [
                     'id' => 'document_acompte_payment' . self::ENTITY_NAME,
-                    'label' => __("Créer un document d'acompte pour les paiements et remboursements.", Sage::TOKEN),
-                    'description' => __("Lorsqu’un paiement est effectué sur le site pour une commande associée à un document de vente dans Sage, et que ce document est à un stade antérieur à celui de facture, un document d’acompte est alors créé dans Sage afin de refléter le paiement ou le remboursement.", Sage::TOKEN),
+                    'label' => __("Créer un document d'acompte pour les paiements et remboursements.", 'egas'),
+                    'description' => __("Lorsqu’un paiement est effectué sur le site pour une commande associée à un document de vente dans Sage, et que ce document est à un stade antérieur à celui de facture, un document d’acompte est alors créé dans Sage afin de refléter le paiement ou le remboursement.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'on',
                 ],
@@ -190,12 +190,12 @@ class FDocenteteResource extends Resource
                 field: 'doDomaine',
                 value: DomaineTypeEnum::DomaineTypeVente->value,
                 condition: 'eq',
-                message: fn(array $fDocentete): string => __("Seuls les documents de ventes peuvent être importés.", Sage::TOKEN) . ' [' . $fDocentete["doPiece"] . '][' . $fDocentete["doType"] . ']'),
+                message: fn(array $fDocentete): string => __("Seuls les documents de ventes peuvent être importés.", 'egas') . ' [' . $fDocentete["doPiece"] . '][' . $fDocentete["doType"] . ']'),
             new ImportConditionDto(
                 field: 'doType',
                 value: FDocenteteUtils::DO_TYPE_MAPPABLE,
                 condition: 'in',
-                message: fn(array $fDocentete): string => __("Seuls les documents ayant ces doType peuvent être importés.", Sage::TOKEN) . ' [' . implode(',', FDocenteteUtils::DO_TYPE_MAPPABLE) . '][' . $fDocentete["doPiece"] . '][' . $fDocentete["doType"] . ']'),
+                message: fn(array $fDocentete): string => __("Seuls les documents ayant ces doType peuvent être importés.", 'egas') . ' [' . implode(',', FDocenteteUtils::DO_TYPE_MAPPABLE) . '][' . $fDocentete["doPiece"] . '][' . $fDocentete["doType"] . ']'),
         ];
         $this->import = static function (string $identifier) {
             $data = json_decode(stripslashes($identifier), false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);

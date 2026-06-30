@@ -82,90 +82,90 @@ class AdminController
                 $devFields = [
                     [
                         'id' => 'wordpress_db_host',
-                        'label' => __('Adresse du serveur de base de données WordPress', Sage::TOKEN),
-                        'description' => __("Renseignez l'adresse IP ou le nom d'hôte permettant à l'API Sage d'accéder à la base de données WordPress.", Sage::TOKEN),
+                        'label' => __('Adresse du serveur de base de données WordPress', 'egas'),
+                        'description' => __("Renseignez l'adresse IP ou le nom d'hôte permettant à l'API Sage d'accéder à la base de données WordPress.", 'egas'),
                         'type' => 'text',
                         'default' => $wpdb->dbhost,
-                        'placeholder' => __($wpdb->dbhost, Sage::TOKEN)
+                        'placeholder' => $wpdb->dbhost
                     ],
                     [
                         'id' => 'wordpress_db_name',
-                        'label' => __('Nom de la base de données WordPress', Sage::TOKEN),
-                        'description' => __('Renseignez le nom de la base de données WordPress.', Sage::TOKEN),
+                        'label' => __('Nom de la base de données WordPress', 'egas'),
+                        'description' => __('Renseignez le nom de la base de données WordPress.', 'egas'),
                         'type' => 'text',
                         'default' => $wpdb->dbname,
-                        'placeholder' => __($wpdb->dbname, Sage::TOKEN)
+                        'placeholder' => $wpdb->dbname
                     ],
                     [
                         'id' => 'wordpress_db_username',
-                        'label' => __("Nom d'utilisateur de la base de données WordPress", Sage::TOKEN),
-                        'description' => __("Renseignez le nom d'utilisateur utilisé pour accéder à la base de données WordPress.", Sage::TOKEN),
+                        'label' => __("Nom d'utilisateur de la base de données WordPress", 'egas'),
+                        'description' => __("Renseignez le nom d'utilisateur utilisé pour accéder à la base de données WordPress.", 'egas'),
                         'type' => 'text',
                         'default' => $wpdb->dbuser,
-                        'placeholder' => __($wpdb->dbuser, Sage::TOKEN)
+                        'placeholder' => $wpdb->dbuser
                     ],
                     [
                         'id' => 'wordpress_db_password',
-                        'label' => __('Mot de passe de la base de données WordPress', Sage::TOKEN),
-                        'description' => __('Renseignez le mot de passe utilisé pour accéder à la base de données WordPress.', Sage::TOKEN),
+                        'label' => __('Mot de passe de la base de données WordPress', 'egas'),
+                        'description' => __('Renseignez le mot de passe utilisé pour accéder à la base de données WordPress.', 'egas'),
                         'type' => 'text',
                         'default' => $wpdb->dbpassword,
-                        'placeholder' => __($wpdb->dbpassword, Sage::TOKEN)
+                        'placeholder' => $wpdb->dbpassword
                     ],
                 ];
             }
             $settings = [
                 'api' => [
-                    'title' => __('Api', Sage::TOKEN),
-                    'description' => __('', Sage::TOKEN),
+                    'title' => __('Api', 'egas'),
+                    'description' => __('', 'egas'),
                     'fields' => [
                         [
                             'id' => 'api_key',
-                            'label' => __('Clé API', Sage::TOKEN),
-                            'description' => __('Ouvrez l’application Sage API Manager et renseignez la clé API disponible dans le détail de votre configuration.', Sage::TOKEN),
+                            'label' => __('Clé API', 'egas'),
+                            'description' => __('Ouvrez l’application Sage API Manager et renseignez la clé API disponible dans le détail de votre configuration.', 'egas'),
                             'type' => 'text',
                             'default' => '',
-                            'placeholder' => __('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', Sage::TOKEN)
+                            'placeholder' => __('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', 'egas')
                         ],
                         [
                             'id' => 'api_host_url',
-                            'label' => __("Adresse de l'API Sage", Sage::TOKEN),
-                            'description' => __("Renseignez le nom de domaine (s'il est configuré) ou l'adresse de votre API Sage.", Sage::TOKEN),
+                            'label' => __("Adresse de l'API Sage", 'egas'),
+                            'description' => __("Renseignez le nom de domaine (s'il est configuré) ou l'adresse de votre API Sage.", 'egas'),
                             'type' => 'text',
                             'default' => '',
-                            'placeholder' => __('https://monsite-exemple.fr', Sage::TOKEN),
+                            'placeholder' => __('https://monsite-exemple.fr', 'egas'),
                             // https://windows
                         ],
                         [
                             'id' => 'activate_https_verification_graphql',
-                            'label' => __('Vérifier le certificat HTTPS de l’API', Sage::TOKEN),
-                            'description' => __("Décochez cette case si vous obtenez l'erreur : « cURL error 60: SSL certificate problem: self-signed certificate ». ", Sage::TOKEN),
+                            'label' => __('Vérifier le certificat HTTPS de l’API', 'egas'),
+                            'description' => __("Décochez cette case si vous obtenez l'erreur : « cURL error 60: SSL certificate problem: self-signed certificate ». ", 'egas'),
                             'type' => 'checkbox',
                             'default' => 'on'
                         ],
                         [
                             'id' => 'wordpress_host_url',
-                            'label' => __('Adresse de WordPress', Sage::TOKEN),
-                            'description' => __("Renseignez l'adresse à laquelle l'API Sage peut joindre WordPress.", Sage::TOKEN),
+                            'label' => __('Adresse de WordPress', 'egas'),
+                            'description' => __("Renseignez l'adresse à laquelle l'API Sage peut joindre WordPress.", 'egas'),
                             'type' => 'text',
                             'default' => $defaultWordpressUrl,
-                            'placeholder' => __($defaultWordpressUrl, Sage::TOKEN)
+                            'placeholder' => __($defaultWordpressUrl, 'egas')
                         ],
                         [
                             'id' => 'activate_https_verification_wordpress',
-                            'label' => __('Vérifier le certificat HTTPS de WordPress', Sage::TOKEN),
-                            'description' => __("Décochez cette case si vous obtenez l'erreur : « The SSL connection could not be established, see inner exception ». ", Sage::TOKEN),
+                            'label' => __('Vérifier le certificat HTTPS de WordPress', 'egas'),
+                            'description' => __("Décochez cette case si vous obtenez l'erreur : « The SSL connection could not be established, see inner exception ». ", 'egas'),
                             'type' => 'checkbox',
                             'default' => 'on'
                         ],
                         ...$devFields,
                         [
                             'id' => 'nb_threads',
-                            'label' => __("Nombre d'opérations simultanées", Sage::TOKEN),
-                            'description' => __("Définissez le nombre maximal d'opérations exécutées en parallèle. Augmentez cette valeur uniquement si votre serveur dispose de ressources suffisantes.", Sage::TOKEN),
+                            'label' => __("Nombre d'opérations simultanées", 'egas'),
+                            'description' => __("Définissez le nombre maximal d'opérations exécutées en parallèle. Augmentez cette valeur uniquement si votre serveur dispose de ressources suffisantes.", 'egas'),
                             'type' => 'number',
                             'default' => '1',
-                            'placeholder' => __('1', Sage::TOKEN)
+                            'placeholder' => __('1', 'egas')
                         ],
                     ]
                 ],
@@ -184,24 +184,24 @@ class AdminController
                 $options = [
                     [
                         'id' => $resource->getEntityName() . '_show_fields',
-                        'label' => __('Champs à montrer', Sage::TOKEN),
-                        'description' => __('Veuillez sélectionner les champs à afficher sur le tableau.', Sage::TOKEN),
+                        'label' => __('Champs à montrer', 'egas'),
+                        'description' => __('Veuillez sélectionner les champs à afficher sur le tableau.', 'egas'),
                         'type' => '2_select_multi',
                         'options' => $showFields,
                         'default' => $defaultFields,
                     ],
                     [
                         'id' => $resource->getEntityName() . '_filter_fields',
-                        'label' => __('Champs pouvant être filtrés', Sage::TOKEN),
-                        'description' => __('Veuillez sélectionner les champs pouvant servir à filter vos résultats.', Sage::TOKEN),
+                        'label' => __('Champs pouvant être filtrés', 'egas'),
+                        'description' => __('Veuillez sélectionner les champs pouvant servir à filter vos résultats.', 'egas'),
                         'type' => '2_select_multi',
                         'options' => array_filter($filterFields, static fn(string $key): bool => !str_starts_with($key, Sage::PREFIX_META_DATA), ARRAY_FILTER_USE_KEY),
                         'default' => array_filter($defaultFields, static fn(string $v): bool => !str_starts_with($v, Sage::PREFIX_META_DATA)),
                     ],
                     [
                         'id' => $resource->getEntityName() . '_perPage',
-                        'label' => __("Nombre d'élément par défaut par page", Sage::TOKEN),
-                        'description' => __('Veuillez sélectionner le nombre de lignes à afficher sur le tableau.', Sage::TOKEN),
+                        'label' => __("Nombre d'élément par défaut par page", 'egas'),
+                        'description' => __('Veuillez sélectionner le nombre de lignes à afficher sur le tableau.', 'egas'),
                         'type' => 'select',
                         'options' => array_combine(Sage::$paginationRange, Sage::$paginationRange),
                         'default' => (string)Sage::$defaultPagination,
@@ -210,7 +210,7 @@ class AdminController
                 ];
                 $resource->setOptions(fn() => $options);
                 $settings[$resource->getEntityName()] = [
-                    'title' => __($resource->getTitle(), Sage::TOKEN),
+                    'title' => __($resource->getTitle(), 'egas'),
                     'description' => $resource->getDescription(),
                     'fields' => $options,
                     'resource' => $resource,
@@ -364,8 +364,8 @@ class AdminController
                 }
 
                 $html .= '<img id="' . $option_name . '_preview" alt="' . $option_name . '" class="image_preview" src="' . $image_thumb . '" /><br/>' . "\n";
-                $html .= '<input id="' . $option_name . '_button" type="button" data-uploader_title="' . __('Upload an image', Sage::TOKEN) . '" data-uploader_button_text="' . __('Use image', Sage::TOKEN) . '" class="image_upload_button button" value="' . __('Upload new image', Sage::TOKEN) . '" />' . "\n";
-                $html .= '<input id="' . $option_name . '_delete" type="button" class="image_delete_button button" value="' . __('Remove image', Sage::TOKEN) . '" />' . "\n";
+                $html .= '<input id="' . $option_name . '_button" type="button" data-uploader_title="' . __('Upload an image', 'egas') . '" data-uploader_button_text="' . __('Use image', 'egas') . '" class="image_upload_button button" value="' . __('Upload new image', 'egas') . '" />' . "\n";
+                $html .= '<input id="' . $option_name . '_delete" type="button" class="image_delete_button button" value="' . __('Remove image', 'egas') . '" />' . "\n";
                 $html .= '<input id="' . $option_name . '" class="image_data_field" type="hidden" name="' . $option_name . '" value="' . $data . '"/><br/>' . "\n";
                 break;
             case 'color':
@@ -477,8 +477,8 @@ class AdminController
                 [
                     'location' => 'menu',
                     // Possible settings: options, menu, submenu.
-                    'page_title' => __('Egas', Sage::TOKEN),
-                    'menu_title' => __('Egas', Sage::TOKEN),
+                    'page_title' => __('Egas', 'egas'),
+                    'menu_title' => __('Egas', 'egas'),
                     'capability' => 'manage_options',
                     'menu_slug' => Sage::TOKEN . '_settings',
                     'function' => null,
@@ -489,15 +489,15 @@ class AdminController
                     'location' => 'submenu',
                     // Possible settings: options, menu, submenu.
                     'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __('Settings', Sage::TOKEN),
-                    'menu_title' => __('Settings', Sage::TOKEN),
+                    'page_title' => __('Settings', 'egas'),
+                    'menu_title' => __('Settings', 'egas'),
                     'capability' => 'manage_options',
                     'menu_slug' => Sage::TOKEN . '_settings',
                     'function' => function (): void {
                         // Build page HTML.
                         $html = TwigService::getInstance()->render('base.html.twig');
                         $html .= '<div class="wrap" id="' . Sage::TOKEN . '_settings">' . "\n";
-                        $html .= '<h2>' . __('Egas', Sage::TOKEN) . '</h2>' . "\n";
+                        $html .= '<h2>' . __('Egas', 'egas') . '</h2>' . "\n";
 
                         $tab = '';
                         if (isset($_GET['tab']) && $_GET['tab']) {
@@ -548,7 +548,7 @@ class AdminController
 
                         $html .= '<p class="submit">' . "\n";
                         $html .= '<input type="hidden" name="tab" value="' . esc_attr($tab) . '" />' . "\n";
-                        $html .= '<input name="Submit" type="submit" class="button-primary" value="' . esc_attr(__('Save Settings', Sage::TOKEN)) . '" />' . "\n";
+                        $html .= '<input name="Submit" type="submit" class="button-primary" value="' . esc_attr(__('Save Settings', 'egas')) . '" />' . "\n";
                         $html .= '</p>' . "\n";
                         $html .= '</form>' . "\n";
                         $html .= '</div>' . "\n";
@@ -561,8 +561,8 @@ class AdminController
                     'location' => 'submenu',
                     // Possible settings: options, menu, submenu.
                     'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __($resource->getTitle(), Sage::TOKEN),
-                    'menu_title' => __($resource->getTitle(), Sage::TOKEN),
+                    'page_title' => __($resource->getTitle(), 'egas'),
+                    'menu_title' => __($resource->getTitle(), 'egas'),
                     'capability' => 'manage_options',
                     'menu_slug' => Sage::TOKEN . '_' . $resource->getEntityName(),
                     'function' => static function () use ($resource): void {
@@ -592,8 +592,8 @@ class AdminController
                     'location' => 'submenu',
                     // Possible settings: options, menu, submenu.
                     'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __('À propos', Sage::TOKEN),
-                    'menu_title' => __('À propos', Sage::TOKEN),
+                    'page_title' => __('À propos', 'egas'),
+                    'menu_title' => __('À propos', 'egas'),
                     'capability' => 'manage_options',
                     'menu_slug' => Sage::TOKEN . '_about',
                     'function' => static function (): void {
@@ -605,8 +605,8 @@ class AdminController
                     'location' => 'submenu',
                     // Possible settings: options, menu, submenu.
                     'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __('Logs', Sage::TOKEN),
-                    'menu_title' => __('Logs', Sage::TOKEN),
+                    'page_title' => __('Logs', 'egas'),
+                    'menu_title' => __('Logs', 'egas'),
                     'capability' => 'manage_options',
                     'menu_slug' => Sage::TOKEN . '_log',
                     'function' => static function (): void {
@@ -681,13 +681,13 @@ class AdminController
                 optionName: 'woocommerce_enable_guest_checkout',
                 optionValue: 'no',
                 trans: __('Allow customers to place orders without an account', 'woocommerce'),
-                description: __("Lorsque cette option est activée vos clients ne sont pas obligés de se connecter à leurs comptes pour passer commande et il est donc impossible de créer automatiquement la commande passé dans Woocommerce dans Sage.", Sage::TOKEN),
+                description: __("Lorsque cette option est activée vos clients ne sont pas obligés de se connecter à leurs comptes pour passer commande et il est donc impossible de créer automatiquement la commande passé dans Woocommerce dans Sage.", 'egas'),
             ),
             new SageExpectedOption(
                 optionName: 'woocommerce_calc_taxes',
                 optionValue: 'yes',
                 trans: __('Enable tax rates and calculations', 'woocommerce'),
-                description: __("Cette option doit être activé pour que le plugin Egas fonctionne correctement afin de récupérer les taxes directement renseignées dans Sage.", Sage::TOKEN),
+                description: __("Cette option doit être activé pour que le plugin Egas fonctionne correctement afin de récupérer les taxes directement renseignées dans Sage.", 'egas'),
             ),
         ];
         if (!is_null($pDossier?->nDeviseCompteNavigation?->dCodeIso)) {
@@ -695,7 +695,7 @@ class AdminController
                 optionName: 'woocommerce_currency',
                 optionValue: $pDossier->nDeviseCompteNavigation->dCodeIso,
                 trans: __('Currency', 'woocommerce'),
-                description: __("La devise dans Woocommerce n'est pas la même que dans Sage.", Sage::TOKEN),
+                description: __("La devise dans Woocommerce n'est pas la même que dans Sage.", 'egas'),
             );
         }
         /** @var SageExpectedOption[] $changes */
@@ -715,8 +715,8 @@ class AdminController
             $optionNames = [];
             foreach ($changes as $sageExpectedOption) {
                 $optionValue = $sageExpectedOption->getOptionValue();
-                $result .= "<div>" . __('Le plugin Egas a besoin de modifier l\'option', Sage::TOKEN) . " <code>" .
-                    $sageExpectedOption->getTrans() . "</code> " . __('pour lui donner la valeur', Sage::TOKEN) . " <code>" .
+                $result .= "<div>" . __('Le plugin Egas a besoin de modifier l\'option', 'egas') . " <code>" .
+                    $sageExpectedOption->getTrans() . "</code> " . __('pour lui donner la valeur', 'egas') . " <code>" .
                     $optionValue . "</code>
 <div class='tooltip'>
         <span class='dashicons dashicons-info' style='padding-right: 22px'></span>
@@ -735,7 +735,7 @@ class AdminController
                 <input type="hidden" name="option_page" value="options"/>'
                     . wp_nonce_field('options-options', '_wpnonce', true, false)
                     . '<p class="submit">
-                <input name="Update" type="submit" class="button-primary" value="' . esc_attr(__('Mettre à jour', Sage::TOKEN)) . '">
+                <input name="Update" type="submit" class="button-primary" value="' . esc_attr(__('Mettre à jour', 'egas')) . '">
                 </p>
                 </form>
                 </div>');

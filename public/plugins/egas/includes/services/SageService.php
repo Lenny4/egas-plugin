@@ -712,13 +712,13 @@ WHERE user_login LIKE %s
     {
         if (is_null($ctNum)) {
             return [null, null, "<div class='error'>
-                    " . __("Vous devez spécifier le numéro de compte Sage", Sage::TOKEN) . "
+                    " . __("Vous devez spécifier le numéro de compte Sage", 'egas') . "
                             </div>", 0];
         }
         $fComptet ??= GraphqlService::getInstance()->getFComptet($ctNum);
         if (is_null($fComptet)) {
             return [null, null, "<div class='error'>
-                    " . __("Le compte Sage n'a pas pu être importé", Sage::TOKEN) . "
+                    " . __("Le compte Sage n'a pas pu être importé", 'egas') . "
                             </div>", 0];
         }
         $sageService = SageService::getInstance();
@@ -754,14 +754,14 @@ WHERE user_login LIKE %s
         foreach ($metadata as $key => $value) {
             update_user_meta($userId, $key, $value);
         }
-        $url = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "user-edit.php?user_id=" . $userId . "'>" . __("Voir l'utilisateur", Sage::TOKEN) . "</a></span></strong>";
+        $url = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "user-edit.php?user_id=" . $userId . "'>" . __("Voir l'utilisateur", 'egas') . "</a></span></strong>";
         if (!$newUser) {
             return [true, null, $showSuccessMessage ? "<div class='notice notice-success is-dismissible'>
-                        " . __('L\'utilisateur a été modifié', Sage::TOKEN) . $url . "
+                        " . __('L\'utilisateur a été modifié', 'egas') . $url . "
                                 </div>" : "", $userId];
         }
         return [true, null, $showSuccessMessage ? "<div class='notice notice-success is-dismissible'>
-                        " . __('L\'utilisateur a été créé', Sage::TOKEN) . $url . "
+                        " . __('L\'utilisateur a été créé', 'egas') . $url . "
                                 </div>" : "", $userId];
     }
 

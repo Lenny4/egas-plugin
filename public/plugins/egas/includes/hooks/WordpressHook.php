@@ -122,7 +122,7 @@ class WordpressHook
         // endregion
         // Add settings link to plugins page.
         add_filter('plugin_action_links_' . plugin_basename($sage->file), static function (array $links): array {
-            $links[] = '<a href="options-general.php?page=' . Sage::TOKEN . '_settings">' . __('Settings', Sage::TOKEN) . '</a>';
+            $links[] = '<a href="options-general.php?page=' . Sage::TOKEN . '_settings">' . __('Settings', 'egas') . '</a>';
             return $links;
         }
         );
@@ -162,8 +162,15 @@ LIMIT 1
                             (int)$r[0]->ID !== $prepared_user->ID
                         )
                     ) {
+                        /* translators: 1: Sage account number, 2: WordPress username, 3: WordPress user ID */
+                        $message = sprintf(
+                            __('Le compte Sage [%1$s] est déjà lié au compte Wordpress [%2$s (id: %3$s)]', 'egas'),
+                            $ctNum,
+                            $r[0]->user_login,
+                            $r[0]->ID
+                        );
                         wp_send_json_error([
-                            'existing_user_ctNum' => __("Le compte Sage [" . $ctNum . "] est déjà lié au compte Wordpress [" . $r[0]->user_login . " (id: " . $r[0]->ID . ")]"),
+                            'existing_user_ctNum' => $message,
                         ]);
                     }
                 }
@@ -205,7 +212,7 @@ LIMIT 1
         // endregion
         // region user show Sage id: https://wordpress.stackexchange.com/a/160423/201039
         add_filter('manage_users_columns', static function (array $columns): array {
-            $columns[Sage::TOKEN] = __("Sage", Sage::TOKEN);
+            $columns[Sage::TOKEN] = __("Sage", 'egas');
             return $columns;
         });
         add_filter('manage_users_custom_column', static fn(string $val, string $columnName, int $userId): string => WordpressService::getInstance()->getUserWordpressIdForSage($userId) ?? '', accepted_args: 3);

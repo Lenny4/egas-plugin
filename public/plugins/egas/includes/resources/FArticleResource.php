@@ -26,8 +26,8 @@ class FArticleResource extends Resource
     {
         parent::__construct();
         global $wpdb;
-        $this->title = __("Articles", Sage::TOKEN);
-        $this->description = __("Gestion des articles", Sage::TOKEN);
+        $this->title = __("Articles", 'egas');
+        $this->description = __("Gestion des articles", 'egas');
         $this->entityName = self::ENTITY_NAME;
         $this->typeModel = self::TYPE_MODEL;
         $this->defaultSortField = self::DEFAULT_SORT;
@@ -51,37 +51,37 @@ class FArticleResource extends Resource
             return [
                 [
                     'id' => 'sage_create_new_' . self::ENTITY_NAME,
-                    'label' => __("Créer l'article dans Sage.", Sage::TOKEN),
-                    'description' => __("Créer l'article dans Sage lorsqu'un nouveau produit Woocommerce est crée.", Sage::TOKEN),
+                    'label' => __("Créer l'article dans Sage.", 'egas'),
+                    'description' => __("Créer l'article dans Sage lorsqu'un nouveau produit Woocommerce est crée.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
 //            [
 //                'id' => 'sage_create_old_' . self::ENTITY_NAME,
-//                'label' => __("Importe les anciens produits.", Sage::TOKEN),
-//                'description' => __("Importe les anciens produits Woocommerce dans Sage.", Sage::TOKEN),
+//                'label' => __("Importe les anciens produits.", 'egas'),
+//                'description' => __("Importe les anciens produits Woocommerce dans Sage.", 'egas'),
 //                'type' => 'checkbox',
 //                'default' => 'off',
 //            ],
                 [
                     'id' => 'sage_update_' . self::ENTITY_NAME,
-                    'label' => __("Met à jour l’article Sage.", Sage::TOKEN),
-                    'description' => __("Met à jour l’article Sage lorsque le produit WooCommerce qui lui est lié est modifié.", Sage::TOKEN),
+                    'label' => __("Met à jour l’article Sage.", 'egas'),
+                    'description' => __("Met à jour l’article Sage lorsque le produit WooCommerce qui lui est lié est modifié.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
                 [
                     'id' => 'website_create_new_' . self::ENTITY_NAME,
-                    'label' => __("Créer le produit dans Woocommerce.", Sage::TOKEN),
-                    'description' => __("Créer le produit dans Woocommerce lorsqu'un nouvel article Sage est crée.", Sage::TOKEN),
+                    'label' => __("Créer le produit dans Woocommerce.", 'egas'),
+                    'description' => __("Créer le produit dans Woocommerce lorsqu'un nouvel article Sage est crée.", 'egas'),
                     'type' => 'resource',
                     'initFilter' => $initFilterJson,
                     'default' => '',
                 ],
                 [
                     'id' => 'website_create_old_' . self::ENTITY_NAME,
-                    'label' => __("Importe les anciens articles.", Sage::TOKEN),
-                    'description' => __("Importe les anciens articles Sage dans Woocommerce.", Sage::TOKEN),
+                    'label' => __("Importe les anciens articles.", 'egas'),
+                    'description' => __("Importe les anciens articles Sage dans Woocommerce.", 'egas'),
                     'type' => 'resource',
                     'initFilter' => json_encode([
                         'values' => [
@@ -97,8 +97,8 @@ class FArticleResource extends Resource
                 ],
                 [
                     'id' => 'website_update_' . self::ENTITY_NAME,
-                    'label' => __("Met à jour le produit Woocommerce.", Sage::TOKEN),
-                    'description' => __("Met à jour le produit Woocommerce lorsque l'article Sage qui lui est lié est modifié.", Sage::TOKEN),
+                    'label' => __("Met à jour le produit Woocommerce.", 'egas'),
+                    'description' => __("Met à jour le produit Woocommerce lorsque l'article Sage qui lui est lié est modifié.", 'egas'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
@@ -137,13 +137,13 @@ class FArticleResource extends Resource
                     ArticleTypeEnum::ArticleTypeStandard->value,
                 ],
                 condition: 'in',
-                message: fn(array $fArticle): string => __("Seuls les articles standard peuvent être importés.", Sage::TOKEN) . ' [' . $fArticle["arRef"] . ']'
+                message: fn(array $fArticle): string => __("Seuls les articles standard peuvent être importés.", 'egas') . ' [' . $fArticle["arRef"] . ']'
             ),
             new ImportConditionDto(
                 field: 'arNomencl',
                 value: NomenclatureTypeEnum::NomenclatureTypeAucun->value,
                 condition: 'eq',
-                message: fn(array $fArticle): string => __("Seuls les articles ayant une nomenclature Aucun peuvent être importés.", Sage::TOKEN) . ' [' . $fArticle["arRef"] . ']'
+                message: fn(array $fArticle): string => __("Seuls les articles ayant une nomenclature Aucun peuvent être importés.", 'egas') . ' [' . $fArticle["arRef"] . ']'
             ),
         ];
         $this->import = static function (string $identifier) {

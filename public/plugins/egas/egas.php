@@ -43,7 +43,7 @@ $sage = Sage::getInstance(__FILE__);
 if (!$sage->isWooCommerceActive()) {
     add_action('admin_notices', function () {
         echo '<div class="notice notice-error"><p>' .
-            __('Egas a besoin de Woocommerce pour fonctionner.', Sage::TOKEN) .
+            __('Egas a besoin de Woocommerce pour fonctionner.', 'egas') .
             '</p></div>';
     });
 } else {

@@ -36,7 +36,7 @@ class WoocommerceHook
         add_action('add_meta_boxes_' . $screenId, static function (WC_Order $order) use ($screenId): void { // woocommerce/src/Internal/Admin/Orders/Edit.php: do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
             add_meta_box(
                 'woocommerce-order-' . Sage::TOKEN . '-main',
-                __('Egas', Sage::TOKEN),
+                __('Egas', 'egas'),
                 static function () use ($order): void {
                     echo WoocommerceController::getMetaboxFDocentete($order);
                 },
@@ -99,9 +99,9 @@ class WoocommerceHook
         add_filter('product_type_selector', static function (array $types): array {
             $arRef = get_post_meta(get_the_ID(), FArticleResource::META_KEY, true);
             if (!empty($arRef)) {
-                return [Sage::TOKEN => __('Egas', Sage::TOKEN)];
+                return [Sage::TOKEN => __('Egas', 'egas')];
             }
-            return array_merge([Sage::TOKEN => __('Sage product', Sage::TOKEN)], $types);
+            return array_merge([Sage::TOKEN => __('Sage product', 'egas')], $types);
         });
         add_filter('product_type_options', function (array $productOptions): array {
             foreach ($productOptions as &$productOption) {
@@ -126,7 +126,7 @@ class WoocommerceHook
             }
 
             $tabs[Sage::TOKEN] = [
-                'label' => __('Egas', Sage::TOKEN),
+                'label' => __('Egas', 'egas'),
                 'target' => Sage::TARGET_PANEL,
                 'class' => ['show_if_' . Sage::TOKEN],
                 'priority' => 0,
@@ -178,7 +178,7 @@ class WoocommerceHook
                 ?>
                 <div class="notice notice-info">
                     <p>
-                        <?= __("Veuillez ne pas modifier les taxes Sage manuellement ici, elles sont automatiquement mises à jour en fonction des taxes dans Sage ('Stucture' -> 'Comptabilité' -> 'Taux de taxes').", Sage::TOKEN) ?>
+                        <?= __("Veuillez ne pas modifier les taxes Sage manuellement ici, elles sont automatiquement mises à jour en fonction des taxes dans Sage ('Stucture' -> 'Comptabilité' -> 'Taux de taxes').", 'egas') ?>
                     </p>
                 </div>
                 <?php
@@ -209,8 +209,8 @@ class WoocommerceHook
                         [
                             $i,
                             $pExpedition->slug,
-                            '[' . __('Egas', Sage::TOKEN) . '] ' . $pExpedition->eIntitule,
-                            '<span style="font-weight: bold">[' . __('Egas', Sage::TOKEN) . ']</span> ' . $pExpedition->eIntitule,
+                            '[' . __('Egas', 'egas') . '] ' . $pExpedition->eIntitule,
+                            '<span style="font-weight: bold">[' . __('Egas', 'egas') . ']</span> ' . $pExpedition->eIntitule,
                         ],
                         $skeletonShippingMethod[0]
                     );
@@ -235,12 +235,12 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
                 echo '
 <div class="notice notice-warning"><p>
     <span style="display: block; margin: 0.5em 0.5em 0 0; clear: both;">
-        ' . __('Certain Mode(s) d’expédition qui ne proviennent pas de Sage sont activés. Cliquez sur "Désactiver" pour désactiver les modes d\'expéditions qui ne proviennent pas de Sage', Sage::TOKEN) . '
+        ' . __('Certain Mode(s) d’expédition qui ne proviennent pas de Sage sont activés. Cliquez sur "Désactiver" pour désactiver les modes d\'expéditions qui ne proviennent pas de Sage', 'egas') . '
     </span>
     <strong>
     <span style="display: block; margin: 0.5em 0.5em 0 0; clear: both;">
         <a href="' . get_site_url() . '/index.php?rest_route=' . urlencode('/' . Sage::TOKEN . '/v1/deactivate-shipping-zones') . '&_wpnonce=' . wp_create_nonce('wp_rest') . '">
-        ' . __('Désactiver', Sage::TOKEN) . '
+        ' . __('Désactiver', 'egas') . '
         </a>
     </span>
     </strong>
@@ -278,14 +278,14 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
             }
             $arRef = SageService::getInstance()->get_post_meta_single($product->get_id(), FArticleResource::META_KEY, true);
             if (!empty($arRef)) {
-                echo __('Sage ref', Sage::TOKEN) . ': ' . $arRef;
+                echo __('Sage ref', 'egas') . ': ' . $arRef;
             }
         }, 10, 3);
         // endregion
 
         // region add column to product list
         add_filter('manage_edit-product_columns', function (array $columns) { // https://stackoverflow.com/a/44702012/6824121
-            $columns[Sage::TOKEN] = __('Sage', Sage::TOKEN);
+            $columns[Sage::TOKEN] = __('Sage', 'egas');
             return $columns;
         }, 10, 1);
 
@@ -316,7 +316,7 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
 
         add_filter('manage_edit-product_cat_columns', function (array $columns) {
             // Ajouter la colonne 'Egas' après le nom
-            $columns[Sage::TOKEN] = __("Sage", Sage::TOKEN);
+            $columns[Sage::TOKEN] = __("Sage", 'egas');
             return $columns;
         });
         add_action('manage_product_cat_custom_column', function (string $content, string $column_name, int $term_id): void {
