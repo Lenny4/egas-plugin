@@ -466,7 +466,7 @@ class WoocommerceService
                 $message = $responseError;
             } elseif ($response["response"]["code"] === 201) {
                 $body = json_decode((string)$response["body"], false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-                $urlArticle = str_replace('%id%', $body->id, $urlArticle);
+                $urlArticle = str_replace('%id%', (string)$body->id, $urlArticle);
                 $articlePostId = $body->id;
                 if ($showSuccessMessage) {
                     $message = "<div class='notice notice-success is-dismissible'>
@@ -1230,7 +1230,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $wcOrder;
     }
 
-    public function custom_price(string $price, WC_Product $wcProduct, int $userId = 0, ?bool $withTaxes = null): float|string
+    public function custom_price(string|float|int $price, WC_Product $wcProduct, int $userId = 0, ?bool $withTaxes = null): float|string
     {
         $field = 'priceHt';
         if (

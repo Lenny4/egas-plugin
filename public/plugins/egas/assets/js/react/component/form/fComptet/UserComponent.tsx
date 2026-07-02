@@ -10,8 +10,8 @@ const containerSelector = `#${TOKEN}_user`;
 const siteUrl = $(`[data-${TOKEN}-site-url]`).attr(`data-${TOKEN}-site-url`);
 const wpnonce = $(`[data-${TOKEN}-nonce]`).attr(`data-${TOKEN}-nonce`);
 const autoCreateSageFcomptet =
-  $(`[data-${TOKEN}-auto-create-${TOKEN}-fcomptet]`).attr(
-    `data-${TOKEN}-auto-create-${TOKEN}-fcomptet`,
+  $(`[data-${TOKEN}-sage-create-new-fComptets]`).attr(
+    `data-${TOKEN}-sage-create-new-fComptets`,
   ) === "on";
 let translations: any = getTranslations();
 let currentCtNumSearch = "";

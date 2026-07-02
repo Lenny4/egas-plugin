@@ -19,7 +19,7 @@ RUN install-php-extensions xdebug-stable
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs procps less && \
+    apt-get install -y nodejs procps less iputils-ping && \
     npm install --global yarn && \
     yarn add -D webpack-cli && \
     XDEBUG_MODE=off composer install && \

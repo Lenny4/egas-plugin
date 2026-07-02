@@ -97,16 +97,20 @@ class WordpressService
     public function isOptionFormSubmitted(): bool
     {
         return
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             array_key_exists('settings-updated', $_GET) &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             array_key_exists('page', $_GET) &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $_GET["settings-updated"] === 'true' &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $_GET["page"] === Sage::TOKEN . '_settings';
     }
 
     /**
      * https://developer.wordpress.org/rest-api/reference/application-passwords/#create-a-application-password
      */
-    private function getCreateApplicationPassword(string $userId, bool $force = false): string
+    private function getCreateApplicationPassword(string|int $userId, bool $force = false): string
     {
         $optionName = Sage::TOKEN . '_application-passwords';
         $password = get_option($optionName, null);
@@ -129,7 +133,7 @@ class WordpressService
         return $password;
     }
 
-    private function createUpdateWebsite(string $userId, string $password): bool|string
+    private function createUpdateWebsite(string|int $userId, string $password): bool|string
     {
         $graphqlService = GraphqlService::getInstance();
         $user = get_user_by('id', $userId);
@@ -248,11 +252,9 @@ class WordpressService
 
     private function load_plugin_textdomain(): void
     {
-        $sage = Sage::getInstance();
         $domain = Sage::TOKEN;
         $locale = apply_filters('plugin_locale', get_locale(), $domain);
         load_textdomain($domain, WP_LANG_DIR . '/' . $domain . '/' . $domain . '-' . $locale . '.mo');
-        load_plugin_textdomain($domain, false, dirname(plugin_basename($sage->file)) . '/lang/');
     }
 
     public function removeUpdateApi(): void
@@ -274,12 +276,14 @@ class WordpressService
                     $join .= "INNER JOIN {$resource->getTable()}
                         ON {$resource->getTable()}.ID = {$resource->getMetaTable()}.{$resource->getMetaColumnIdentifier()}";
                 }
-                $wpdb->query($wpdb->prepare("
+                $sql = "
                     DELETE {$resource->getMetaTable()}
                     FROM {$resource->getMetaTable()}
                     {$join}
                     WHERE {$resource->getMetaTable()}.meta_key = %s {$where}
-", ...$args));
+";
+                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                $wpdb->query($wpdb->prepare($sql, ...$args));
             }
         }
     }
@@ -287,6 +291,18 @@ class WordpressService
     public function onSavePost(int $postId): void
     {
         if ($postId === 0) {
+            return;
+        }
+        if (
+            !empty($_POST) &&
+            (
+                !isset($_POST['_wpnonce']) ||
+                !wp_verify_nonce(
+                    sanitize_text_field(wp_unslash($_POST['_wpnonce'])),
+                    'update-post_' . $postId
+                )
+            )
+        ) {
             return;
         }
         $arRef = null;
@@ -329,44 +345,54 @@ class WordpressService
 
     public function saveCustomerUserMetaFields(int $userId, bool $isNew): void
     {
+        $post = wp_unslash($_POST);
+        $create_nonce = $post['_wpnonce_create-user'] ?? '';
+        $update_nonce = $post['_wpnonce'] ?? '';
+        if (
+            !wp_verify_nonce($create_nonce, 'create-user') &&
+            !wp_verify_nonce($update_nonce, 'update-user_' . $userId)
+        ) {
+            return;
+        }
         $nbUpdatedMeta = 0;
         $oldCreationType = get_user_meta($userId, '_' . Sage::TOKEN . '_creationType', true);
         if (empty($oldCreationType) || $oldCreationType === 'none') {
             $isNew = true;
         }
         $sageUpdateFcomptet = null;
-        if (array_key_exists('_' . Sage::TOKEN . '_creationType', $_POST)) {
-            $sageUpdateFcomptet = $_POST['_' . Sage::TOKEN . '_creationType'] !== 'none';
+        if (array_key_exists('_' . Sage::TOKEN . '_creationType', $post)) {
+            $sageUpdateFcomptet = $post['_' . Sage::TOKEN . '_creationType'] !== 'none';
             if ($sageUpdateFcomptet) {
-                $fComptet = GraphqlService::getInstance()->getFComptet($_POST[FComptetResource::META_KEY]);
-                if ($_POST['_' . Sage::TOKEN . '_creationType'] === 'link') {
+                $metaKey = FComptetResource::META_KEY;
+                $fComptet = GraphqlService::getInstance()->getFComptet($post[$metaKey] ?? null);
+                if ($post['_' . Sage::TOKEN . '_creationType'] === 'link') {
                     if (
-                        !array_key_exists(FComptetResource::META_KEY, $_POST) ||
+                        !array_key_exists($metaKey, $post) ||
                         !($fComptet instanceof stdClass)
                     ) {
                         return;
                     }
-                    $user = get_users([
-                        'meta_key' => FComptetResource::META_KEY,
-                        'meta_value' => strtoupper((string)$_POST[FComptetResource::META_KEY])
+                    $users = get_users([
+                        'meta_key' => $metaKey,
+                        'meta_value' => strtoupper((string)$post[$metaKey])
                     ]);
-                    if (!empty($user) && $user[0]->ID !== $userId) {
+                    if (!empty($users) && $users[0]->ID !== $userId) {
                         return;
                     }
                 }
-                if ($_POST['_' . Sage::TOKEN . '_creationType'] === 'new' && $fComptet instanceof stdClass) {
+                if ($post['_' . Sage::TOKEN . '_creationType'] === 'new' && $fComptet instanceof stdClass) {
                     return;
                 }
             }
         }
-        foreach ($_POST as $key => $value) {
+        foreach ($post as $key => $value) {
             if (str_starts_with($key, '_' . Sage::TOKEN)) {
-                $value = trim((string)preg_replace('/\s\s+/', ' ', (string)$value)); // supprimer les espaces supérieur à 2
+                $value = trim((string)preg_replace('/\s{2,}/', ' ', (string)$value));
                 if ($key === FComptetResource::META_KEY) {
                     $value = strtoupper($value);
                 }
-                $nbUpdatedMeta++;
                 update_user_meta($userId, $key, $value);
+                $nbUpdatedMeta++;
             }
         }
         if (!$isNew && $nbUpdatedMeta > 0) {

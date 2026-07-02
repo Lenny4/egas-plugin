@@ -38,7 +38,7 @@ class Sage
     {
         $files = glob(__DIR__ . '/hooks' . '/*.php');
         foreach ($files as $file) {
-            $hookClass = 'App\\hooks\\' . basename($file, '.php');
+            $hookClass = 'Egas\\hooks\\' . basename($file, '.php');
             if (class_exists($hookClass)) {
                 new $hookClass();
             }

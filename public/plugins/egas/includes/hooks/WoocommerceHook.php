@@ -226,7 +226,7 @@ class WoocommerceHook
                     $thisSkeletonShippingMethod = str_replace(
                         ['__index__', '__id__', '__name__', '__description__'],
                         [
-                            $i,
+                            (string)$i,
                             $pExpedition->slug,
                             '[' . __('Egas', 'egas') . '] ' . $pExpedition->eIntitule,
                             '<span style="font-weight: bold">[' . __('Egas', 'egas') . ']</span> ' . $pExpedition->eIntitule,
@@ -239,7 +239,7 @@ class WoocommerceHook
                 }
             }
             foreach ($pExpeditions as $i => $pExpedition) {
-                $result[$pExpedition->slug] = str_replace('__index__', $i, $className);
+                $result[$pExpedition->slug] = str_replace('__index__', (string)$i, $className);
             }
             return $result;
         });

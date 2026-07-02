@@ -7,7 +7,7 @@
  * Author: Alexandre Beaujour
  * Author URI: https://egas-solutions.com/
  *
- * Requires at least: 6.3
+ * Requires at least: 6.9
  * Tested up to: 6.9
  * Requires PHP: 8.2
  * Requires Plugins: woocommerce

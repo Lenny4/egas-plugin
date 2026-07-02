@@ -146,7 +146,7 @@ WHERE user_login LIKE %s
                 if (str_ends_with($file, '/ImportConditionDto.php')) {
                     continue;
                 }
-                $hookClass = 'App\\resources\\' . basename($file, '.php');
+                $hookClass = 'Egas\\resources\\' . basename($file, '.php');
                 if (class_exists($hookClass) && $hookClass::supports()) {
                     /** @var Resource $resource */
                     $resource = $hookClass::getInstance();
@@ -859,9 +859,10 @@ WHERE user_login LIKE %s
         $metaColumnIdentifier = $resource->getMetaColumnIdentifier();
         global $wpdb;
         $metaTable2 = $metaTable . '2';
-        $idList = implode("','", array_map('esc_sql', $ids)); // sécurise les IDs
-        $keyList = implode("','", array_map('esc_sql', array_merge([$metaKeyIdentifier], $fieldNames)));
-        $temps = $wpdb->get_results("
+        $idPlaceholders = implode(',', array_fill(0, count($ids), '%s'));
+        $keys = array_values(array_unique([$metaKeyIdentifier, ...$fieldNames]));
+        $keyPlaceholders = implode(',', array_fill(0, count($keys), '%s'));
+        $sql = "
 SELECT
     {$metaTable2}.{$metaColumnIdentifier} AS post_id,
     {$metaTable2}.meta_value,
@@ -869,10 +870,12 @@ SELECT
 FROM {$metaTable}
 LEFT JOIN {$metaTable} {$metaTable2}
     ON {$metaTable2}.{$metaColumnIdentifier} = {$metaTable}.{$metaColumnIdentifier}
-WHERE {$metaTable}.meta_value IN ('{$idList}')
-  AND {$metaTable2}.meta_key IN ('{$keyList}')
-ORDER BY {$metaTable2}.meta_key = '{$metaKeyIdentifier}' DESC
-");
+WHERE {$metaTable}.meta_value IN ({$idPlaceholders})
+  AND {$metaTable2}.meta_key IN ({$keyPlaceholders})
+ORDER BY {$metaTable2}.meta_key = %s DESC
+";
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $temps = $wpdb->get_results($wpdb->prepare($sql, [...$ids, ...$keys, $metaKeyIdentifier]));
         $results = [];
         $mapping = [];
         foreach ($temps as $temp) {
