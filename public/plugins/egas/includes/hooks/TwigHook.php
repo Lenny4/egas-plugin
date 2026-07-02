@@ -1,13 +1,13 @@
 <?php
 
-namespace App\hooks;
+namespace Egas\hooks;
 
-use App\resources\Resource;
-use App\Sage;
-use App\services\SageService;
-use App\services\TwigService;
-use App\utils\FDocenteteUtils;
-use App\utils\SageTranslationUtils;
+use Egas\resources\Resource;
+use Egas\Sage;
+use Egas\services\SageService;
+use Egas\services\TwigService;
+use Egas\utils\FDocenteteUtils;
+use Egas\utils\SageTranslationUtils;
 use stdClass;
 use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;

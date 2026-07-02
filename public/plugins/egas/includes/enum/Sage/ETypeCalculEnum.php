@@ -1,6 +1,6 @@
 <?php
 
-namespace App\enum\Sage;
+namespace Egas\enum\Sage;
 enum ETypeCalculEnum: int
 {
     case Valeur = 0; // Valeur

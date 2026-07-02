@@ -1,6 +1,6 @@
 <?php
 
-namespace App\class;
+namespace Egas\class;
 
 use WC_Shipping_Free_Shipping;
 

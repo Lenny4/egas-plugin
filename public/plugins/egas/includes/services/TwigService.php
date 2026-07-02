@@ -1,8 +1,8 @@
 <?php
 
-namespace App\services;
+namespace Egas\services;
 
-use App\Sage;
+use Egas\Sage;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;

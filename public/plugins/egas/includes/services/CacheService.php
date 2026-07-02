@@ -1,6 +1,6 @@
 <?php
 
-namespace App\services;
+namespace Egas\services;
 
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 

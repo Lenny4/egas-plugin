@@ -1,6 +1,6 @@
 <?php
 
-namespace App\class\dto;
+namespace Egas\class\dto;
 
 final class ArgumentSelectionSetDto
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\resources;
+namespace Egas\resources;
 
-use App\enum\Sage\TiersTypeEnum;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\SageService;
-use App\utils\SageTranslationUtils;
+use Egas\enum\Sage\TiersTypeEnum;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\SageService;
+use Egas\utils\SageTranslationUtils;
 use stdClass;
 
 class FComptetResource extends Resource

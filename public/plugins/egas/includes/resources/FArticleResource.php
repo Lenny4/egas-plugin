@@ -1,15 +1,15 @@
 <?php
 
-namespace App\resources;
+namespace Egas\resources;
 
-use App\class\SageEntityMetadata;
-use App\enum\Sage\ArticleTypeEnum;
-use App\enum\Sage\NomenclatureTypeEnum;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\SageService;
-use App\services\WoocommerceService;
-use App\utils\SageTranslationUtils;
+use Egas\class\SageEntityMetadata;
+use Egas\enum\Sage\ArticleTypeEnum;
+use Egas\enum\Sage\NomenclatureTypeEnum;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\SageService;
+use Egas\services\WoocommerceService;
+use Egas\utils\SageTranslationUtils;
 use stdClass;
 
 class FArticleResource extends Resource

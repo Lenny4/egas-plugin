@@ -1,6 +1,6 @@
 <?php
 
-namespace App\resources;
+namespace Egas\resources;
 
 class CbSyslibreResource extends Resource
 {

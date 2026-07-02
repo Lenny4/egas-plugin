@@ -1,19 +1,19 @@
 <?php
 
-namespace App\services;
+namespace Egas\services;
 
-use App\class\dto\ArgumentSelectionSetDto;
-use App\class\SageEntityMetadata;
-use App\controllers\AdminController;
-use App\resources\FArticleResource;
-use App\resources\FComptetResource;
-use App\resources\Resource;
-use App\Sage;
-use App\utils\FDocenteteUtils;
-use App\utils\OrderUtils;
-use App\utils\PathUtils;
-use App\utils\RoundUtils;
-use App\utils\SageTranslationUtils;
+use Egas\class\dto\ArgumentSelectionSetDto;
+use Egas\class\SageEntityMetadata;
+use Egas\controllers\AdminController;
+use Egas\resources\FArticleResource;
+use Egas\resources\FComptetResource;
+use Egas\resources\Resource;
+use Egas\Sage;
+use Egas\utils\FDocenteteUtils;
+use Egas\utils\OrderUtils;
+use Egas\utils\PathUtils;
+use Egas\utils\RoundUtils;
+use Egas\utils\SageTranslationUtils;
 use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use Exception;
 use StdClass;

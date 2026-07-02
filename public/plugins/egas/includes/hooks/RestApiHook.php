@@ -1,17 +1,17 @@
 <?php
 
-namespace App\hooks;
+namespace Egas\hooks;
 
-use App\controllers\WoocommerceController;
-use App\enum\Sage\DocumentProvenanceTypeEnum;
-use App\enum\Sage\DomaineTypeEnum;
-use App\resources\FComptetResource;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\SageService;
-use App\services\WoocommerceService;
-use App\services\WordpressService;
-use App\utils\FDocenteteUtils;
+use Egas\controllers\WoocommerceController;
+use Egas\enum\Sage\DocumentProvenanceTypeEnum;
+use Egas\enum\Sage\DomaineTypeEnum;
+use Egas\resources\FComptetResource;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\SageService;
+use Egas\services\WoocommerceService;
+use Egas\services\WordpressService;
+use Egas\utils\FDocenteteUtils;
 use Automattic\WooCommerce\Admin\Overrides\Order;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;

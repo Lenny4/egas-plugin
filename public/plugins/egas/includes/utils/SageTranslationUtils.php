@@ -1,9 +1,9 @@
 <?php
 
-namespace App\utils;
+namespace Egas\utils;
 
-use App\resources\FComptetResource;
-use App\Sage;
+use Egas\resources\FComptetResource;
+use Egas\Sage;
 
 final class SageTranslationUtils
 {

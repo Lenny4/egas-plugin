@@ -1,8 +1,8 @@
 <?php
 
-namespace App\utils;
+namespace Egas\utils;
 
-use App\Sage;
+use Egas\Sage;
 use stdClass;
 
 final class PathUtils

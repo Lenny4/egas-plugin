@@ -21,7 +21,7 @@
  * @package Egas
  */
 
-use App\Sage;
+use Egas\Sage;
 
 if (!defined('ABSPATH')) {
     exit;

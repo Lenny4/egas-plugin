@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\resources;
+namespace Egas\resources;
 
 class PPreferenceResource extends Resource
 {

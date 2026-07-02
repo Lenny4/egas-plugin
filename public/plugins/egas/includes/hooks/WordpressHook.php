@@ -1,15 +1,15 @@
 <?php
 
-namespace App\hooks;
+namespace Egas\hooks;
 
-use App\controllers\AdminController;
-use App\controllers\WoocommerceController;
-use App\resources\FComptetResource;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\SageService;
-use App\services\TwigService;
-use App\services\WordpressService;
+use Egas\controllers\AdminController;
+use Egas\controllers\WoocommerceController;
+use Egas\resources\FComptetResource;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\SageService;
+use Egas\services\TwigService;
+use Egas\services\WordpressService;
 use stdClass;
 use WC_Order;
 use WP_REST_Request;

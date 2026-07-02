@@ -1,14 +1,14 @@
 <?php
 
-namespace App\services;
+namespace Egas\services;
 
-use App\class\SageEntityMetadata;
-use App\controllers\AdminController;
-use App\resources\FArticleResource;
-use App\resources\FComptetResource;
-use App\Sage;
-use App\utils\PathUtils;
-use App\utils\TaxeUtils;
+use Egas\class\SageEntityMetadata;
+use Egas\controllers\AdminController;
+use Egas\resources\FArticleResource;
+use Egas\resources\FComptetResource;
+use Egas\Sage;
+use Egas\utils\PathUtils;
+use Egas\utils\TaxeUtils;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use DateTime;
 use stdClass;

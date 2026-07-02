@@ -1,8 +1,8 @@
 <?php
 
-namespace App\class\term;
+namespace Egas\class\term;
 
-use App\Sage;
+use Egas\Sage;
 use WC_Product;
 
 // like class WC_Product_Simple

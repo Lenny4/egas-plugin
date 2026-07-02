@@ -1,6 +1,6 @@
 <?php
 
-namespace App\services;
+namespace Egas\services;
 
 use WP_Error;
 use WP_Http;

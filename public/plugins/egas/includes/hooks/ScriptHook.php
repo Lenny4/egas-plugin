@@ -1,8 +1,8 @@
 <?php
 
-namespace App\hooks;
+namespace Egas\hooks;
 
-use App\Sage;
+use Egas\Sage;
 
 class ScriptHook
 {

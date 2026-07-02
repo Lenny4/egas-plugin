@@ -1,6 +1,6 @@
 <?php
 
-namespace App\utils;
+namespace Egas\utils;
 
 final class OrderUtils
 {

@@ -1,18 +1,18 @@
 <?php
 
-namespace App\hooks;
+namespace Egas\hooks;
 
-use App\class\SageShippingMethod__index__;
-use App\class\term\WC_Product_Egas;
-use App\controllers\AdminController;
-use App\controllers\WoocommerceController;
-use App\resources\FArticleResource;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\SageService;
-use App\services\TwigService;
-use App\services\WoocommerceService;
-use App\utils\SageTranslationUtils;
+use Egas\class\SageShippingMethod__index__;
+use Egas\class\term\WC_Product_Egas;
+use Egas\controllers\AdminController;
+use Egas\controllers\WoocommerceController;
+use Egas\resources\FArticleResource;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\SageService;
+use Egas\services\TwigService;
+use Egas\services\WoocommerceService;
+use Egas\utils\SageTranslationUtils;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use stdClass;
 use WC_Meta_Data;

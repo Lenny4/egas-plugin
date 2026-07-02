@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Egas;
 
 /**
  * Main plugin class.

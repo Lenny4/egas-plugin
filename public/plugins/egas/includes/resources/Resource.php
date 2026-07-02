@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\resources;
+namespace Egas\resources;
 
-use App\class\SageEntityMetadata;
+use Egas\class\SageEntityMetadata;
 use Closure;
 use DateTime;
 use stdClass;

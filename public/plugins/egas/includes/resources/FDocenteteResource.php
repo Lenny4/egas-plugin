@@ -1,14 +1,14 @@
 <?php
 
-namespace App\resources;
+namespace Egas\resources;
 
-use App\enum\Sage\DomaineTypeEnum;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\SageService;
-use App\services\WoocommerceService;
-use App\utils\FDocenteteUtils;
-use App\utils\SageTranslationUtils;
+use Egas\enum\Sage\DomaineTypeEnum;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\SageService;
+use Egas\services\WoocommerceService;
+use Egas\utils\FDocenteteUtils;
+use Egas\utils\SageTranslationUtils;
 use stdClass;
 use WC_Meta_Data;
 use WC_Order;

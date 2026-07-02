@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\enum\Sage;
+namespace Egas\enum\Sage;
 /**
  * - TaxeTauxType.TaxeTauxTypePourcent: pourcentage du prix
  * - TaxeTauxType.TaxeTauxTypeMontant: montant fixe ajouté à chaque ligne du document de vente quelque soit la quantité du produit

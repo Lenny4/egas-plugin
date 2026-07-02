@@ -1,9 +1,9 @@
 <?php
 
-namespace App\utils;
+namespace Egas\utils;
 
-use App\enum\Sage\DocumentTypeEnum;
-use App\Sage;
+use Egas\enum\Sage\DocumentTypeEnum;
+use Egas\Sage;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 final class FDocenteteUtils

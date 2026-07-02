@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\hooks;
+namespace Egas\hooks;
 
-use App\Sage;
-use App\services\WordpressService;
+use Egas\Sage;
+use Egas\services\WordpressService;
 use WP_Upgrader;
 
 class InstallPluginHook

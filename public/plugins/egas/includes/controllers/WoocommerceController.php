@@ -1,17 +1,17 @@
 <?php
 
-namespace App\controllers;
+namespace Egas\controllers;
 
-use App\enum\Sage\DocumentProvenanceTypeEnum;
-use App\enum\Sage\DomaineTypeEnum;
-use App\resources\FDocenteteResource;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\TwigService;
-use App\services\WoocommerceService;
-use App\utils\FDocenteteUtils;
-use App\utils\PCatComptaUtils;
-use App\utils\SageTranslationUtils;
+use Egas\enum\Sage\DocumentProvenanceTypeEnum;
+use Egas\enum\Sage\DomaineTypeEnum;
+use Egas\resources\FDocenteteResource;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\TwigService;
+use Egas\services\WoocommerceService;
+use Egas\utils\FDocenteteUtils;
+use Egas\utils\PCatComptaUtils;
+use Egas\utils\SageTranslationUtils;
 use Symfony\Component\DomCrawler\Crawler;
 use WC_Meta_Box_Order_Data;
 use WC_Order;

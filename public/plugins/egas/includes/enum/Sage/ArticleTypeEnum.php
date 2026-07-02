@@ -1,6 +1,6 @@
 <?php
 
-namespace App\enum\Sage;
+namespace Egas\enum\Sage;
 
 enum ArticleTypeEnum: int
 {

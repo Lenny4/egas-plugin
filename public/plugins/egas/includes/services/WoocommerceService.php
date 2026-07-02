@@ -1,20 +1,20 @@
 <?php
 
-namespace App\services;
+namespace Egas\services;
 
-use App\controllers\AdminController;
-use App\enum\Sage\DocumentFraisTypeEnum;
-use App\enum\Sage\DocumentProvenanceTypeEnum;
-use App\enum\Sage\DomaineTypeEnum;
-use App\enum\Sage\ETypeCalculEnum;
-use App\enum\Sage\TaxeTauxType;
-use App\resources\FArticleResource;
-use App\resources\FComptetResource;
-use App\resources\FDocenteteResource;
-use App\resources\Resource;
-use App\Sage;
-use App\utils\OrderUtils;
-use App\utils\TaxeUtils;
+use Egas\controllers\AdminController;
+use Egas\enum\Sage\DocumentFraisTypeEnum;
+use Egas\enum\Sage\DocumentProvenanceTypeEnum;
+use Egas\enum\Sage\DomaineTypeEnum;
+use Egas\enum\Sage\ETypeCalculEnum;
+use Egas\enum\Sage\TaxeTauxType;
+use Egas\resources\FArticleResource;
+use Egas\resources\FComptetResource;
+use Egas\resources\FDocenteteResource;
+use Egas\resources\Resource;
+use Egas\Sage;
+use Egas\utils\OrderUtils;
+use Egas\utils\TaxeUtils;
 use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;

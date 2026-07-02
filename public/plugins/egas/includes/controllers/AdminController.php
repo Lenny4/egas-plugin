@@ -1,14 +1,14 @@
 <?php
 
-namespace App\controllers;
+namespace Egas\controllers;
 
-use App\class\SageExpectedOption;
-use App\resources\ImportConditionDto;
-use App\resources\Resource;
-use App\Sage;
-use App\services\GraphqlService;
-use App\services\SageService;
-use App\services\TwigService;
+use Egas\class\SageExpectedOption;
+use Egas\resources\ImportConditionDto;
+use Egas\resources\Resource;
+use Egas\Sage;
+use Egas\services\GraphqlService;
+use Egas\services\SageService;
+use Egas\services\TwigService;
 
 class AdminController
 {
