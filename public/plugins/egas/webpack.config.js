@@ -18,7 +18,7 @@ module.exports = (env, argv) => {
       }),
       new MiniCssExtractPlugin(),
       new webpack.DefinePlugin({
-        SOCKET_PORT: JSON.stringify(isDevelopment ? 4433 : undefined),
+        SOCKET_PORT: JSON.stringify(isDevelopment ? 4433 : undefined), // on utilise le port mappé sur - 4433:443
       }),
       // ✅ Ajout du plugin pour copier toutes les images
       new CopyPlugin({
