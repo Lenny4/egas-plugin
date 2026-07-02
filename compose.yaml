@@ -13,9 +13,10 @@ services:
       - sage_wordpress_caddy_config:/config
     environment:
       PHP_IDE_CONFIG: serverName=xdebug-sage-wp-plugin
-      XDEBUG_MODE: debug
       XDEBUG_SESSION: PHPSTORM
       WP_ENVIRONMENT_TYPE: local
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
     ports:

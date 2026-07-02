@@ -130,22 +130,38 @@ class WoocommerceService
 
     public function afterCreateOrEditOrder(WC_Order $order, bool $isNewOrder = false): void
     {
+        $nonce = isset($_POST['woocommerce_meta_nonce'])
+            ? sanitize_text_field(wp_unslash($_POST['woocommerce_meta_nonce']))
+            : '';
         if (
-            array_key_exists(Sage::TOKEN . '-fdocentete-dotype', $_POST) &&
-            array_key_exists(Sage::TOKEN . '-fdocentete-dopiece', $_POST) &&
-            is_numeric($_POST[Sage::TOKEN . '-fdocentete-dotype']) &&
-            !empty($_POST[Sage::TOKEN . '-fdocentete-dopiece'])
+            !$nonce ||
+            !wp_verify_nonce($nonce, 'woocommerce_save_data')
         ) {
-            $this->importFDocenteteFromSage(
-                $_POST[Sage::TOKEN . '-fdocentete-dopiece'],
-                (int)$_POST[Sage::TOKEN . '-fdocentete-dotype'],
-                $order,
-            );
+            return;
+        }
+
+        if (
+            isset(
+                $_POST[Sage::TOKEN . '-fdocentete-dotype'],
+                $_POST[Sage::TOKEN . '-fdocentete-dopiece']
+            ) &&
+            is_numeric($_POST[Sage::TOKEN . '-fdocentete-dotype']) &&
+            $_POST[Sage::TOKEN . '-fdocentete-dopiece'] !== ''
+        ) {
+            $doPiece = isset($_POST[Sage::TOKEN . '-fdocentete-dopiece'])
+                ? sanitize_text_field(wp_unslash($_POST[Sage::TOKEN . '-fdocentete-dopiece']))
+                : '';
+            $doType = isset($_POST[Sage::TOKEN . '-fdocentete-dotype'])
+                ? (int)sanitize_text_field(wp_unslash($_POST[Sage::TOKEN . '-fdocentete-dotype']))
+                : 0;
+            $this->importFDocenteteFromSage($doPiece, $doType, $order);
         }
     }
 
     public function importFDocenteteFromSage(string $doPiece, string $doType, WC_Order|null $order = null, ?string $origin = null): array
     {
+        // if the document is big it can take quite some time
+        set_time_limit(60 * 10);
         if (is_null($order)) {
             $orders = wc_get_orders([
                 'limit' => 1,
@@ -384,8 +400,8 @@ class WoocommerceService
                         break;
                     default:
                         $message .= "<div class='notice notice-error is-dismissible'>
-            <p>" . __('Aucune action défini pour', 'egas') . ": " . print_r($syncChange['changes'], true) . "</p>
-        </div>";
+    <p>" . __('Aucune action définie pour', 'egas') . ': ' . esc_html(json_encode($syncChange['changes'], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)) . "</p>
+</div>";
                         break;
                 };
             }
@@ -733,7 +749,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
             if ($showMessage && $taxeChanges !== []) {
                 ?>
                 <div class="notice notice-success is-dismissible">
-                    <p><strong><?= esc_html__("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
+                    <p><strong><?php echo esc_html__("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
                 </div>
                 <?php
             }

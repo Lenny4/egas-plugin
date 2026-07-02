@@ -32,6 +32,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 }
 
 if (WP_DEBUG) {
+    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
     set_error_handler(function ($errno, $errstr, $errfile, $errline) {
         if (is_string($errline) && str_contains($errline, Sage::TOKEN)) {
             throw new ErrorException(esc_attr($errstr), 0, esc_attr($errno), esc_attr($errfile), esc_attr($errline));

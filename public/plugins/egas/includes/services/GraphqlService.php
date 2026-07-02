@@ -76,73 +76,91 @@ class GraphqlService
             return;
         }
         $this->pingApi = false;
-        if (!current_user_can('read')) { // Minimum capability required to access /wp-admin
+        if (!current_user_can('read')) {
             return;
         }
         $hostUrl = get_option(Sage::TOKEN . '_api_host_url');
+        $link = "<strong><span style='display: block; clear: both;'><a href='" .
+            get_admin_url() . "admin.php?page=" . Sage::TOKEN . "_settings'>" .
+            __("Modifier", 'egas') .
+            "</a></span></strong>";
         $message = null;
-        $link = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "admin.php?page=" . Sage::TOKEN . "_settings'>" . __("Modifier", 'egas') . "</a></span></strong>";
-        if (!is_string($hostUrl) || ($hostUrl === '' || $hostUrl === '0')) {
+        if (!is_string($hostUrl) || $hostUrl === '' || $hostUrl === '0') {
             $message = __("Veuillez renseigner l'host du serveur Sage. ", 'egas') . $link;
         } elseif (filter_var($hostUrl, FILTER_VALIDATE_URL) === false) {
             $message = __("L'host du serveur Sage n'est pas une url valide. ", 'egas') . $link;
         }
         if (!is_null($message)) {
             AdminController::adminNotices("
-<div class='notice notice-info'>
-    <p>" . $message . "</p>
-</div>
-");
+            <div class='notice notice-info'>
+                <p>" . esc_html($message) . "</p>
+            </div>
+        ");
             return;
         }
 
-        $curlHandle = curl_init();
-        $sslVerification =
-            filter_var(get_option(Sage::TOKEN . '_activate_https_verification_graphql', false), FILTER_VALIDATE_BOOLEAN);
-        $data = [
-            CURLOPT_URL => $hostUrl . '/healthz',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 2,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-        ];
-        if (!$sslVerification) {
-            $data[CURLOPT_SSL_VERIFYPEER] = false;
-            $data[CURLOPT_SSL_VERIFYHOST] = 0;
-        }
+        $sslVerification = filter_var(
+            get_option(Sage::TOKEN . '_activate_https_verification_graphql', false),
+            FILTER_VALIDATE_BOOLEAN
+        );
 
-        curl_setopt_array($curlHandle, $data);
-        $responseString = curl_exec($curlHandle);
+        $response = wp_remote_get($hostUrl . '/healthz', [
+            'timeout' => 2,
+            'redirection' => 10,
+            'sslverify' => $sslVerification,
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+        ]);
+
         $errorMsg = null;
-        if (curl_errno($curlHandle) !== 0) {
-            $errorMsg = curl_error($curlHandle);
+
+        if (is_wp_error($response)) {
+            $errorMsg = $response->get_error_message();
+            $this->pingApi = false;
+        } else {
+            $responseBody = wp_remote_retrieve_body($response);
+            try {
+                $data = json_decode(
+                    $responseBody,
+                    true,
+                    512,
+                    JSON_UNESCAPED_UNICODE |
+                    JSON_THROW_ON_ERROR |
+                    JSON_UNESCAPED_SLASHES |
+                    JSON_INVALID_UTF8_SUBSTITUTE
+                );
+
+                if (is_array($data)) {
+                    $this->pingApi = ($data['status'] === 'Healthy');
+                    $this->apiVersion = $data['version'] ?? null;
+
+                    if (!$this->pingApi) {
+                        if (defined('WP_DEBUG') && WP_DEBUG) {
+                            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                            error_log('healthz responseString: ' . $responseBody);
+                        };
+                    }
+                }
+            } catch (Throwable $e) {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    error_log($e->getMessage());
+                }
+                $this->pingApi = false;
+            }
         }
 
-        curl_close($curlHandle);
-        try {
-            $response = json_decode($responseString, true, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-            if (!is_null($response)) {
-                $this->pingApi = $response["status"] === 'Healthy';
-                if (!$this->pingApi) {
-                    error_log('healthz responseString: ' . $responseString);
-                }
-                $this->apiVersion = $response["version"];
-            }
-        } catch (Throwable $e) {
-            error_log($e->getMessage());
-        }
         if (!$this->pingApi) {
             AdminController::adminNotices(
                 "<div id='" . Sage::TOKEN . "_join_api' class='error'><p>" .
-                __("L'API Sage n'est pas joignable. Avez-vous lancé le serveur ?", 'egas')
-                . (is_null($errorMsg)
-                    ? ""
-                    : "<br>" . __('Error', 'egas') . ": " . $errorMsg
+                __("L'API Sage n'est pas joignable. Avez-vous lancé le serveur ?", 'egas') .
+                ($errorMsg
+                    ? "<br>" . __('Erreur', 'egas') . ": " . esc_html($errorMsg)
+                    : ""
                 ) .
-                "</p></div>");
+                "</p></div>"
+            );
         }
     }
 
@@ -154,7 +172,7 @@ class GraphqlService
     {
         global $wpdb;
         $hasError = false;
-        $wordpressHostUrl = parse_url((string)get_option(Sage::TOKEN . '_wordpress_host_url'));
+        $wordpressHostUrl = wp_parse_url((string)get_option(Sage::TOKEN . '_wordpress_host_url'));
         if (!array_key_exists("scheme", $wordpressHostUrl)) {
             AdminController::adminNotices("
 <div class='error'>
@@ -163,7 +181,7 @@ class GraphqlService
 ");
             $hasError = true;
         }
-        $apiHostUrl = parse_url((string)get_option(Sage::TOKEN . '_api_host_url'));
+        $apiHostUrl = wp_parse_url((string)get_option(Sage::TOKEN . '_api_host_url'));
         if (!array_key_exists("scheme", $apiHostUrl)) {
             AdminController::adminNotices("
 <div class='error'>
@@ -301,7 +319,10 @@ class GraphqlService
                 $array["errorDetails"] = $throwable->getErrorDetails();
             }
             $message = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-            error_log($message);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                error_log($message);
+            }
             if ($getError) {
                 return $message;
             }
@@ -1341,6 +1362,9 @@ class GraphqlService
             return false;
         }
         $fDocentetes = $fDocentetes->data->fDocentetes->items;
+        if (empty($fDocentetes)) {
+            return $fDocentetes;
+        }
         if ($addWordpressUserId) {
             $fDocentetes = $this->addWordpressUserId($fDocentetes);
         }
@@ -1360,13 +1384,15 @@ class GraphqlService
                 'doType' => $fDocentete->doType,
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), $fDocentetes);
             global $wpdb;
-            $r = $wpdb->get_results(
-                $wpdb->prepare("
-SELECT order_id, meta_value
-FROM " . $wpdb->prefix . "wc_orders_meta
-WHERE meta_key = %s
-  AND meta_value IN ('" . implode(', ', $values) . "')
-", [FDocenteteResource::META_KEY]));
+            $placeholders = implode(',', array_fill(0, count($values), '%s'));
+            $sql = "
+    SELECT order_id, meta_value
+    FROM {$wpdb->prefix}wc_orders_meta
+    WHERE meta_key = %s
+      AND meta_value IN ($placeholders)
+";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $r = $wpdb->get_results($wpdb->prepare($sql, FDocenteteResource::META_KEY, ...array_values($values)));
             foreach ($fDocentetes as $fDocentete) {
                 $fDocentete->wordpressIds = [];
                 foreach ($r as $wcOrdersMeta) {
@@ -1575,14 +1601,16 @@ WHERE meta_key = %s
     private function addWordpressUserId(array $fDocentetes): array
     {
         global $wpdb;
-        $ctNums = array_map(static fn(stdClass $fDocentete) => $fDocentete->doTiers, $fDocentetes);
-        $r = $wpdb->get_results(
-            $wpdb->prepare("
-SELECT user_id, meta_value
-FROM {$wpdb->usermeta}
-WHERE meta_key = %s
-  AND meta_value IN ('" . implode(', ', $ctNums) . "')
-", [FComptetResource::META_KEY]));
+        $ctNums = array_values(array_map(static fn(stdClass $fDocentete) => $fDocentete->doTiers, $fDocentetes));
+        $placeholders = implode(',', array_fill(0, count($ctNums), '%s'));
+        $sql = "
+    SELECT user_id, meta_value
+    FROM {$wpdb->usermeta}
+    WHERE meta_key = %s
+      AND meta_value IN ($placeholders)
+";
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $r = $wpdb->get_results($wpdb->prepare($sql, FComptetResource::META_KEY, ...$ctNums));
         $mapping = [];
         foreach ($r as $row) {
             $mapping[$row->meta_value] = $row->user_id;
@@ -1601,17 +1629,21 @@ WHERE meta_key = %s
     {
         global $wpdb;
         $arRefs = array_values(array_unique(array_map(static fn(stdClass $fDocligne) => $fDocligne->arRef, $fDoclignes)));
-        $r = $wpdb->get_results(
-            $wpdb->prepare(
-                "
-SELECT post_id, meta_value
-FROM {$wpdb->postmeta}
-         INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id AND {$wpdb->posts}.post_status != 'trash'
-WHERE {$wpdb->postmeta}.meta_key = %s
-  AND {$wpdb->postmeta}.meta_value IN ('" . implode("','", $arRefs) . "')
-", [
-                FArticleResource::META_KEY,
-            ]));
+        if (!$arRefs) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($arRefs), '%s'));
+        $sql = "
+    SELECT post_id, meta_value
+    FROM {$wpdb->postmeta}
+    INNER JOIN {$wpdb->posts}
+        ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id
+        AND {$wpdb->posts}.post_status != 'trash'
+    WHERE {$wpdb->postmeta}.meta_key = %s
+      AND {$wpdb->postmeta}.meta_value IN ($placeholders)
+";
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $r = $wpdb->get_results($wpdb->prepare($sql, FArticleResource::META_KEY, ...$arRefs));
         foreach ($fDoclignes as $fDocligne) {
             $fDocligne->postId = null;
             foreach ($r as $product) {
@@ -2053,6 +2085,7 @@ WHERE {$wpdb->postmeta}.meta_key = %s
 
     public function getResourceWithQuery(Resource $resource, bool $getData = true, bool $allFilterField = false, bool $withMetadata = true): array
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $queryParams = $_GET;
         $entityName = $resource->getEntityName();
         $rawShowFields = get_option(Sage::TOKEN . '_' . $entityName . '_show_fields');

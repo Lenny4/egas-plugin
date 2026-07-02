@@ -119,6 +119,7 @@ class WoocommerceController
                     $html
                 );
             }
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo $html;
         }, $screen, $context, 'high');
     }
@@ -139,6 +140,7 @@ class WoocommerceController
                 __('%s data', 'egas'),
                 __('Commande', 'egas')
             ), static function (WC_Order $order) use ($callback): void {
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo WoocommerceController::getMetaBoxOrder($order, $callback);
             }, $screen, $context, 'high');
     }

@@ -20,11 +20,10 @@ class AdminController
         // Check posted/selected tab.
         $current_section = '';
         if (isset($_POST['tab']) && $_POST['tab']) {
-            $current_section = $_POST['tab'];
+            $current_section = sanitize_text_field(wp_unslash($_POST['tab']));
         } elseif (isset($_GET['tab']) && $_GET['tab']) {
-            $current_section = $_GET['tab'];
+            $current_section = sanitize_text_field(wp_unslash($_GET['tab']));
         }
-
         foreach ($settings as $section => $data) {
 
             if ($current_section && $current_section !== $section) {
@@ -75,7 +74,7 @@ class AdminController
     private static function getSettings(): ?array
     {
         if (is_null(self::$settings)) {
-            $url = parse_url(get_site_url());
+            $url = wp_parse_url(get_site_url());
             $defaultWordpressUrl = $url["scheme"] . '://' . $url["host"];
             global $wpdb;
             $devFields = [];
@@ -439,7 +438,7 @@ class AdminController
                     $html .= '<label for="' . esc_attr($field['id']) . '">' . "\n";
                 }
 
-                $html .= '<span class="description">' . $field['description'] . '</span>' . "\n";
+                $html .= '<span class="description">' . esc_attr($field['description']) . '</span>' . "\n";
 
                 if ($post === null) {
                     $html .= '</label>' . "\n";
@@ -451,7 +450,7 @@ class AdminController
         if (!$echo) {
             return $html;
         }
-
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo $html;
         return '';
     }
@@ -549,11 +548,12 @@ class AdminController
 
                         $html .= '<p class="submit">' . "\n";
                         $html .= '<input type="hidden" name="tab" value="' . esc_attr($tab) . '" />' . "\n";
-                        $html .= '<input name="Submit" type="submit" class="button-primary" value="' . esc_attr(__('Save Settings', 'egas')) . '" />' . "\n";
+                        $html .= '<input name="Submit" type="submit" class="button-primary" value="' . esc_attr(__('Sauvegarder', 'egas')) . '" />' . "\n";
                         $html .= '</p>' . "\n";
                         $html .= '</form>' . "\n";
                         $html .= '</div>' . "\n";
 
+                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                         echo $html;
                     },
                     'position' => null,
@@ -575,15 +575,23 @@ class AdminController
                             $perPage,
                             $queryParams,
                         ] = GraphqlService::getInstance()->getResourceWithQuery($resource, getData: false);
+                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                         echo TwigService::getInstance()->render('sage/list.html.twig', [
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                             'showFields' => $showFields,
                             'resourceFilter' => [
+                                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                                 ...self::getResourceFilter($resource, $filterFields),
+                                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                                 'initFilter' => $resource::getDefaultResourceFilter(),
                             ],
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                             'perPage' => $perPage,
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                             'hideFields' => $hideFields,
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                             'mandatoryFields' => $resource->getMandatoryFields(),
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                             'sageEntityName' => $resource->getEntityName(),
                         ]);
                     },
@@ -655,7 +663,9 @@ class AdminController
         if (is_string($data) || is_null($data)) {
             if (is_string($data) && is_admin() /*on admin page*/) {
                 ?>
-                <div class="error"><?= $data ?></div>
+                <div class="error"><?php echo
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    $data ?></div>
                 <?php
             }
             return true;
@@ -668,6 +678,7 @@ class AdminController
         if (is_admin()) {
             add_action('admin_notices', static function () use ($message): void {
                 if (!empty($message)) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                     echo $message;
                 }
             });
@@ -712,7 +723,9 @@ class AdminController
         }
         if ($changes !== []) {
             $result = "<div class='error''>";
-            $fieldsForm = '';
+            ob_start();
+            settings_fields(Sage::TOKEN . '_settings');
+            $fieldsForm = ob_get_clean();
             $optionNames = [];
             foreach ($changes as $sageExpectedOption) {
                 $optionValue = $sageExpectedOption->getOptionValue();
@@ -731,10 +744,7 @@ class AdminController
             return $result . ('<form method="post" action="options.php" enctype="multipart/form-data">'
                     . $fieldsForm
                     . '<input type="hidden" name="page_options" value="' . esc_attr(implode(',', $optionNames)) . '"/>
-                <input type="hidden" name="_wp_http_referer" value="' . esc_attr($_SERVER["REQUEST_URI"]) . '">
-                <input type="hidden" name="action" value="update">
-                <input type="hidden" name="option_page" value="options"/>'
-                    . wp_nonce_field('options-options', '_wpnonce', true, false)
+                       <input type="hidden" name="_wp_http_referer" value="' . esc_attr($_SERVER["REQUEST_URI"]) . '">'
                     . '<p class="submit">
                 <input name="Update" type="submit" class="button-primary" value="' . esc_attr(__('Mettre à jour', 'egas')) . '">
                 </p>

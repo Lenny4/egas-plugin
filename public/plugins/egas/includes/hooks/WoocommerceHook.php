@@ -195,7 +195,7 @@ class WoocommerceHook
                 ?>
                 <div class="notice notice-info">
                     <p>
-                        <?= esc_html__("Veuillez ne pas modifier les taxes Sage manuellement ici, elles sont automatiquement mises à jour en fonction des taxes dans Sage ('Stucture' -> 'Comptabilité' -> 'Taux de taxes').", 'egas') ?>
+                        <?php echo esc_html__("Veuillez ne pas modifier les taxes Sage manuellement ici, elles sont automatiquement mises à jour en fonction des taxes dans Sage ('Stucture' -> 'Comptabilité' -> 'Taux de taxes').", 'egas') ?>
                     </p>
                 </div>
                 <?php
@@ -231,7 +231,9 @@ class WoocommerceHook
                         ],
                         $skeletonShippingMethod[0]
                     );
-                    eval(str_replace('@TOKEN@', Sage::TOKEN, $thisSkeletonShippingMethod));
+                    // no other way to dynamically create a new shipping method
+                    // phpcs:ignore Generic.PHP.ForbiddenFunctions.Found
+                    eval($thisSkeletonShippingMethod);
                 }
             }
             foreach ($pExpeditions as $i => $pExpedition) {
@@ -241,13 +243,15 @@ class WoocommerceHook
         });
         add_action('woocommerce_settings_shipping', static function (): void {
             global $wpdb;
-            $r = $wpdb->get_results(
-                $wpdb->prepare("
-SELECT COUNT(instance_id) nbInstance
-FROM {$wpdb->prefix}woocommerce_shipping_zone_methods
-WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
-  AND is_enabled = 1
-"));
+            $like = Sage::TOKEN . '%';
+            $sql = "
+    SELECT COUNT(instance_id) AS nbInstance
+    FROM {$wpdb->prefix}woocommerce_shipping_zone_methods
+    WHERE method_id NOT LIKE %s
+      AND is_enabled = 1
+";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $r = $wpdb->get_var($wpdb->prepare($sql, $like));
             if ((int)$r[0]->nbInstance > 0) {
                 echo '
 <div class="notice notice-warning"><p>

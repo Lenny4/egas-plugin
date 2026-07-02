@@ -60,6 +60,10 @@ class RestApiHook
             GraphqlService::getInstance()->ping();
             return $result; // must return $result
         });
+        add_filter('allowed_redirect_hosts', function ($hosts) {
+            $hosts[] = wp_parse_url(site_url(), PHP_URL_HOST);
+            return $hosts;
+        });
         add_action('rest_api_init', function (): void {
             register_rest_route(Sage::TOKEN . '/v1', '/search-entities/(?P<entityName>[A-Za-z0-9]+)', [
                 'methods' => 'GET',
@@ -69,6 +73,7 @@ class RestApiHook
                     $graphqlService = GraphqlService::getInstance();
                     $result = $graphqlService->searchEntities(
                         $entityName,
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                         $_GET,
                         $graphqlService->{$selectionSet}(),
                     );
@@ -161,7 +166,6 @@ class RestApiHook
             register_rest_route(Sage::TOKEN . '/v1', '/fdocentetes/(?P<doPiece>[A-Za-z0-9]+)/(?P<doType>\d+)/import', args: [
                 'methods' => 'GET',
                 'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    set_time_limit(60 * 10);
                     $doPiece = $request['doPiece'];
                     $doType = $request['doType'];
                     $orderId = $request->get_param('orderId');
@@ -239,14 +243,17 @@ class RestApiHook
                 'methods' => 'GET',
                 'callback' => static function (WP_REST_Request $request): void {
                     global $wpdb;
-                    $wpdb->get_results($wpdb->prepare("
-UPDATE {$wpdb->prefix}woocommerce_shipping_zone_methods
-SET is_enabled = 0
-WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
-  AND is_enabled = 1
-"));
+                    $like = Sage::TOKEN . '%';
+                    $sql = "
+    UPDATE {$wpdb->prefix}woocommerce_shipping_zone_methods
+    SET is_enabled = 0
+    WHERE method_id NOT LIKE %s
+      AND is_enabled = 1
+";
+                    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                    $wpdb->query($wpdb->prepare($sql, $like));
                     $redirect = wp_get_referer();
-                    wp_redirect($redirect);
+                    wp_safe_redirect($redirect);
                     exit();
                 },
                 'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),

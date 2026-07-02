@@ -167,7 +167,7 @@ class WordpressService
             if ($showMessage && $taxeChanges !== []) {
                 ?>
                 <div class="notice notice-success is-dismissible">
-                    <p><strong><?= esc_html__("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
+                    <p><strong><?php echo esc_html__("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
                 </div>
                 <?php
             }
@@ -377,16 +377,6 @@ class WordpressService
         }
     }
 
-    public function deleteSageMetadataForUser(int $userId): void
-    {
-        global $wpdb;
-        $wpdb->query($wpdb->prepare("
-DELETE
-FROM {$wpdb->usermeta}
-WHERE user_id = %s AND meta_key LIKE '_" . Sage::TOKEN . "_%'
-        ", [$userId]));
-    }
-
     public function getUserIdWithCtNum(string $ctNum): int|null
     {
         global $wpdb;
@@ -430,15 +420,19 @@ WHERE meta_key = %s
     public function deleteMetaTrashResource(string $key, string $value): void
     {
         global $wpdb;
-        $wpdb->query($wpdb->prepare("
-DELETE pm
-FROM {$wpdb->postmeta} pm
-         JOIN {$wpdb->posts} p ON p.ID = pm.post_id AND p.post_status = 'trash'
-         JOIN {$wpdb->postmeta} pm_filter
-              ON pm_filter.post_id = pm.post_id
-                  AND pm_filter.meta_key = %s
-                  AND pm_filter.meta_value = %s
-WHERE pm.meta_key LIKE '_" . Sage::TOKEN . "_%'
-        ", [$key, $value]));
-    }
-}
+        $like = '_' . Sage::TOKEN . '_%';
+        $sql = "
+        DELETE pm
+        FROM {$wpdb->postmeta} pm
+        INNER JOIN {$wpdb->posts} p
+            ON p.ID = pm.post_id
+            AND p.post_status = 'trash'
+        INNER JOIN {$wpdb->postmeta} pm_filter
+            ON pm_filter.post_id = pm.post_id
+            AND pm_filter.meta_key = %s
+            AND pm_filter.meta_value = %s
+        WHERE pm.meta_key LIKE %s
+    ";
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $wpdb->query($wpdb->prepare($sql, $key, $value, $like));
+    }}
