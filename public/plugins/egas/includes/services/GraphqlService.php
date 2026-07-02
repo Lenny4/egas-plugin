@@ -1389,7 +1389,7 @@ class GraphqlService
     SELECT order_id, meta_value
     FROM {$wpdb->prefix}wc_orders_meta
     WHERE meta_key = %s
-      AND meta_value IN ($placeholders)
+      AND meta_value IN ({$placeholders})
 ";
             // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
             $r = $wpdb->get_results($wpdb->prepare($sql, FDocenteteResource::META_KEY, ...array_values($values)));
@@ -1607,7 +1607,7 @@ class GraphqlService
     SELECT user_id, meta_value
     FROM {$wpdb->usermeta}
     WHERE meta_key = %s
-      AND meta_value IN ($placeholders)
+      AND meta_value IN ({$placeholders})
 ";
         // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $r = $wpdb->get_results($wpdb->prepare($sql, FComptetResource::META_KEY, ...$ctNums));
@@ -1640,7 +1640,7 @@ class GraphqlService
         ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id
         AND {$wpdb->posts}.post_status != 'trash'
     WHERE {$wpdb->postmeta}.meta_key = %s
-      AND {$wpdb->postmeta}.meta_value IN ($placeholders)
+      AND {$wpdb->postmeta}.meta_value IN ({$placeholders})
 ";
         // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $r = $wpdb->get_results($wpdb->prepare($sql, FArticleResource::META_KEY, ...$arRefs));

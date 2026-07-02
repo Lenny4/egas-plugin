@@ -160,7 +160,7 @@ class WoocommerceService
         }
     }
 
-    public function importFDocenteteFromSage(string $doPiece, string $doType, WC_Order|null $order = null, ?string $origin = null): array
+    public function importFDocenteteFromSage(string $doPiece, string|int $doType, WC_Order|null $order = null, ?string $origin = null): array
     {
         // if the document is big it can take quite some time
         set_time_limit(60 * 10);
@@ -471,7 +471,7 @@ class WoocommerceService
                 if ($showSuccessMessage) {
                     $message = "<div class='notice notice-success is-dismissible'>
                     <p>" . __('Article créé: ', 'egas') . $body->name . "</p>" . $urlArticle . "
-                    $dismissNotice
+                    {$dismissNotice}
                             </div>";
                 }
             } else {
@@ -497,11 +497,11 @@ class WoocommerceService
                 ]
             ];
             $responseError = null;
-            $urlArticle = str_replace('%id%', $articlePostId, $urlArticle);
+            $urlArticle = str_replace('%id%', (string)$articlePostId, $urlArticle);
             if ($showSuccessMessage) {
                 $message = "<div class='notice notice-success is-dismissible'>
                     <p>" . __('Article mis à jour: ', 'egas') . $article["name"] . "</p>" . $urlArticle . "
-                    $dismissNotice
+                    {$dismissNotice}
                             </div>";
             }
         }

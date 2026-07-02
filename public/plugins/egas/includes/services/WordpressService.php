@@ -270,7 +270,7 @@ class WordpressService
                 $join = "";
                 if (!is_null($postType = $resource->getPostType())) {
                     $args[] = $postType;
-                    $where .= "AND {$resource->getTable()}.post_type = %s";
+                    $where .= sprintf('AND %s.post_type = %%s', $resource->getTable());
                     $join .= "INNER JOIN {$resource->getTable()}
                         ON {$resource->getTable()}.ID = {$resource->getMetaTable()}.{$resource->getMetaColumnIdentifier()}";
                 }

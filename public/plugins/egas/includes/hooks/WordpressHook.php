@@ -68,13 +68,13 @@ class WordpressHook
             }
             // like register_order_origin_column in woocommerce/src/Internal/Orders/OrderAttributionController.php
             // HPOS and non-HPOS use different hooks.
-            add_filter("manage_{$screen_id}_columns", WoocommerceController::addColumn(...), 11);
-            add_filter("manage_edit-{$screen_id}_columns", WoocommerceController::addColumn(...), 11);
-            add_action("manage_{$screen_id}_custom_column", static function (string $column_name, WC_Order $order): void {
+            add_filter(sprintf('manage_%s_columns', $screen_id), WoocommerceController::addColumn(...), 11);
+            add_filter(sprintf('manage_edit-%s_columns', $screen_id), WoocommerceController::addColumn(...), 11);
+            add_action(sprintf('manage_%s_custom_column', $screen_id), static function (string $column_name, WC_Order $order): void {
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo WoocommerceController::displayColumn($column_name, $order);
             }, 10, 2);
-            add_action("manage_{$screen_id}_posts_custom_column", static function (string $column_name, WC_Order $order): void {
+            add_action(sprintf('manage_%s_posts_custom_column', $screen_id), static function (string $column_name, WC_Order $order): void {
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo WoocommerceController::displayColumn($column_name, $order);
             }, 10, 2);

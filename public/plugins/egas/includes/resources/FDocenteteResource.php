@@ -56,7 +56,7 @@ class FDocenteteResource extends Resource
             if (!empty($fJournauxs)) {
                 $defaultFJournaux = $fJournauxs[0]->joNum;
                 foreach ($fJournauxs as $fJournaux) {
-                    $fJournauxsOptions[$fJournaux->joNum] = "[$fJournaux->joNum] $fJournaux->joIntitule";
+                    $fJournauxsOptions[$fJournaux->joNum] = sprintf('[%s] %s', $fJournaux->joNum, $fJournaux->joIntitule);
                 }
             }
             // endregion
@@ -75,7 +75,7 @@ class FDocenteteResource extends Resource
             if (!empty($pReglements)) {
                 $defaultPReglement = $pReglements[0]->cbIndice;
                 foreach ($pReglements as $pReglement) {
-                    $pReglementsOptions[$pReglement->cbIndice] = "$pReglement->rIntitule";
+                    $pReglementsOptions[$pReglement->cbIndice] = $pReglement->rIntitule;
                 }
             }
             // endregion

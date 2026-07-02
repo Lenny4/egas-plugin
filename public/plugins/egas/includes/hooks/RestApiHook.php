@@ -332,7 +332,7 @@ class RestApiHook
         $meta_keys = get_transient($cache_key);
         if (empty($meta_keys)) {
             global $wpdb;
-            $meta_keys = $wpdb->get_col("SELECT DISTINCT meta_key FROM {$wpdb->usermeta}");
+            $meta_keys = $wpdb->get_col('SELECT DISTINCT meta_key FROM ' . $wpdb->usermeta);
             if (!empty($meta_keys)) {
                 set_transient($cache_key, $meta_keys, 24 * 3_600);
             }

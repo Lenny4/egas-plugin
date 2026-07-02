@@ -4,6 +4,8 @@ declare(strict_types=1);
 use Rector\CodeQuality\Rector\Empty_\SimplifyEmptyCheckOnEmptyArrayRector;
 use Rector\CodeQuality\Rector\Identical\FlipTypeControlToUseExclusiveTypeRector;
 use Rector\CodeQuality\Rector\If_\ExplicitBoolCompareRector;
+use Rector\CodingStyle\Rector\ClassMethod\NewlineBeforeNewAssignSetRector;
+use Rector\CodingStyle\Rector\Stmt\NewlineAfterStatementRector;
 use Rector\Config\RectorConfig;
 use Rector\Strict\Rector\Empty_\DisallowedEmptyRuleFixerRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
@@ -16,7 +18,7 @@ return RectorConfig::configure()
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
-//        codingStyle: true,
+        codingStyle: true,
         typeDeclarations: true,
         privatization: true,
 //        instanceOf: true,
@@ -37,4 +39,6 @@ return RectorConfig::configure()
         FlipTypeControlToUseExclusiveTypeRector::class,
         ExplicitBoolCompareRector::class,
         SimplifyEmptyCheckOnEmptyArrayRector::class,
+        NewlineAfterStatementRector::class,
+        NewlineBeforeNewAssignSetRector::class,
     ]);

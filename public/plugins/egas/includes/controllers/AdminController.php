@@ -729,7 +729,7 @@ class AdminController
             $optionNames = [];
             foreach ($changes as $sageExpectedOption) {
                 $optionValue = $sageExpectedOption->getOptionValue();
-                $result .= "<div>" . __('Le plugin Egas a besoin de modifier l\'option', 'egas') . " <code>" .
+                $result .= "<div>" . __("Le plugin Egas a besoin de modifier l'option", 'egas') . " <code>" .
                     $sageExpectedOption->getTrans() . "</code> " . __('pour lui donner la valeur', 'egas') . " <code>" .
                     $optionValue . "</code>
 <div class='tooltip'>
