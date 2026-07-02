@@ -59,7 +59,7 @@ class SageService
         $contact = trim($contact ?? '');
         $name = $intitule;
         if (empty($name)) {
-            $name = $contact;
+            return $contact;
         }
         return $name;
     }
@@ -140,10 +140,10 @@ WHERE user_login LIKE %s
             $resources = [];
             $files = glob(__DIR__ . '/../resources' . '/*.php');
             foreach ($files as $file) {
-                if (
-                    str_ends_with($file, '/Resource.php') ||
-                    str_ends_with($file, '/ImportConditionDto.php')
-                ) {
+                if (str_ends_with($file, '/Resource.php')) {
+                    continue;
+                }
+                if (str_ends_with($file, '/ImportConditionDto.php')) {
                     continue;
                 }
                 $hookClass = 'App\\resources\\' . basename($file, '.php');
@@ -656,10 +656,10 @@ WHERE user_login LIKE %s
         $result = [];
         $allFilterType = GraphqlService::getInstance()->getAllFilterType() ?? [];
         foreach ($allFilterType as $filterType) {
-            if (
-                $filterType->kind !== 'INPUT_OBJECT' ||
-                !str_contains($filterType->name, 'Operation')
-            ) {
+            if ($filterType->kind !== 'INPUT_OBJECT') {
+                continue;
+            }
+            if (!str_contains($filterType->name, 'Operation')) {
                 continue;
             }
             $result[$filterType->name] = array_values(array_filter(array_map(fn(stdClass $value) => $value->name, $filterType->inputFields), fn(string $item): bool => !in_array($item, ["and", "or"])));

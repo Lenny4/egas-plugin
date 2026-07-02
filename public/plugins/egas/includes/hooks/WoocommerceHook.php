@@ -84,7 +84,7 @@ class WoocommerceHook
             }
             $remove = '[Egas] ';
             if (str_starts_with($label, $remove)) {
-                $label = substr($label, strlen($remove));
+                return substr($label, strlen($remove));
             }
             return $label;
         }, accepted_args: 2);
