@@ -184,7 +184,9 @@ class RestApiHook
                 'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
                     $extended = false;
                     if (
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                         array_key_exists('extended', $_GET) &&
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                         ($_GET['extended'] === '1' || $_GET['extended'] === 'true')
                     ) {
                         $extended = true;

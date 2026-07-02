@@ -515,23 +515,26 @@ class WoocommerceService
         return [$response, $responseError, $message, $articlePostId];
     }
 
-    public function getWooCommerceIdArticle(string $arRef): int|null
+    public function getWooCommerceIdArticle(string $arRef): ?int
     {
         global $wpdb;
-        $r = $wpdb->get_results(
+        $id = $wpdb->get_var(
             $wpdb->prepare(
                 "
-SELECT {$wpdb->posts}.ID
-FROM {$wpdb->posts}
-         INNER JOIN {$wpdb->postmeta} ON {$wpdb->postmeta}.post_id = {$wpdb->posts}.ID AND {$wpdb->posts}.post_status != 'trash'
-WHERE {$wpdb->posts}.post_type = 'product'
-  AND {$wpdb->postmeta}.meta_key = %s
-  AND {$wpdb->postmeta}.meta_value = %s
-", [FArticleResource::META_KEY, $arRef]));
-        if (!empty($r)) {
-            return (int)$r[0]->ID;
-        }
-        return null;
+            SELECT p.ID
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm
+                ON pm.post_id = p.ID
+            WHERE p.post_type = 'product'
+              AND p.post_status != 'trash'
+              AND pm.meta_key = %s
+              AND pm.meta_value = %s
+            ",
+                FArticleResource::META_KEY,
+                $arRef
+            )
+        );
+        return $id ? (int)$id : null;
     }
 
     public function convertSageArticleToWoocommerce(StdClass $stdClass, Resource $resource, ?int $postId): array

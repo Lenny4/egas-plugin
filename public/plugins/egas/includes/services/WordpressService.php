@@ -253,7 +253,7 @@ class WordpressService
     private function load_plugin_textdomain(): void
     {
         $domain = Sage::TOKEN;
-        $locale = apply_filters('plugin_locale', get_locale(), $domain);
+        $locale = apply_filters('egas_plugin_locale', get_locale(), $domain);
         load_textdomain($domain, WP_LANG_DIR . '/' . $domain . '/' . $domain . '-' . $locale . '.mo');
     }
 

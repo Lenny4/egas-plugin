@@ -33,7 +33,9 @@ class WordpressHook
             WordpressService::getInstance()->onSavePost($postId);
         });
         add_action('admin_init', static function (): void {
-            $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+            $accept = isset($_SERVER['HTTP_ACCEPT'])
+                ? sanitize_text_field(wp_unslash($_SERVER['HTTP_ACCEPT']))
+                : '';
             if (str_contains($accept, 'application/json') || wp_doing_ajax()) {
                 return;
             }
@@ -52,8 +54,13 @@ class WordpressHook
                 "<div id='" . Sage::TOKEN . "_appstate' class='notice notice-info is-dismissible hidden'>
                         <div class='content'></div>
                     </div>"
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                 . (array_key_exists(Sage::TOKEN . '_message', $_GET)
-                    ? str_replace("\\'", "'", $_GET[Sage::TOKEN . '_message'])
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                    ? str_replace("\\'", "'", isset($_GET[Sage::TOKEN . '_message'])
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                        ? sanitize_text_field(wp_unslash($_GET[Sage::TOKEN . '_message']))
+                        : '')
                     : ""
                 )
             );

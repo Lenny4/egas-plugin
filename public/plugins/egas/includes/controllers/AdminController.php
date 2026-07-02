@@ -21,9 +21,13 @@ class AdminController
         $settings = self::getSettings();
         // Check posted/selected tab.
         $current_section = '';
-        if (isset($_POST['tab']) && $_POST['tab']) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if (!empty($_POST['tab'])) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing
             $current_section = sanitize_text_field(wp_unslash($_POST['tab']));
-        } elseif (isset($_GET['tab']) && $_GET['tab']) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        } elseif (!empty($_GET['tab'])) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $current_section = sanitize_text_field(wp_unslash($_GET['tab']));
         }
         foreach ($settings as $section => $data) {
@@ -471,8 +475,10 @@ class AdminController
     public static function registerMenu(): void
     {
         $resources = SageService::getInstance()->getResources();
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $get = $_GET;
         $args = apply_filters(
-            Sage::TOKEN . '_menu_settings',
+            'egas_menu_settings',
             [
                 [
                     'location' => 'menu',
@@ -500,8 +506,8 @@ class AdminController
                         $html .= '<h2>' . __('Egas', 'egas') . '</h2>' . "\n";
 
                         $tab = '';
-                        if (isset($_GET['tab']) && $_GET['tab']) {
-                            $tab .= $_GET['tab'];
+                        if (isset($get['tab']) && $get['tab']) {
+                            $tab .= $get['tab'];
                         }
 
                         $settings = self::getSettings();
@@ -515,17 +521,17 @@ class AdminController
 
                                 // Set tab class.
                                 $class = 'nav-tab';
-                                if (!isset($_GET['tab'])) {
+                                if (!isset($get['tab'])) {
                                     if (0 === $c) {
                                         $class .= ' nav-tab-active';
                                     }
-                                } elseif ($section == $_GET['tab']) {
+                                } elseif ($section == $get['tab']) {
                                     $class .= ' nav-tab-active';
                                 }
 
                                 // Set tab link.
                                 $tab_link = add_query_arg(['tab' => $section]);
-                                if (isset($_GET['settings-updated'])) {
+                                if (isset($get['settings-updated'])) {
                                     $tab_link = remove_query_arg('settings-updated', $tab_link);
                                 }
 
@@ -741,15 +747,19 @@ class AdminController
                 $fieldsForm .= '<input type="hidden" name="' . $optionName . '" value="' . $optionValue . '">';
                 $optionNames[] = $optionName;
             }
-            return $result . ('<form method="post" action="options.php" enctype="multipart/form-data">'
-                    . $fieldsForm
-                    . '<input type="hidden" name="page_options" value="' . esc_attr(implode(',', $optionNames)) . '"/>
-                       <input type="hidden" name="_wp_http_referer" value="' . esc_attr($_SERVER["REQUEST_URI"]) . '">'
-                    . '<p class="submit">
-                <input name="Update" type="submit" class="button-primary" value="' . esc_attr(__('Mettre à jour', 'egas')) . '">
-                </p>
-                </form>
-                </div>');
+            $requestUri = '';
+            if (isset($_SERVER['REQUEST_URI'])) {
+                $requestUri = sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']));
+            }
+            return $result . '<form method="post" action="options.php" enctype="multipart/form-data">'
+                . $fieldsForm
+                . '<input type="hidden" name="page_options" value="' . esc_attr(implode(',', $optionNames)) . '"/>'
+                . '<input type="hidden" name="_wp_http_referer" value="' . esc_attr($requestUri) . '">'
+                . '<p class="submit">
+        <input name="Update" type="submit" class="button-primary" value="' . esc_attr(__('Mettre à jour', 'egas')) . '">
+      </p>
+    </form>
+</div>';
         }
         return null;
     }

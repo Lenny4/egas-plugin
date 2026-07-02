@@ -193,6 +193,7 @@ class WoocommerceHook
         // woocommerce/includes/admin/views/html-admin-settings.php
         add_action('woocommerce_sections_tax', static function (): void {
             WoocommerceService::getInstance()->updateTaxes();
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             if (array_key_exists('section', $_GET) && $_GET['section'] === Sage::TOKEN) {
                 ?>
                 <div class="notice notice-info">
