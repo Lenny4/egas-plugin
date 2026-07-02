@@ -34,7 +34,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 if (WP_DEBUG) {
     set_error_handler(function ($errno, $errstr, $errfile, $errline) {
         if (is_string($errline) && str_contains($errline, Sage::TOKEN)) {
-            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+            throw new ErrorException(esc_attr($errstr), 0, esc_attr($errno), esc_attr($errfile), esc_attr($errline));
         }
     });
 }
@@ -43,7 +43,7 @@ $sage = Sage::getInstance(__FILE__);
 if (!$sage->isWooCommerceActive()) {
     add_action('admin_notices', function () {
         echo '<div class="notice notice-error"><p>' .
-            __('Egas a besoin de Woocommerce pour fonctionner.', 'egas') .
+            esc_html__('Egas a besoin de Woocommerce pour fonctionner.', 'egas') .
             '</p></div>';
     });
 } else {

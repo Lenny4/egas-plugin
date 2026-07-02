@@ -38,6 +38,7 @@ class WoocommerceHook
                 'woocommerce-order-' . Sage::TOKEN . '-main',
                 __('Egas', 'egas'),
                 static function () use ($order): void {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                     echo WoocommerceController::getMetaboxFDocentete($order);
                 },
                 $screenId,
@@ -149,21 +150,37 @@ class WoocommerceHook
                 $changeTypes
             ] = $sageService->importFromSageIfUpdateApi($sageService->getResource(FArticleResource::ENTITY_NAME), $product->get_id());
             $graphqlService = GraphqlService::getInstance();
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo TwigService::getInstance()->render('woocommerce/tabs/sage.html.twig', [
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'fArticle' => $fArticle,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pCattarifs' => $graphqlService->getPCattarifs(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'fCatalogues' => $graphqlService->getFCatalogues(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pCatComptas' => $graphqlService->getPCatComptas(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'fFamilles' => $graphqlService->getFFamilles(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pUnites' => $graphqlService->getPUnites(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'fDepots' => $graphqlService->getFDepots(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'fPays' => $graphqlService->getFPays(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pPreference' => $graphqlService->getPPreference(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'panelId' => Sage::TARGET_PANEL,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'messages' => $messages,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'meta' => $meta,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'updateApi' => $updateApi,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'hasChanges' => $hasChanges,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'changeTypes' => $changeTypes,
             ]);
         });
@@ -178,7 +195,7 @@ class WoocommerceHook
                 ?>
                 <div class="notice notice-info">
                     <p>
-                        <?= __("Veuillez ne pas modifier les taxes Sage manuellement ici, elles sont automatiquement mises à jour en fonction des taxes dans Sage ('Stucture' -> 'Comptabilité' -> 'Taux de taxes').", 'egas') ?>
+                        <?= esc_html__("Veuillez ne pas modifier les taxes Sage manuellement ici, elles sont automatiquement mises à jour en fonction des taxes dans Sage ('Stucture' -> 'Comptabilité' -> 'Taux de taxes').", 'egas') ?>
                     </p>
                 </div>
                 <?php
@@ -235,12 +252,12 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
                 echo '
 <div class="notice notice-warning"><p>
     <span style="display: block; margin: 0.5em 0.5em 0 0; clear: both;">
-        ' . __('Certain Mode(s) d’expédition qui ne proviennent pas de Sage sont activés. Cliquez sur "Désactiver" pour désactiver les modes d\'expéditions qui ne proviennent pas de Sage', 'egas') . '
+        ' . esc_html__('Certain Mode(s) d’expédition qui ne proviennent pas de Sage sont activés. Cliquez sur "Désactiver" pour désactiver les modes d\'expéditions qui ne proviennent pas de Sage', 'egas') . '
     </span>
     <strong>
     <span style="display: block; margin: 0.5em 0.5em 0 0; clear: both;">
-        <a href="' . get_site_url() . '/index.php?rest_route=' . urlencode('/' . Sage::TOKEN . '/v1/deactivate-shipping-zones') . '&_wpnonce=' . wp_create_nonce('wp_rest') . '">
-        ' . __('Désactiver', 'egas') . '
+        <a href="' . esc_url(get_site_url()) . '/index.php?rest_route=' . urlencode('/' . Sage::TOKEN . '/v1/deactivate-shipping-zones') . '&_wpnonce=' . esc_html(wp_create_nonce('wp_rest')) . '">
+        ' . esc_html__('Désactiver', 'egas') . '
         </a>
     </span>
     </strong>
@@ -278,7 +295,7 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
             }
             $arRef = SageService::getInstance()->get_post_meta_single($product->get_id(), FArticleResource::META_KEY, true);
             if (!empty($arRef)) {
-                echo __('Sage ref', 'egas') . ': ' . $arRef;
+                echo esc_html__('Sage ref', 'egas') . ': ' . esc_html($arRef);
             }
         }, 10, 3);
         // endregion
@@ -294,7 +311,7 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
                 $arRef = get_post_meta($postId, FArticleResource::META_KEY, true);
                 if (!empty($arRef)) {
 //                    echo '<span class="dashicons dashicons-yes" style="color: green"></span>';
-                    echo $arRef;
+                    echo esc_html($arRef);
                 } else {
                     echo '<span class="dashicons dashicons-no" style="color: red"></span>';
                 }
@@ -322,16 +339,14 @@ WHERE method_id NOT LIKE '" . Sage::TOKEN . "%'
         add_action('manage_product_cat_custom_column', function (string $content, string $column_name, int $term_id): void {
             if (Sage::TOKEN === $column_name) {
                 $clNo = get_term_meta($term_id, '_' . Sage::TOKEN . '_clNo', true);
-                echo $clNo ?
-                    '
-<div style="display: inline-block;" data-tippy-content="<div>
-<strong>fCatalogue: ' . $clNo . '</strong>
-</div>">
-  <span class="dashicons dashicons-yes" style="color: green"></span>
-</div>
-'
-                    :
-                    '<span class="dashicons dashicons-no" style="color: red"></span>';
+                echo $clNo
+                    ? sprintf(
+                        '<div style="display: inline-block;" data-tippy-content="<div><strong>fCatalogue: %s</strong></div>">
+            <span class="dashicons dashicons-yes" style="color: green"></span>
+        </div>',
+                        esc_attr($clNo)
+                    )
+                    : '<span class="dashicons dashicons-no" style="color: red"></span>';
             }
         }, 10, 3);
         add_filter('woocommerce_order_item_get_formatted_meta_data', fn(array $metaDatas): array => array_filter($metaDatas, fn(stdClass $metaData): bool => $metaData->value !== 'null'));

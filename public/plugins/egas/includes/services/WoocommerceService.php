@@ -733,7 +733,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
             if ($showMessage && $taxeChanges !== []) {
                 ?>
                 <div class="notice notice-success is-dismissible">
-                    <p><strong><?= __("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
+                    <p><strong><?= esc_html__("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
                 </div>
                 <?php
             }

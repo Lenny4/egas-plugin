@@ -85,7 +85,7 @@ class FComptetResource extends Resource
             ],
             [
                 'id' => 'mail_website_create_new_' . self::ENTITY_NAME,
-                'label' => __('Envoyer automatiquement le mail pour définir le mot de passe', 'fComptets'),
+                'label' => __('Envoyer automatiquement le mail pour définir le mot de passe', 'egas'),
                 'description' => __("Lorsqu'un compte Wordpress est créé à partir d'un compte Sage, un mail pour définir le mot de passe du compte Wordpress est automatiquement envoyé à l'utilisateur.", 'egas'),
                 'type' => 'checkbox',
                 'default' => 'off',

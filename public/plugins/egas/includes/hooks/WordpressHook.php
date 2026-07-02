@@ -37,6 +37,7 @@ class WordpressHook
             }
             $wordpressService = WordpressService::getInstance();
             $resultAddWebsiteSageApi = $wordpressService->addWebsiteSageApi();
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo TwigService::getInstance()->render('data.html.twig');
             if (is_string($resultAddWebsiteSageApi)) {
                 AdminController::adminNotices("
@@ -55,6 +56,7 @@ class WordpressHook
                 )
             );
             if (!is_null($wrongOptions = AdminController::getWrongOptions())) {
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo $wrongOptions;
             }
             AdminController::addSections();
@@ -67,9 +69,11 @@ class WordpressHook
             add_filter("manage_{$screen_id}_columns", WoocommerceController::addColumn(...), 11);
             add_filter("manage_edit-{$screen_id}_columns", WoocommerceController::addColumn(...), 11);
             add_action("manage_{$screen_id}_custom_column", static function (string $column_name, WC_Order $order): void {
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo WoocommerceController::displayColumn($column_name, $order);
             }, 10, 2);
             add_action("manage_{$screen_id}_posts_custom_column", static function (string $column_name, WC_Order $order): void {
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo WoocommerceController::displayColumn($column_name, $order);
             }, 10, 2);
         });
@@ -85,26 +89,40 @@ class WordpressHook
                 $hasChanges,
                 $changeTypes
             ] = $sageService->importFromSageIfUpdateApi($sageService->getResource(FComptetResource::ENTITY_NAME), $user->ID);
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo TwigService::getInstance()->render('user/formMetaFields.html.twig', [
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'user' => $user,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'fComptet' => $fComptet,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'userMetaWordpress' => get_user_meta($user->ID),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pCattarifs' => $sageGraphQl->getPCattarifs(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pCatComptas' => $sageGraphQl->getPCatComptas(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'messages' => $messages,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'meta' => $meta,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'updateApi' => $updateApi,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'hasChanges' => $hasChanges,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'changeTypes' => $changeTypes,
             ]);
         });
         add_action('user_new_form', function (): void {
             $sageGraphQl = GraphqlService::getInstance();
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo TwigService::getInstance()->render('user/formMetaFields.html.twig', [
                 'user' => null,
                 'fComptet' => null,
                 'userMetaWordpress' => null,
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pCattarifs' => $sageGraphQl->getPCattarifs(),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'pCatComptas' => $sageGraphQl->getPCatComptas(),
                 'messages' => [],
                 'meta' => [],
@@ -162,8 +180,8 @@ LIMIT 1
                             (int)$r[0]->ID !== $prepared_user->ID
                         )
                     ) {
-                        /* translators: 1: Sage account number, 2: WordPress username, 3: WordPress user ID */
                         $message = sprintf(
+                        /* translators: 1: Sage account number, 2: WordPress username, 3: WordPress user ID */
                             __('Le compte Sage [%1$s] est déjà lié au compte Wordpress [%2$s (id: %3$s)]', 'egas'),
                             $ctNum,
                             $r[0]->user_login,

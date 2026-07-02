@@ -108,7 +108,7 @@ class WoocommerceController
         remove_meta_box($id, $screen, $context);
 
         $callback = $wp_meta_boxes[$screen][$context]["high"][$id]["callback"];
-        add_meta_box($id, __('Product data', 'woocommerce'), static function (WP_Post $wpPost) use ($callback): void {
+        add_meta_box($id, __('Données produit', 'egas'), static function (WP_Post $wpPost) use ($callback): void {
             ob_start();
             $callback($wpPost);
             $html = ob_get_clean();
@@ -133,9 +133,14 @@ class WoocommerceController
         remove_meta_box($id, $screen, $context);
 
         $callback = $wp_meta_boxes[$screen][$context]["high"][$id]["callback"];
-        add_meta_box($id, sprintf(__('%s data', 'woocommerce'), __('Order', 'woocommerce')), static function (WC_Order $order) use ($callback): void {
-            echo WoocommerceController::getMetaBoxOrder($order, $callback);
-        }, $screen, $context, 'high');
+        add_meta_box($id,
+            sprintf(
+            /* translators: %s: object name (e.g. "Commande"). */
+                __('%s data', 'egas'),
+                __('Commande', 'egas')
+            ), static function (WC_Order $order) use ($callback): void {
+                echo WoocommerceController::getMetaBoxOrder($order, $callback);
+            }, $screen, $context, 'high');
     }
 
     public static function getMetaBoxOrder(WC_Order $order, ?callable $callback = null): string

@@ -618,7 +618,7 @@ class GraphqlService
                 return [FArticleResource::DEFAULT_SORT, $defaultSortValue];
             }
 
-            throw new RuntimeException("Unknown page " . $queryParams['page']);
+            throw new RuntimeException(esc_attr("Unknown page " . $queryParams['page']));
         }
 
         return [null, $defaultSortValue];

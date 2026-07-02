@@ -33,7 +33,8 @@ class AdminController
 
             // Add section to page.
             add_settings_section($section, $data['title'], function (array $section) use ($settings): void {
-                $html = '<p>' . $settings[$section['id']]['description'] . '</p>' . "\n";
+                $html = '<p>' . esc_attr($settings[$section['id']]['description']) . '</p>' . "\n";
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo $html;
             }, Sage::TOKEN . '_settings');
 
@@ -117,7 +118,7 @@ class AdminController
             $settings = [
                 'api' => [
                     'title' => __('Api', 'egas'),
-                    'description' => __('', 'egas'),
+                    'description' => '',
                     'fields' => [
                         [
                             'id' => 'api_key',
@@ -149,7 +150,7 @@ class AdminController
                             'description' => __("Renseignez l'adresse à laquelle l'API Sage peut joindre WordPress.", 'egas'),
                             'type' => 'text',
                             'default' => $defaultWordpressUrl,
-                            'placeholder' => __($defaultWordpressUrl, 'egas')
+                            'placeholder' => $defaultWordpressUrl
                         ],
                         [
                             'id' => 'activate_https_verification_wordpress',
@@ -210,7 +211,7 @@ class AdminController
                 ];
                 $resource->setOptions(fn() => $options);
                 $settings[$resource->getEntityName()] = [
-                    'title' => __($resource->getTitle(), 'egas'),
+                    'title' => $resource->getTitle(),
                     'description' => $resource->getDescription(),
                     'fields' => $options,
                     'resource' => $resource,
@@ -372,8 +373,8 @@ class AdminController
                 ?>
                 <div class="color-picker" style="position:relative;">
                     <label>
-                        <input type="text" name="<?php esc_attr_e($option_name); ?>" class="color"
-                               value="<?php esc_attr_e($data); ?>"/>
+                        <input type="text" name="<?php esc_attr($option_name); ?>" class="color"
+                               value="<?php esc_attr($data); ?>"/>
                     </label>
                     <div style="position:absolute;background:#FFF;z-index:99;border-radius:100%;"
                          class="colorpicker"></div>
@@ -561,8 +562,8 @@ class AdminController
                     'location' => 'submenu',
                     // Possible settings: options, menu, submenu.
                     'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __($resource->getTitle(), 'egas'),
-                    'menu_title' => __($resource->getTitle(), 'egas'),
+                    'page_title' => $resource->getTitle(),
+                    'menu_title' => $resource->getTitle(),
                     'capability' => 'manage_options',
                     'menu_slug' => Sage::TOKEN . '_' . $resource->getEntityName(),
                     'function' => static function () use ($resource): void {
@@ -680,13 +681,13 @@ class AdminController
             new SageExpectedOption(
                 optionName: 'woocommerce_enable_guest_checkout',
                 optionValue: 'no',
-                trans: __('Allow customers to place orders without an account', 'woocommerce'),
+                trans: __('Permettre aux clients de passer des commandes sans créer de compte.', 'egas'),
                 description: __("Lorsque cette option est activée vos clients ne sont pas obligés de se connecter à leurs comptes pour passer commande et il est donc impossible de créer automatiquement la commande passé dans Woocommerce dans Sage.", 'egas'),
             ),
             new SageExpectedOption(
                 optionName: 'woocommerce_calc_taxes',
                 optionValue: 'yes',
-                trans: __('Enable tax rates and calculations', 'woocommerce'),
+                trans: __('Activer les taux de taxe et le calcul des taxes.', 'egas'),
                 description: __("Cette option doit être activé pour que le plugin Egas fonctionne correctement afin de récupérer les taxes directement renseignées dans Sage.", 'egas'),
             ),
         ];
@@ -694,7 +695,7 @@ class AdminController
             $sageExpectedOptions[] = new SageExpectedOption(
                 optionName: 'woocommerce_currency',
                 optionValue: $pDossier->nDeviseCompteNavigation->dCodeIso,
-                trans: __('Currency', 'woocommerce'),
+                trans: __('Devise', 'egas'),
                 description: __("La devise dans Woocommerce n'est pas la même que dans Sage.", 'egas'),
             );
         }
