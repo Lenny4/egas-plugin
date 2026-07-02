@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\utils;
 
 use Egas\Sage;
@@ -19,7 +21,7 @@ final class PathUtils
                 continue;
             }
             // Vérifie si le segment contient une clé entre crochets, par exemple : fArtclients[1]
-            if (preg_match('/^([a-zA-Z_][a-zA-Z0-9_]*)\[(.*?)\]$/', $segment, $matches)) {
+            if (preg_match('/^([a-zA-Z_]\w*)\[(.*?)\]$/', $segment, $matches)) {
                 $prop = $matches[1]; // ex: fArtclients
                 $key = $matches[2];  // ex: 1
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\class\term;
 
 use Egas\Sage;

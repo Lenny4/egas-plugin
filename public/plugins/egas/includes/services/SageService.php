@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\services;
 
+use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use Egas\class\dto\ArgumentSelectionSetDto;
 use Egas\class\SageEntityMetadata;
 use Egas\controllers\AdminController;
@@ -14,7 +17,6 @@ use Egas\utils\OrderUtils;
 use Egas\utils\PathUtils;
 use Egas\utils\RoundUtils;
 use Egas\utils\SageTranslationUtils;
-use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use Exception;
 use StdClass;
 use Swaggest\JsonDiff\JsonDiff;

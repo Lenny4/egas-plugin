@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\controllers;
 
 use Egas\class\SageExpectedOption;
@@ -400,10 +402,8 @@ class AdminController
                 $checked = '';
                 if (!empty($data)) {
                     $checked = 'checked="checked"';
-                } else {
-                    if (array_key_exists('initFilter', $field)) {
-                        $data = $field["initFilter"];
-                    }
+                } elseif (array_key_exists('initFilter', $field)) {
+                    $data = $field["initFilter"];
                 }
                 [
                     $data2,
@@ -664,7 +664,7 @@ class AdminController
             if (is_string($data) && is_admin() /*on admin page*/) {
                 ?>
                 <div class="error"><?php echo
-                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                     $data ?></div>
                 <?php
             }

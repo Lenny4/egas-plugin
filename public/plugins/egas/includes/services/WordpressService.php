@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\services;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use DateTime;
 use Egas\class\SageEntityMetadata;
 use Egas\controllers\AdminController;
 use Egas\resources\FArticleResource;
@@ -9,8 +13,6 @@ use Egas\resources\FComptetResource;
 use Egas\Sage;
 use Egas\utils\PathUtils;
 use Egas\utils\TaxeUtils;
-use Automattic\WooCommerce\Utilities\OrderUtil;
-use DateTime;
 use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
 use WC_Shipping_Zone;
@@ -435,4 +437,5 @@ WHERE meta_key = %s
     ";
         // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $wpdb->query($wpdb->prepare($sql, $key, $value, $like));
-    }}
+    }
+}

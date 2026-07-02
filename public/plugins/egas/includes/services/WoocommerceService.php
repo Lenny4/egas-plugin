@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\services;
 
+use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use Egas\controllers\AdminController;
 use Egas\enum\Sage\DocumentFraisTypeEnum;
 use Egas\enum\Sage\DocumentProvenanceTypeEnum;
@@ -15,7 +18,6 @@ use Egas\resources\Resource;
 use Egas\Sage;
 use Egas\utils\OrderUtils;
 use Egas\utils\TaxeUtils;
-use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;
 use WC_Cart;
@@ -403,7 +405,7 @@ class WoocommerceService
     <p>" . __('Aucune action définie pour', 'egas') . ': ' . esc_html(json_encode($syncChange['changes'], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)) . "</p>
 </div>";
                         break;
-                };
+                }
             }
         }
 

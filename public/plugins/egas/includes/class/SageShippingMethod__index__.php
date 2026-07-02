@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\class;
 
 use WC_Shipping_Free_Shipping;

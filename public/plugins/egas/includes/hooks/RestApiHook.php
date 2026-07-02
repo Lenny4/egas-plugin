@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\hooks;
 
+use Automattic\WooCommerce\Admin\Overrides\Order;
 use Egas\controllers\WoocommerceController;
 use Egas\enum\Sage\DocumentProvenanceTypeEnum;
 use Egas\enum\Sage\DomaineTypeEnum;
@@ -12,7 +15,6 @@ use Egas\services\SageService;
 use Egas\services\WoocommerceService;
 use Egas\services\WordpressService;
 use Egas\utils\FDocenteteUtils;
-use Automattic\WooCommerce\Admin\Overrides\Order;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 use WC_Order;

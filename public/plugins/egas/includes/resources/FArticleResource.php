@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\resources;
 
 use Egas\class\SageEntityMetadata;

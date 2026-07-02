@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\services;
 
 use Egas\class\dto\ArgumentSelectionSetDto;
@@ -135,11 +137,9 @@ class GraphqlService
                     $this->pingApi = ($data['status'] === 'Healthy');
                     $this->apiVersion = $data['version'] ?? null;
 
-                    if (!$this->pingApi) {
-                        if (defined('WP_DEBUG') && WP_DEBUG) {
-                            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                            error_log('healthz responseString: ' . $responseBody);
-                        };
+                    if (!$this->pingApi && (defined('WP_DEBUG') && WP_DEBUG)) {
+                        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                        error_log('healthz responseString: ' . $responseBody);
                     }
                 }
             } catch (Throwable $e) {

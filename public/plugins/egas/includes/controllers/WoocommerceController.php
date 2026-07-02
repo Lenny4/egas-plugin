@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Egas\controllers;
 
 use Egas\enum\Sage\DocumentProvenanceTypeEnum;
