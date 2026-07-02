@@ -22,7 +22,7 @@ class FArticleResource extends Resource
     public const FILTER_TYPE = 'FArticleFilterInput';
     public final const META_KEY = '_' . Sage::TOKEN . '_arRef';
 
-    private static ?FArticleResource $instance = null;
+    private static ?FArticleResource $fArticleResource = null;
 
     private function __construct()
     {
@@ -110,9 +110,9 @@ class FArticleResource extends Resource
         $this->metadata = function (?stdClass $obj = null): array {
             $result = [
                 ...$this->getMandatoryMetadata(),
-                new SageEntityMetadata(field: '_prices', value: static fn(StdClass $fArticle) => json_encode($fArticle->prices, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
-                new SageEntityMetadata(field: '_max_price', value: static fn(StdClass $fArticle) => json_encode(WoocommerceService::getInstance()->getMaxPrice($fArticle->prices), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
-                new SageEntityMetadata(field: '_canEditArSuiviStock', value: static fn(StdClass $fArticle) => $fArticle->canEditArSuiviStock),
+                new SageEntityMetadata(field: '_prices', value: static fn(StdClass $stdClass) => json_encode($stdClass->prices, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
+                new SageEntityMetadata(field: '_max_price', value: static fn(StdClass $stdClass) => json_encode(WoocommerceService::getInstance()->getMaxPrice($stdClass->prices), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
+                new SageEntityMetadata(field: '_canEditArSuiviStock', value: static fn(StdClass $stdClass) => $stdClass->canEditArSuiviStock),
             ];
             return SageService::getInstance()->addSelectionSetAsMetadata(GraphqlService::getInstance()->_getFArticleSelectionSet(), $result, $obj);
         };
@@ -172,10 +172,10 @@ class FArticleResource extends Resource
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$fArticleResource === null) {
+            self::$fArticleResource = new self();
         }
-        return self::$instance;
+        return self::$fArticleResource;
     }
 
     public static function supports(): bool

@@ -11,7 +11,7 @@ use Twig\Loader\FilesystemLoader;
 
 class TwigService
 {
-    private static ?TwigService $instance = null;
+    private static ?TwigService $twigService = null;
     public Environment $twig;
     public string $dir;
     public bool $register = false;
@@ -38,10 +38,10 @@ class TwigService
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$twigService === null) {
+            self::$twigService = new self();
         }
-        return self::$instance;
+        return self::$twigService;
     }
 
     public function render(string $name, array $context = []): string

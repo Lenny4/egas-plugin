@@ -30,25 +30,25 @@ use WP_User;
 
 class SageService
 {
-    private static ?SageService $instance = null;
+    private static ?SageService $sageService = null;
     public ?array $resources = null;
     public ?stdClass $websiteApiOption = null;
 
-    public function createAddressWithFComptet(StdClass $fComptet): StdClass
+    public function createAddressWithFComptet(StdClass $stdClass): StdClass
     {
         $r = new StdClass();
-        $r->liIntitule = $fComptet->ctIntitule;
-        $r->liAdresse = $fComptet->ctAdresse;
-        $r->liComplement = $fComptet->ctComplement;
-        $r->liCodePostal = $fComptet->ctCodePostal;
+        $r->liIntitule = $stdClass->ctIntitule;
+        $r->liAdresse = $stdClass->ctAdresse;
+        $r->liComplement = $stdClass->ctComplement;
+        $r->liCodePostal = $stdClass->ctCodePostal;
         $r->liPrincipal = 0;
-        $r->liVille = $fComptet->ctVille;
-        $r->liPays = $fComptet->ctPays;
-        $r->liPaysCode = $fComptet->ctPaysCode;
-        $r->liContact = $fComptet->ctContact;
-        $r->liTelephone = $fComptet->ctTelephone;
-        $r->liEmail = $fComptet->ctEmail;
-        $r->liCodeRegion = $fComptet->ctCodeRegion;
+        $r->liVille = $stdClass->ctVille;
+        $r->liPays = $stdClass->ctPays;
+        $r->liPaysCode = $stdClass->ctPaysCode;
+        $r->liContact = $stdClass->ctContact;
+        $r->liTelephone = $stdClass->ctTelephone;
+        $r->liEmail = $stdClass->ctEmail;
+        $r->liCodeRegion = $stdClass->ctCodeRegion;
         $r->liAdresseFact = 0;
         return $r;
     }
@@ -165,13 +165,13 @@ WHERE user_login LIKE %s
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$sageService === null) {
+            self::$sageService = new self();
         }
-        return self::$instance;
+        return self::$sageService;
     }
 
-    public function getMainFDocenteteOfExtendedFDocentetes(WC_Order $order, array|null|string $extendedFDocentetes): stdClass|null|string
+    public function getMainFDocenteteOfExtendedFDocentetes(WC_Order $wcOrder, array|null|string $extendedFDocentetes): stdClass|null|string
     {
         if (empty($extendedFDocentetes)) {
             return null;
@@ -179,7 +179,7 @@ WHERE user_login LIKE %s
         if (!is_array($extendedFDocentetes)) {
             return $extendedFDocentetes;
         }
-        $fDocenteteIdentifier = WoocommerceService::getInstance()->getFDocenteteIdentifierFromOrder($order);
+        $fDocenteteIdentifier = WoocommerceService::getInstance()->getFDocenteteIdentifierFromOrder($wcOrder);
         if (count($extendedFDocentetes) > 1) {
             usort($extendedFDocentetes, static function (stdClass $a, stdClass $b) use ($fDocenteteIdentifier): int {
                 if ($fDocenteteIdentifier["doPiece"] === $a->doPiece && $fDocenteteIdentifier["doType"] === $a->doType) {
@@ -194,11 +194,11 @@ WHERE user_login LIKE %s
         return array_values($extendedFDocentetes)[0];
     }
 
-    public function getTasksSynchronizeOrder_Products(WC_Order $order, array $fDoclignes): array
+    public function getTasksSynchronizeOrder_Products(WC_Order $wcOrder, array $fDoclignes): array
     {
         $taxeCodes = [];
         // to get order data: wp-content/plugins/woocommerce/includes/admin/meta-boxes/views/html-order-items.php:24
-        $lineItems = array_values($order->get_items());
+        $lineItems = array_values($wcOrder->get_items());
 
         $nbLines = max(count($lineItems), count($fDoclignes));
         $productChanges = [];
@@ -222,8 +222,8 @@ WHERE user_login LIKE %s
                 $metaData = $lineItems[$i]->get_meta_data();
                 $old->fLotseriesOut = null;
                 if (!empty($metaData)) {
-                    foreach ($metaData as $meta) {
-                        $data = $meta->get_data();
+                    foreach ($metaData as $metumData) {
+                        $data = $metumData->get_data();
                         if ($data['key'] === '_' . Sage::TOKEN . '_fLotseriesOut') {
                             $old->fLotseriesOut = json_decode((string)$data['value'], null, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
                             break;
@@ -292,12 +292,12 @@ WHERE user_login LIKE %s
         $products = [];
         if (!empty($productIds)) {
             $products = wc_get_products(['include' => $productIds]); // https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
-            $products = array_combine(array_map(static fn(WC_Product $product) => $product->get_id(), $products), $products);
+            $products = array_combine(array_map(static fn(WC_Product $wcProduct) => $wcProduct->get_id(), $products), $products);
         }
         return [$productChanges, $products, $taxeCodes];
     }
 
-    public function getTasksSynchronizeOrder_Shipping(WC_Order $order, stdClass $fDocentete): array
+    public function getTasksSynchronizeOrder_Shipping(WC_Order $wcOrder, stdClass $fDocentete): array
     {
         $taxeCodes = [];
         [$taxe, $rates] = WoocommerceService::getInstance()->getWordpressTaxes();
@@ -310,7 +310,7 @@ WHERE user_login LIKE %s
         $shippingChanges = [];
 
         // to get order data: wp-content/plugins/woocommerce/includes/admin/meta-boxes/views/html-order-items.php:27
-        $lineItemsShipping = array_values($order->get_items('shipping'));
+        $lineItemsShipping = array_values($wcOrder->get_items('shipping'));
 
         $old = null;
         // region new
@@ -379,10 +379,10 @@ WHERE user_login LIKE %s
         return [$shippingChanges, $taxeCodes];
     }
 
-    public function getTasksSynchronizeOrder_Fee(WC_Order $order): array
+    public function getTasksSynchronizeOrder_Fee(WC_Order $wcOrder): array
     {
         $feeChanges = [];
-        $lineItemsFee = array_values($order->get_items('fee'));
+        $lineItemsFee = array_values($wcOrder->get_items('fee'));
         foreach ($lineItemsFee as $lineItemFee) {
             $old = new stdClass();
             $old->id = $lineItemFee->get_id();
@@ -399,10 +399,10 @@ WHERE user_login LIKE %s
         return $feeChanges;
     }
 
-    public function getTasksSynchronizeOrder_Coupon(WC_Order $order): array
+    public function getTasksSynchronizeOrder_Coupon(WC_Order $wcOrder): array
     {
         $couponChanges = [];
-        $coupons = $order->get_coupons();
+        $coupons = $wcOrder->get_coupons();
         foreach ($coupons as $coupon) {
             $old = new stdClass();
             $old->id = $coupon->get_id();
@@ -419,12 +419,12 @@ WHERE user_login LIKE %s
         return $couponChanges;
     }
 
-    public function getTasksSynchronizeOrder_Taxes(WC_Order $order, array $new): array
+    public function getTasksSynchronizeOrder_Taxes(WC_Order $wcOrder, array $new): array
     {
         $taxesChanges = [];
-        $old = array_values(array_map(static fn(WC_Order_Item_Tax $wcOrderItemTax) => $wcOrderItemTax->get_label(), $order->get_taxes()));
+        $old = array_values(array_map(static fn(WC_Order_Item_Tax $wcOrderItemTax) => $wcOrderItemTax->get_label(), $wcOrder->get_taxes()));
         $changes = [];
-        [$toRemove, $toAdd] = WoocommerceService::getInstance()->getToRemoveToAddTaxes($order, $new);
+        [$toRemove, $toAdd] = WoocommerceService::getInstance()->getToRemoveToAddTaxes($wcOrder, $new);
         if (count($toRemove) > 0 || count($toAdd) > 0) {
             $changes[] = OrderUtils::UPDATE_WC_ORDER_ITEM_TAX_ACTION;
         }
@@ -438,7 +438,7 @@ WHERE user_login LIKE %s
         return $taxesChanges;
     }
 
-    public function getTasksSynchronizeOrder_Payment(WC_Order $order, stdClass $fDocentete): array
+    public function getTasksSynchronizeOrder_Payment(WC_Order $wcOrder, stdClass $fDocentete): array
     {
         $fCreglements = array_values(array_filter(array_map(
             fn($fRegleche) => $fRegleche->fCreglement ?? null,
@@ -447,20 +447,20 @@ WHERE user_login LIKE %s
                 $fDocentete->fDocregls
             ))
         )));
-        $refunds = $order->get_refunds();
+        $refunds = $wcOrder->get_refunds();
         $old = [
-            'refunds' => array_map(fn(OrderRefund $refund): array => [
-                'id' => $refund->get_id(),
-                'amount' => round((float)$refund->get_total(), 2),
+            'refunds' => array_map(fn(OrderRefund $orderRefund): array => [
+                'id' => $orderRefund->get_id(),
+                'amount' => round((float)$orderRefund->get_total(), 2),
             ], $refunds),
-            'isPaid' => !is_null($order->get_date_paid()),
+            'isPaid' => !is_null($wcOrder->get_date_paid()),
         ];
         $new = [
             'refunds' => [],
             'isPaid' => array_sum(array_map(
                     fn(stdClass $fCreglement): float => round((float)$fCreglement->rgMontant, 2),
                     array_filter($fCreglements, fn(stdClass $fCreglement): bool => $fCreglement->rgMontant > 0)
-                )) >= round((float)$order->get_total(), 2),
+                )) >= round((float)$wcOrder->get_total(), 2),
         ];
         foreach ($fCreglements as $fCreglement) {
             if ($fCreglement->rgMontant >= 0) {
@@ -505,10 +505,10 @@ WHERE user_login LIKE %s
         return $paymentChanges;
     }
 
-    public function getTasksSynchronizeOrder_User(WC_Order $order, stdClass $fDocentete): array
+    public function getTasksSynchronizeOrder_User(WC_Order $wcOrder, stdClass $fDocentete): array
     {
         $userChanges = [];
-        $orderUserId = $order->get_user_id();
+        $orderUserId = $wcOrder->get_user_id();
         $ctNum = $fDocentete->doTiers;
         $expectedUserId = WordpressService::getInstance()->getUserIdWithCtNum($ctNum);
         if ($expectedUserId !== $orderUserId) {
@@ -527,7 +527,7 @@ WHERE user_login LIKE %s
         } elseif (!is_null($orderUserId)) {
             $userChanges = [...$userChanges, ...$this->getUserChanges($orderUserId, $fDocentete->doTiersNavigation)];
             $userChanges = [...$userChanges, ...$this->getOrderAddressTypeChanges(
-                $order,
+                $wcOrder,
                 $fDocentete->doTiersNavigation,
                 $fDocentete->liNoNavigation
             )];
@@ -580,7 +580,7 @@ WHERE user_login LIKE %s
         return $userChanges;
     }
 
-    private function getOrderAddressTypeChanges(WC_Order $order, stdClass $fComptet, stdClass $fLivraison): array
+    private function getOrderAddressTypeChanges(WC_Order $wcOrder, stdClass $fComptet, stdClass $fLivraison): array
     {
         $addressTypeChanges = [];
         $addressTypes = [
@@ -617,7 +617,7 @@ WHERE user_login LIKE %s
                     $objValue = WordpressService::getInstance()->getValidWordpressMail($objValue);
                 }
                 if (
-                    ($oldValue = $order->{'get_' . $type . '_' . $key1}()) !== $objValue &&
+                    ($oldValue = $wcOrder->{'get_' . $type . '_' . $key1}()) !== $objValue &&
                     (!empty($oldValue) || !empty($objValue))
                 ) {
                     $old->{$key1} = $oldValue;
@@ -825,7 +825,7 @@ WHERE user_login LIKE %s
     {
         foreach ($selectionSets as $subEntity => $selectionSet) {
             if (is_array($selectionSet) && array_key_exists('name', $selectionSet)) {
-                $sageEntityMetadatas[] = new SageEntityMetadata(field: '_' . $prefix . $selectionSet['name'], value: static fn(StdClass $entity) => PathUtils::getByPath($entity, $prefix)->{$selectionSet['name']});
+                $sageEntityMetadatas[] = new SageEntityMetadata(field: '_' . $prefix . $selectionSet['name'], value: static fn(StdClass $stdClass) => PathUtils::getByPath($stdClass, $prefix)->{$selectionSet['name']});
             } elseif (!is_null($obj) && $selectionSet instanceof ArgumentSelectionSetDto) {
                 foreach ($obj->{$subEntity} as $subObject) {
                     $this->addSelectionSetAsMetadata(
@@ -1031,8 +1031,8 @@ ORDER BY {$metaTable2}.meta_key = '{$metaKeyIdentifier}' DESC
             if (isset($meta["changes"]["removed"])) {
                 $meta["changes"]["removed"] = array_filter($meta["changes"]["removed"], static fn(string $value): bool => !empty($value));
             }
-            foreach ($changeTypes as $type) {
-                if (!empty($meta['changes'][$type])) {
+            foreach ($changeTypes as $changeType) {
+                if (!empty($meta['changes'][$changeType])) {
                     $hasChanges = true;
                     break;
                 }

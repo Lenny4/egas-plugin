@@ -27,13 +27,13 @@ class WoocommerceController
         return $columns;
     }
 
-    public static function displayColumn(string $column_name, WC_Order $order): string
+    public static function displayColumn(string $column_name, WC_Order $wcOrder): string
     {
         $trans = SageTranslationUtils::getTranslations();
         if (Sage::TOKEN !== $column_name) {
             return '';
         }
-        $identifier = WoocommerceService::getInstance()->getFDocenteteIdentifierFromOrder($order);
+        $identifier = WoocommerceService::getInstance()->getFDocenteteIdentifierFromOrder($wcOrder);
         if (empty($identifier)) {
             return '<span class="dashicons dashicons-no" style="color: red"></span>';
         }
@@ -42,11 +42,11 @@ class WoocommerceController
             . $identifier["doPiece"];
     }
 
-    public static function getMetaboxFDocentete(WC_Order $order, string $message = ''): string
+    public static function getMetaboxFDocentete(WC_Order $wcOrder, string $message = ''): string
     {
         $woocommerceService = WoocommerceService::getInstance();
         $graphqlService = GraphqlService::getInstance();
-        $fDocenteteIdentifier = $woocommerceService->getFDocenteteIdentifierFromOrder($order);
+        $fDocenteteIdentifier = $woocommerceService->getFDocenteteIdentifierFromOrder($wcOrder);
         $hasFDocentete = !is_null($fDocenteteIdentifier);
         $extendedFDocentetes = null;
         $tasksSynchronizeOrder = [];
@@ -73,11 +73,11 @@ class WoocommerceController
             // pour l'instant on appelle manuellement applyTasksSynchronizeOrder
             // $sageService = SageService::getInstance();
             // $sageService->importFromSageIfUpdateApi($sageService->getResource(FDocenteteResource::ENTITY_NAME), $order->get_id());
-            $tasksSynchronizeOrder = $woocommerceService->getTasksSynchronizeOrder($order, $extendedFDocentetes);
+            $tasksSynchronizeOrder = $woocommerceService->getTasksSynchronizeOrder($wcOrder, $extendedFDocentetes);
             if (filter_var(get_option(Sage::TOKEN . '_website_update_' . FDocenteteResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN)) {
-                [$var1, $var2, $message2, $rOrder] = $woocommerceService->applyTasksSynchronizeOrder($order, $tasksSynchronizeOrder);
+                [$var1, $var2, $message2, $rOrder] = $woocommerceService->applyTasksSynchronizeOrder($wcOrder, $tasksSynchronizeOrder);
                 $message .= $message2;
-                $tasksSynchronizeOrder = $woocommerceService->getTasksSynchronizeOrder($order, $extendedFDocentetes);
+                $tasksSynchronizeOrder = $woocommerceService->getTasksSynchronizeOrder($wcOrder, $extendedFDocentetes);
             }
         }
         // original WC_Meta_Box_Order_Data::output
@@ -85,7 +85,7 @@ class WoocommerceController
             'message' => $message,
             'doPieceIdentifier' => $fDocenteteIdentifier ? $fDocenteteIdentifier["doPiece"] : null,
             'doTypeIdentifier' => $fDocenteteIdentifier ? $fDocenteteIdentifier["doType"] : null,
-            'order' => $order,
+            'order' => $wcOrder,
             'hasFDocentete' => $hasFDocentete,
             'extendedFDocentetes' => $extendedFDocentetes,
             'currency' => get_woocommerce_currency(),
@@ -96,7 +96,7 @@ class WoocommerceController
         ]);
     }
 
-    public static function getMetaBoxOrderItems(WC_Order $order): string
+    public static function getMetaBoxOrderItems(WC_Order $wcOrder): string
     {
         ob_start();
         include __DIR__ . '/../../woocommerce/includes/admin/meta-boxes/views/html-order-items.php';
@@ -141,24 +141,24 @@ class WoocommerceController
             /* translators: %s: object name (e.g. "Commande"). */
                 __('%s data', 'egas'),
                 __('Commande', 'egas')
-            ), static function (WC_Order $order) use ($callback): void {
+            ), static function (WC_Order $wcOrder) use ($callback): void {
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                echo WoocommerceController::getMetaBoxOrder($order, $callback);
+                echo WoocommerceController::getMetaBoxOrder($wcOrder, $callback);
             }, $screen, $context, 'high');
     }
 
-    public static function getMetaBoxOrder(WC_Order $order, ?callable $callback = null): string
+    public static function getMetaBoxOrder(WC_Order $wcOrder, ?callable $callback = null): string
     {
         ob_start();
         if (is_null($callback)) {
-            WC_Meta_Box_Order_Data::output($order);
+            WC_Meta_Box_Order_Data::output($wcOrder);
         } else {
-            $callback($order);
+            $callback($wcOrder);
         }
         $html = ob_get_clean();
         $crawler = new Crawler($html);
         $dom = $crawler->getNode(0)->ownerDocument;
-        $fDocenteteIdentifier = WoocommerceService::getInstance()->getFDocenteteIdentifierFromOrder($order);
+        $fDocenteteIdentifier = WoocommerceService::getInstance()->getFDocenteteIdentifierFromOrder($wcOrder);
         $translations = SageTranslationUtils::getTranslations();
         if (!empty($fDocenteteIdentifier)) {
             // region add Sage document info in the header

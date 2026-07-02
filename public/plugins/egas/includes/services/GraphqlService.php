@@ -45,7 +45,7 @@ use Throwable;
 
 class GraphqlService
 {
-    private static ?GraphqlService $instance = null;
+    private static ?GraphqlService $graphqlService = null;
     private ?Client $client = null;
     private ?bool $pingApi = null;
     private ?string $apiVersion = null;
@@ -193,7 +193,7 @@ class GraphqlService
         if ($hasError) {
             return null;
         }
-        $mutation = (new Mutation('createUpdateWebsite'))
+        $query = (new Mutation('createUpdateWebsite'))
             ->setVariables([new Variable('websiteDto', 'WebsiteDtoInput', true)])
             ->setArguments(['websiteDto' => '$websiteDto'])
             ->setSelectionSet(
@@ -244,15 +244,15 @@ class GraphqlService
                 'websiteUpdateOrder' => filter_var(get_option(Sage::TOKEN . '_website_update_' . FDocenteteResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
             ]
         ];
-        return $this->runQuery($mutation, $getError, $variables);
+        return $this->runQuery($query, $getError, $variables);
     }
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$graphqlService === null) {
+            self::$graphqlService = new self();
         }
-        return self::$instance;
+        return self::$graphqlService;
     }
 
     private function getOptionResource(string $key): ?string
@@ -2005,15 +2005,15 @@ class GraphqlService
 
     public function updateAllSageEntitiesInOption(array $ignores = []): void
     {
-        $reflection = new ReflectionClass($this);
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            $methodName = $method->getName();
+        $reflectionClass = new ReflectionClass($this);
+        foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
+            $methodName = $reflectionMethod->getName();
             if (in_array($methodName, $ignores, true)) {
                 continue;
             }
             // Check if the method name starts with "get"
             if (str_starts_with($methodName, 'get')) {
-                $parameters = $method->getParameters();
+                $parameters = $reflectionMethod->getParameters();
                 $paramNames = array_map(fn($param): string => $param->getName(), $parameters);
 
                 // Check if both 'useCache' and 'getFromSage' are in the parameter list
@@ -2024,19 +2024,19 @@ class GraphqlService
                     // Build argument list in correct order with values (example: true, false)
                     $args = [];
 
-                    foreach ($parameters as $param) {
-                        if ($param->getName() === 'useCache') {
+                    foreach ($parameters as $parameter) {
+                        if ($parameter->getName() === 'useCache') {
                             $args[] = true;
-                        } elseif ($param->getName() === 'getFromSage') {
+                        } elseif ($parameter->getName() === 'getFromSage') {
                             $args[] = true;
                         } else {
                             // Provide default or null for other parameters
-                            $args[] = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
+                            $args[] = $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null;
                         }
                     }
 
                     // Call the method with constructed arguments
-                    $method->invokeArgs($this, $args);
+                    $reflectionMethod->invokeArgs($this, $args);
                 }
             }
         }

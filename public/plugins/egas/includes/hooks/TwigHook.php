@@ -22,14 +22,14 @@ class TwigHook
     public function __construct()
     {
         add_action('init', function (): void {
-            $twig = TwigService::getInstance();
-            if ($twig->register) {
+            $twigService = TwigService::getInstance();
+            if ($twigService->register) {
                 return;
             }
-            $twig->twig->addExtension(new IntlExtension());
+            $twigService->twig->addExtension(new IntlExtension());
             $this->registerFunction();
             $this->registerFilter();
-            $twig->register = true;
+            $twigService->register = true;
         });
     }
 
@@ -178,7 +178,7 @@ class TwigHook
             ];
         }, SageService::getInstance()->getResources())));
         $twig->addFunction(new TwigFunction('getFDoclignes', static fn(array|null|string $fDocentetes): array => SageService::getInstance()->getFDoclignes($fDocentetes)));
-        $twig->addFunction(new TwigFunction('getMainFDocenteteOfExtendedFDocentetes', static fn(WC_Order $order, array|null|string $fDocentetes): stdClass|null|string => SageService::getInstance()->getMainFDocenteteOfExtendedFDocentetes($order, $fDocentetes)));
+        $twig->addFunction(new TwigFunction('getMainFDocenteteOfExtendedFDocentetes', static fn(WC_Order $wcOrder, array|null|string $fDocentetes): stdClass|null|string => SageService::getInstance()->getMainFDocenteteOfExtendedFDocentetes($wcOrder, $fDocentetes)));
         $twig->addFunction(new TwigFunction('getFDocentete', static function (array $fDocentetes, string $doPiece, int $doType): stdClass|null|string {
             $fDocentete = current(array_filter($fDocentetes, static fn(stdClass $fDocentete): bool => $fDocentete->doPiece === $doPiece && $fDocentete->doType === $doType));
             if ($fDocentete !== false) {

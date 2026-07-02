@@ -21,7 +21,7 @@ use WP_Application_Passwords;
 
 class WordpressService
 {
-    private static ?WordpressService $instance = null;
+    private static ?WordpressService $wordpressService = null;
 
     public function install(): void
     {
@@ -53,10 +53,10 @@ class WordpressService
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$wordpressService === null) {
+            self::$wordpressService = new self();
         }
-        return self::$instance;
+        return self::$wordpressService;
     }
 
     /**
@@ -298,7 +298,7 @@ class WordpressService
             $resource = SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME);
             $metadataToKeep = [
                 FArticleResource::META_KEY,
-                ...array_map(fn(SageEntityMetadata $metadata): string => '_' . Sage::TOKEN . $metadata->getField(), $resource->getMetadata()()),
+                ...array_map(fn(SageEntityMetadata $sageEntityMetadata): string => '_' . Sage::TOKEN . $sageEntityMetadata->getField(), $resource->getMetadata()()),
             ];
             $meta = get_post_meta($postId);
             foreach ($meta as $key => $values) {

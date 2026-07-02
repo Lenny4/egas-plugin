@@ -458,10 +458,10 @@ class AdminController
     private static function getResourceFilter(Resource $resource, array $filterFields): array
     {
         return [
-            'importCondition' => array_map(fn(ImportConditionDto $importCondition): array => [
-                'field' => $importCondition->getField(),
-                'value' => $importCondition->getValue(),
-                'condition' => $importCondition->getCondition(),
+            'importCondition' => array_map(fn(ImportConditionDto $importConditionDto): array => [
+                'field' => $importConditionDto->getField(),
+                'value' => $importConditionDto->getValue(),
+                'condition' => $importConditionDto->getCondition(),
             ], $resource->getImportCondition()),
             'allFilterType' => SageService::getInstance()->getAllFilterType(),
             'filterFields' => $filterFields,
@@ -710,24 +710,24 @@ class AdminController
                 description: __("La devise dans Woocommerce n'est pas la même que dans Sage.", 'egas'),
             );
         }
-        /** @var SageExpectedOption[] $changes */
-        $changes = [];
+        /** @var SageExpectedOption[] $sageExpectedOptions */
+        $sageExpectedOptions = [];
         foreach ($sageExpectedOptions as $sageExpectedOption) {
             $optionName = $sageExpectedOption->getOptionName();
             $expectedOptionValue = $sageExpectedOption->getOptionValue();
             $value = get_option($optionName);
             $sageExpectedOption->setCurrentOptionValue($value);
             if ($value !== $expectedOptionValue) {
-                $changes[] = $sageExpectedOption;
+                $sageExpectedOptions[] = $sageExpectedOption;
             }
         }
-        if ($changes !== []) {
+        if ($sageExpectedOptions !== []) {
             $result = "<div class='error''>";
             ob_start();
             settings_fields(Sage::TOKEN . '_settings');
             $fieldsForm = ob_get_clean();
             $optionNames = [];
-            foreach ($changes as $sageExpectedOption) {
+            foreach ($sageExpectedOptions as $sageExpectedOption) {
                 $optionValue = $sageExpectedOption->getOptionValue();
                 $result .= "<div>" . __("Le plugin Egas a besoin de modifier l'option", 'egas') . " <code>" .
                     $sageExpectedOption->getTrans() . "</code> " . __('pour lui donner la valeur', 'egas') . " <code>" .

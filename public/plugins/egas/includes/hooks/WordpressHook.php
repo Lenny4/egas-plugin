@@ -70,19 +70,19 @@ class WordpressHook
             // HPOS and non-HPOS use different hooks.
             add_filter(sprintf('manage_%s_columns', $screen_id), WoocommerceController::addColumn(...), 11);
             add_filter(sprintf('manage_edit-%s_columns', $screen_id), WoocommerceController::addColumn(...), 11);
-            add_action(sprintf('manage_%s_custom_column', $screen_id), static function (string $column_name, WC_Order $order): void {
+            add_action(sprintf('manage_%s_custom_column', $screen_id), static function (string $column_name, WC_Order $wcOrder): void {
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                echo WoocommerceController::displayColumn($column_name, $order);
+                echo WoocommerceController::displayColumn($column_name, $wcOrder);
             }, 10, 2);
-            add_action(sprintf('manage_%s_posts_custom_column', $screen_id), static function (string $column_name, WC_Order $order): void {
+            add_action(sprintf('manage_%s_posts_custom_column', $screen_id), static function (string $column_name, WC_Order $wcOrder): void {
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                echo WoocommerceController::displayColumn($column_name, $order);
+                echo WoocommerceController::displayColumn($column_name, $wcOrder);
             }, 10, 2);
         });
         // region link wordpress user to sage user
-        add_action('personal_options', function (WP_User $user): void {
+        add_action('personal_options', function (WP_User $wpUser): void {
             $sageService = SageService::getInstance();
-            $sageGraphQl = GraphqlService::getInstance();
+            $graphqlService = GraphqlService::getInstance();
             [
                 $fComptet,
                 $messages,
@@ -90,19 +90,19 @@ class WordpressHook
                 $updateApi,
                 $hasChanges,
                 $changeTypes
-            ] = $sageService->importFromSageIfUpdateApi($sageService->getResource(FComptetResource::ENTITY_NAME), $user->ID);
+            ] = $sageService->importFromSageIfUpdateApi($sageService->getResource(FComptetResource::ENTITY_NAME), $wpUser->ID);
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo TwigService::getInstance()->render('user/formMetaFields.html.twig', [
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                'user' => $user,
+                'user' => $wpUser,
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'fComptet' => $fComptet,
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                'userMetaWordpress' => get_user_meta($user->ID),
+                'userMetaWordpress' => get_user_meta($wpUser->ID),
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                'pCattarifs' => $sageGraphQl->getPCattarifs(),
+                'pCattarifs' => $graphqlService->getPCattarifs(),
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                'pCatComptas' => $sageGraphQl->getPCatComptas(),
+                'pCatComptas' => $graphqlService->getPCatComptas(),
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 'messages' => $messages,
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -116,16 +116,16 @@ class WordpressHook
             ]);
         });
         add_action('user_new_form', function (): void {
-            $sageGraphQl = GraphqlService::getInstance();
+            $graphqlService = GraphqlService::getInstance();
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo TwigService::getInstance()->render('user/formMetaFields.html.twig', [
                 'user' => null,
                 'fComptet' => null,
                 'userMetaWordpress' => null,
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                'pCattarifs' => $sageGraphQl->getPCattarifs(),
+                'pCattarifs' => $graphqlService->getPCattarifs(),
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                'pCatComptas' => $sageGraphQl->getPCatComptas(),
+                'pCatComptas' => $graphqlService->getPCatComptas(),
                 'messages' => [],
                 'meta' => [],
                 'updateApi' => false,
@@ -153,12 +153,12 @@ class WordpressHook
         $userMetaProp = Sage::PREFIX_META_DATA;
         add_filter('rest_pre_insert_user', static function ( // /!\ aussi trigger lorsque l'on update un user
             stdClass        $prepared_user,
-            WP_REST_Request $request
+            WP_REST_Request $wprestRequest
         ) use ($userMetaProp): stdClass {
-            if (!empty($request['meta'])) {
+            if (!empty($wprestRequest['meta'])) {
                 $prepared_user->{$userMetaProp} = [];
                 $ctNum = null;
-                foreach ($request['meta'] as $key => $value) {
+                foreach ($wprestRequest['meta'] as $key => $value) {
                     if ($key === FComptetResource::META_KEY) {
                         $ctNum = $value;
                     }
@@ -199,7 +199,7 @@ LIMIT 1
         }, accepted_args: 2);
         add_filter('insert_custom_user_meta', static function (
             array   $custom_meta,
-            WP_User $user,
+            WP_User $wpUser,
             bool    $update,
             array   $userdata
         ) use ($userMetaProp): array {
@@ -211,22 +211,22 @@ LIMIT 1
             return $custom_meta;
         }, accepted_args: 4);
         add_action('rest_after_insert_user', static function (
-            WP_User         $user,
-            WP_REST_Request $request,
+            WP_User         $wpUser,
+            WP_REST_Request $wprestRequest,
             bool            $creating
         ): void {
             $sageService = SageService::getInstance();
-            $metadata = $sageService->get_user_meta_single($user->ID);
+            $metadata = $sageService->get_user_meta_single($wpUser->ID);
             if (array_key_exists(FComptetResource::META_KEY, $metadata)) {
                 $sageService->importFComptetFromSage($metadata[FComptetResource::META_KEY], showSuccessMessage: false);
             }
             if (
                 $creating &&
                 filter_var(get_option(Sage::TOKEN . '_mail_website_create_new_' . FComptetResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN) &&
-                !str_ends_with($user->user_email, '@nomail.com')
+                !str_ends_with($wpUser->user_email, '@nomail.com')
             ) {
                 // Accepts only 'user', 'admin' , 'both' or default '' as $notify.
-                wp_send_new_user_notifications($user->ID, 'user');
+                wp_send_new_user_notifications($wpUser->ID, 'user');
             }
         }, accepted_args: 3);
         // endregion

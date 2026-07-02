@@ -36,7 +36,7 @@ final class FDocenteteUtils
 
     public static function slugifyPExpeditionEIntitule(string $eIntitule): string
     {
-        $slugger = new AsciiSlugger();
-        return Sage::TOKEN . '-' . strtolower($slugger->slug($eIntitule));
+        $asciiSlugger = new AsciiSlugger();
+        return Sage::TOKEN . '-' . strtolower($asciiSlugger->slug($eIntitule)->toString());
     }
 }

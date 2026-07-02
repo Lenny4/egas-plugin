@@ -69,8 +69,8 @@ class RestApiHook
         add_action('rest_api_init', function (): void {
             register_rest_route(Sage::TOKEN . '/v1', '/search-entities/(?P<entityName>[A-Za-z0-9]+)', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $entityName = $request['entityName'];
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $entityName = $wprestRequest['entityName'];
                     $selectionSet = '_get' . ucfirst(substr($entityName, 0, -1)) . 'SelectionSet';
                     $graphqlService = GraphqlService::getInstance();
                     $result = $graphqlService->searchEntities(
@@ -85,12 +85,12 @@ class RestApiHook
                     // todo return error message
                     return new WP_REST_Response(null, Response::HTTP_INTERNAL_SERVER_ERROR);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/search/sage-entity-menu/(?P<resourceName>[A-Za-z0-9]+)', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $resourceName = $request['resourceName'];
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $resourceName = $wprestRequest['resourceName'];
                     $resource = SageService::getInstance()->getResource($resourceName);
                     [
                         $data,
@@ -105,19 +105,19 @@ class RestApiHook
                     }
                     return new WP_REST_Response($data, Response::HTTP_SERVICE_UNAVAILABLE);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/farticles/(?P<arRef>([^&]*))/available', args: [ // https://stackoverflow.com/a/10126995/6824121
                 'methods' => 'GET',
-                'callback' => static fn(WP_REST_Request $request): WP_REST_Response => new WP_REST_Response([
-                    'availableArRef' => GraphqlService::getInstance()->getAvailableArRef(arRef: $request['arRef']),
+                'callback' => static fn(WP_REST_Request $wprestRequest): WP_REST_Response => new WP_REST_Response([
+                    'availableArRef' => GraphqlService::getInstance()->getAvailableArRef(arRef: $wprestRequest['arRef']),
                 ], Response::HTTP_OK),
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/orders/(?P<id>\d+)/sync', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $order = new WC_Order($request['id']);
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $order = new WC_Order($wprestRequest['id']);
                     $woocommerceService = WoocommerceService::getInstance();
                     $fDocenteteIdentifier = $woocommerceService->getFDocenteteIdentifierFromOrder($order);
                     [$response, $responseError, $message, $order] = WoocommerceService::getInstance()->importFDocenteteFromSage($fDocenteteIdentifier["doPiece"], $fDocenteteIdentifier["doType"], $order);
@@ -126,16 +126,16 @@ class RestApiHook
                         'html' => WoocommerceController::getMetaboxFDocentete($order, message: $message),
                     ], Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/farticles/(?P<arRef>([^&]*))/import', args: [ // https://stackoverflow.com/a/10126995/6824121
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $arRef = $request['arRef'];
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $arRef = $wprestRequest['arRef'];
                     [$response, $responseError, $message, $postId] = WoocommerceService::getInstance()->importFArticleFromSage(
                         $arRef,
                     );
-                    if ($request->get_param('json') === '1') {
+                    if ($wprestRequest->get_param('json') === '1') {
                         if ($response instanceof WP_Error) {
                             $body = json_encode($response->get_error_messages(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
                             $code = $response->get_error_code();
@@ -155,7 +155,7 @@ class RestApiHook
                         }
                         return new WP_REST_Response($body, $code);
                     }
-                    $order = new Order($request['orderId']);
+                    $order = new Order($wprestRequest['orderId']);
                     return new WP_REST_Response([
                         'html' => WoocommerceController::getMetaboxFDocentete(
                             $order,
@@ -163,25 +163,25 @@ class RestApiHook
                         )
                     ], is_int($response) ? $response : $response['response']['code']);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/fdocentetes/(?P<doPiece>[A-Za-z0-9]+)/(?P<doType>\d+)/import', args: [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $doPiece = $request['doPiece'];
-                    $doType = $request['doType'];
-                    $orderId = $request->get_param('orderId');
-                    [$response, $responseError, $message, $order] = WoocommerceService::getInstance()->importFDocenteteFromSage($doPiece, $doType, new WC_Order($orderId), $request->get_param('origin'));
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $doPiece = $wprestRequest['doPiece'];
+                    $doType = $wprestRequest['doType'];
+                    $orderId = $wprestRequest->get_param('orderId');
+                    [$response, $responseError, $message, $order] = WoocommerceService::getInstance()->importFDocenteteFromSage($doPiece, $doType, new WC_Order($orderId), $wprestRequest->get_param('origin'));
                     return new WP_REST_Response([
                         'id' => is_int($order) ? $order : $order->get_id(),
                         'message' => $message,
                     ], is_int($response) ? $response : Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/fdocentetes/(?P<doPiece>[A-Za-z0-9]+$)', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
                     $extended = false;
                     if (
                         array_key_exists('extended', $_GET) &&
@@ -190,7 +190,7 @@ class RestApiHook
                         $extended = true;
                     }
                     $fDocentetes = GraphqlService::getInstance()->getFDocentetes(
-                        strtoupper(trim((string)$request['doPiece'])),
+                        strtoupper(trim((string)$wprestRequest['doPiece'])),
                         doTypes: FDocenteteUtils::DO_TYPE_MAPPABLE,
                         doDomaine: DomaineTypeEnum::DomaineTypeVente->value,
                         doProvenance: DocumentProvenanceTypeEnum::DocProvenanceNormale->value,
@@ -213,37 +213,37 @@ class RestApiHook
                     }
                     return new WP_REST_Response($fDocentetes, Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/orders/(?P<id>\d+)/desynchronize', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $order = new WC_Order($request['id']);
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $order = new WC_Order($wprestRequest['id']);
                     $order = WoocommerceService::getInstance()->desynchronizeOrder($order);
                     return new WP_REST_Response([
                         // we create a new order here to be sure to refresh all data from bdd
                         'html' => WoocommerceController::getMetaboxFDocentete($order)
                     ], Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/orders/(?P<id>\d+)/fdocentete', [
                 'methods' => 'POST',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $body = json_decode($request->get_body(), false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $body = json_decode($wprestRequest->get_body(), false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
                     $doPiece = $body->{Sage::TOKEN . "-fdocentete-dopiece"};
                     $doType = (int)$body->{Sage::TOKEN . "-fdocentete-dotype"};
-                    [$order, $extendedFDocentetes] = WoocommerceService::getInstance()->importFDocenteteFromSage($doPiece, $doType, new WC_Order($request['id']));
+                    [$order, $extendedFDocentetes] = WoocommerceService::getInstance()->importFDocenteteFromSage($doPiece, $doType, new WC_Order($wprestRequest['id']));
                     return new WP_REST_Response([
                         // we create a new order here to be sure to refresh all data from bdd
                         'html' => WoocommerceController::getMetaboxFDocentete($order)
                     ], Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/deactivate-shipping-zones', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): void {
+                'callback' => static function (WP_REST_Request $wprestRequest): void {
                     global $wpdb;
                     $like = Sage::TOKEN . '%';
                     $sql = "
@@ -258,18 +258,18 @@ class RestApiHook
                     wp_safe_redirect($redirect);
                     exit();
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/add-website-sage-api', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
                     $result = WordpressService::getInstance()->addWebsiteSageApi(true);
                     if ($result !== true) {
                         return new WP_REST_Response($result, Response::HTTP_INTERNAL_SERVER_ERROR);
                     }
                     return new WP_REST_Response(null, Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/healthz', [
                 'methods' => 'GET',
@@ -278,10 +278,10 @@ class RestApiHook
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/orders/(?P<id>\d+)/meta-box-order', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
                     // this includes import woocommerce_wp_text_input
                     include_once __DIR__ . '/../../woocommerce/includes/admin/wc-meta-box-functions.php';
-                    $order = new WC_Order($request['id']);
+                    $order = new WC_Order($wprestRequest['id']);
                     $orderHtml = WoocommerceController::getMetaBoxOrder($order);
                     $itemHtml = WoocommerceController::getMetaBoxOrderItems($order);
                     return new WP_REST_Response([
@@ -289,12 +289,12 @@ class RestApiHook
                         'itemHtml' => $itemHtml
                     ], Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/user/(?P<ctNum>([^&]*))', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $ctNum = $request['ctNum'];
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $ctNum = $wprestRequest['ctNum'];
                     $fComptet = GraphqlService::getInstance()->getFComptet($ctNum);
                     $user = get_users([
                         'meta_key' => FComptetResource::META_KEY,
@@ -306,18 +306,18 @@ class RestApiHook
                         'user' => $user,
                     ], Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             register_rest_route(Sage::TOKEN . '/v1', '/import/(?P<entityName>[A-Za-z0-9]+)/(?P<identifier>.+)', [
                 'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $request): WP_REST_Response {
-                    $resource = SageService::getInstance()->getResource($request['entityName']);
-                    $postId = $resource->getImport()($request['identifier']);
+                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
+                    $resource = SageService::getInstance()->getResource($wprestRequest['entityName']);
+                    $postId = $resource->getImport()($wprestRequest['identifier']);
                     return new WP_REST_Response([
                         'id' => $postId,
                     ], Response::HTTP_OK);
                 },
-                'permission_callback' => static fn(WP_REST_Request $request) => current_user_can('manage_options'),
+                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
             $this->expose_all_user_meta_in_rest(); // must be call after all register_rest_route
         });
@@ -338,8 +338,8 @@ class RestApiHook
             }
         }
         if (!empty($meta_keys)) {
-            foreach ($meta_keys as $key) {
-                register_meta('user', $key, [
+            foreach ($meta_keys as $metum_key) {
+                register_meta('user', $metum_key, [
                     'show_in_rest' => true,
                     'single' => true,
                     'type' => 'string',

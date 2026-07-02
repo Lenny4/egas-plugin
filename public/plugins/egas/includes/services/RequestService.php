@@ -9,14 +9,14 @@ use WP_Http;
 
 class RequestService
 {
-    private static ?RequestService $instance = null;
+    private static ?RequestService $requestService = null;
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$requestService === null) {
+            self::$requestService = new self();
         }
-        return self::$instance;
+        return self::$requestService;
     }
 
     public function selfRequest(

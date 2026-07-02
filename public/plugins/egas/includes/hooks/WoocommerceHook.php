@@ -35,13 +35,13 @@ class WoocommerceHook
         });
         // region link wordpress order to sage order
         $screenId = 'woocommerce_page_wc-orders';
-        add_action('add_meta_boxes_' . $screenId, static function (WC_Order $order) use ($screenId): void { // woocommerce/src/Internal/Admin/Orders/Edit.php: do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
+        add_action('add_meta_boxes_' . $screenId, static function (WC_Order $wcOrder) use ($screenId): void { // woocommerce/src/Internal/Admin/Orders/Edit.php: do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
             add_meta_box(
                 'woocommerce-order-' . Sage::TOKEN . '-main',
                 __('Egas', 'egas'),
-                static function () use ($order): void {
+                static function () use ($wcOrder): void {
                     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                    echo WoocommerceController::getMetaboxFDocentete($order);
+                    echo WoocommerceController::getMetaboxFDocentete($wcOrder);
                 },
                 $screenId,
                 'normal',
@@ -49,15 +49,15 @@ class WoocommerceHook
             );
         });
         // action is trigger when click update button on order
-        add_action('woocommerce_process_shop_order_meta', static function (int $orderId, WC_Order $order): void {
-            if ($order->get_status() === 'auto-draft') {
+        add_action('woocommerce_process_shop_order_meta', static function (int $orderId, WC_Order $wcOrder): void {
+            if ($wcOrder->get_status() === 'auto-draft') {
                 // handle by the add_action `woocommerce_new_order`
                 return;
             }
-            WoocommerceService::getInstance()->afterCreateOrEditOrder($order);
+            WoocommerceService::getInstance()->afterCreateOrEditOrder($wcOrder);
         }, accepted_args: 2);
-        add_action('woocommerce_new_order', static function (int $orderId, WC_Order $order): void {
-            WoocommerceService::getInstance()->afterCreateOrEditOrder($order, true);
+        add_action('woocommerce_new_order', static function (int $orderId, WC_Order $wcOrder): void {
+            WoocommerceService::getInstance()->afterCreateOrEditOrder($wcOrder, true);
         }, accepted_args: 2);
         // endregion
         $updateApiOrder = function (int $orderId): void {
@@ -71,7 +71,7 @@ class WoocommerceHook
         add_action('woocommerce_order_refunded', function (int $orderId) use ($updateApiOrder): void {
             $updateApiOrder($orderId);
         });
-        add_filter('woocommerce_orders_table_query_sql', fn(string $sql, OrdersTableQuery $table, array $args): string|array|null => preg_replace(
+        add_filter('woocommerce_orders_table_query_sql', fn(string $sql, OrdersTableQuery $ordersTableQuery, array $args): string|array|null => preg_replace(
             "/IN\s*\(\s*('_billing_address_index'\s*,\s*'_shipping_address_index')\s*\)/",
             "IN ($1, '_" . Sage::TOKEN . "_doPiece')",
             $sql
@@ -291,11 +291,11 @@ class WoocommerceHook
         // endregion
 
         // region edit woocommerce product display
-        add_action('woocommerce_after_order_itemmeta', function (int $item_id, WC_Order_Item $item, WC_Product|bool|null $product): void {
+        add_action('woocommerce_after_order_itemmeta', function (int $item_id, WC_Order_Item $wcOrderItem, WC_Product|bool|null $product): void {
             if (
                 is_bool($product) ||
                 is_null($product) ||
-                !($item instanceof WC_Order_Item_Product)
+                !($wcOrderItem instanceof WC_Order_Item_Product)
             ) {
                 return;
             }

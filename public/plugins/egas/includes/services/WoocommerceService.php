@@ -35,7 +35,7 @@ use WP_User;
 
 class WoocommerceService
 {
-    private static ?WoocommerceService $instance = null;
+    private static ?WoocommerceService $woocommerceService = null;
     private array $prices = [];
 
     private function __construct()
@@ -43,12 +43,12 @@ class WoocommerceService
     }
 
     public function convertFComptetToUser(
-        StdClass $fComptet,
+        StdClass $stdClass,
         ?int     $userId = null,
     ): array
     {
         $sageService = SageService::getInstance();
-        $email = $sageService->getEmailFromFComptet($fComptet);
+        $email = $sageService->getEmailFromFComptet($stdClass);
         $i = 1;
         $newEmail = $email;
         while (email_exists($newEmail)) {
@@ -57,15 +57,15 @@ class WoocommerceService
             $newEmail = implode('@', $emailArray);
         }
         $email = $newEmail;
-        $fComptetAddress = $sageService->createAddressWithFComptet($fComptet);
+        $fComptetAddress = $sageService->createAddressWithFComptet($stdClass);
         $address = [];
         $fPays = GraphqlService::getInstance()->getFPays(false);
         foreach (OrderUtils::ALL_ADDRESS_TYPE as $addressType) {
-            $thisAdress = current(array_filter($fComptet->fLivraisons, static function (StdClass $fLivraison) use ($addressType, $fComptetAddress): bool {
+            $thisAdress = current(array_filter($stdClass->fLivraisons, static function (StdClass $stdClass) use ($addressType, $fComptetAddress): bool {
                 if ($addressType === OrderUtils::BILLING_ADDRESS_TYPE) {
-                    return $fLivraison->liAdresseFact === 1;
+                    return $stdClass->liAdresseFact === 1;
                 }
-                return $fLivraison->liPrincipal === 1;
+                return $stdClass->liPrincipal === 1;
             }));
             if ($thisAdress === false) {
                 $thisAdress = $fComptetAddress;
@@ -73,11 +73,11 @@ class WoocommerceService
             $address[$addressType] = $thisAdress;
         }
         $meta = [];
-        $resource = FComptetResource::getInstance();
-        foreach ($resource->getMetadata()() as $metadata) {
+        $fComptetResource = FComptetResource::getInstance();
+        foreach ($fComptetResource->getMetadata()() as $metadata) {
             $value = $metadata->getValue();
             if (!is_null($value)) {
-                $meta['_' . Sage::TOKEN . $metadata->getField()] = $value($fComptet);
+                $meta['_' . Sage::TOKEN . $metadata->getField()] = $value($stdClass);
             }
         }
         foreach (OrderUtils::ALL_ADDRESS_TYPE as $addressType) {
@@ -86,7 +86,7 @@ class WoocommerceService
                 $thisAddress->liIntitule,
                 $thisAddress->liContact
             );
-            $fPay = current(array_filter($fPays, static fn(StdClass $fPay): bool => $fPay->paIntitule === $thisAddress->liPays));
+            $fPay = current(array_filter($fPays, static fn(StdClass $stdClass): bool => $stdClass->paIntitule === $thisAddress->liPays));
             $meta = [
                 ...$meta,
                 // region woocommerce (got from: woocommerce/includes/class-wc-privacy-erasers.php)
@@ -105,17 +105,17 @@ class WoocommerceService
             ];
         }
         [$firstName, $lastName] = $sageService->getFirstNameLastName(
-            $fComptet->ctIntitule,
-            $fComptet->ctContact
+            $stdClass->ctIntitule,
+            $stdClass->ctContact
         );
         $wpUser = new WP_User($userId ?? 0);
-        $wpUser->display_name = $sageService->getName(intitule: $fComptet->ctIntitule, contact: $fComptet->ctContact);
+        $wpUser->display_name = $sageService->getName(intitule: $stdClass->ctIntitule, contact: $stdClass->ctContact);
         $wpUser->first_name = $firstName;
         $wpUser->last_name = $lastName;
         $wpUser->user_email = $email;
 
         if (is_null($userId)) {
-            $wpUser->user_login = $sageService->getAvailableUserName($fComptet->ctNum);
+            $wpUser->user_login = $sageService->getAvailableUserName($stdClass->ctNum);
             $wpUser->user_pass = bin2hex(random_bytes(5));
         }
 
@@ -124,13 +124,13 @@ class WoocommerceService
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$woocommerceService === null) {
+            self::$woocommerceService = new self();
         }
-        return self::$instance;
+        return self::$woocommerceService;
     }
 
-    public function afterCreateOrEditOrder(WC_Order $order, bool $isNewOrder = false): void
+    public function afterCreateOrEditOrder(WC_Order $wcOrder, bool $isNewOrder = false): void
     {
         $nonce = isset($_POST['woocommerce_meta_nonce'])
             ? sanitize_text_field(wp_unslash($_POST['woocommerce_meta_nonce']))
@@ -156,7 +156,7 @@ class WoocommerceService
             $doType = isset($_POST[Sage::TOKEN . '-fdocentete-dotype'])
                 ? (int)sanitize_text_field(wp_unslash($_POST[Sage::TOKEN . '-fdocentete-dotype']))
                 : 0;
-            $this->importFDocenteteFromSage($doPiece, $doType, $order);
+            $this->importFDocenteteFromSage($doPiece, $doType, $wcOrder);
         }
     }
 
@@ -234,7 +234,7 @@ class WoocommerceService
     }
 
     public function getTasksSynchronizeOrder(
-        WC_Order          $order,
+        WC_Order          $wcOrder,
         array|null|string $extendedFDocentetes,
         bool              $allChanges = true,
         bool              $getProductChanges = false,
@@ -267,40 +267,40 @@ class WoocommerceService
         $getPaymentChanges = $allChanges || $getPaymentChanges;
         $sageService = SageService::getInstance();
         $fDoclignes = $sageService->getFDoclignes($extendedFDocentetes);
-        $fDoclignes = array_values(array_filter($fDoclignes, fn(StdClass $fDocligne): bool => empty($fDocligne->canImport)));
-        $mainFDocentete = $sageService->getMainFDocenteteOfExtendedFDocentetes($order, $extendedFDocentetes);
+        $fDoclignes = array_values(array_filter($fDoclignes, fn(StdClass $stdClass): bool => empty($stdClass->canImport)));
+        $mainFDocentete = $sageService->getMainFDocenteteOfExtendedFDocentetes($wcOrder, $extendedFDocentetes);
         if ($getProductChanges || $getTaxesChanges || $getSerialChanges) {
-            [$productChanges, $products, $taxeCodesProduct] = $sageService->getTasksSynchronizeOrder_Products($order, $fDoclignes);
+            [$productChanges, $products, $taxeCodesProduct] = $sageService->getTasksSynchronizeOrder_Products($wcOrder, $fDoclignes);
             $result['products'] = $products;
             if ($getProductChanges) {
                 $result['syncChanges'] = [...$result['syncChanges'], ...$productChanges];
             }
         }
         if ($getShippingChanges || $getTaxesChanges) {
-            [$shippingChanges, $taxeCodesShipping] = $sageService->getTasksSynchronizeOrder_Shipping($order, $mainFDocentete);
+            [$shippingChanges, $taxeCodesShipping] = $sageService->getTasksSynchronizeOrder_Shipping($wcOrder, $mainFDocentete);
             if ($getShippingChanges) {
                 $result['syncChanges'] = [...$result['syncChanges'], ...$shippingChanges];
             }
         }
         if ($getFeeChanges) {
-            $feeChanges = $sageService->getTasksSynchronizeOrder_Fee($order);
+            $feeChanges = $sageService->getTasksSynchronizeOrder_Fee($wcOrder);
             $result['syncChanges'] = [...$result['syncChanges'], ...$feeChanges];
         }
         if ($getCouponChanges) {
-            $couponChanges = $sageService->getTasksSynchronizeOrder_Coupon($order);
+            $couponChanges = $sageService->getTasksSynchronizeOrder_Coupon($wcOrder);
             $result['syncChanges'] = [...$result['syncChanges'], ...$couponChanges];
         }
         if ($getTaxesChanges) {
             $taxeCodesProduct = array_values(array_unique([...$taxeCodesProduct, ...$taxeCodesShipping]));
-            $taxesChanges = $sageService->getTasksSynchronizeOrder_Taxes($order, $taxeCodesProduct);
+            $taxesChanges = $sageService->getTasksSynchronizeOrder_Taxes($wcOrder, $taxeCodesProduct);
             $result['syncChanges'] = [...$result['syncChanges'], ...$taxesChanges];
         }
         if ($getUserChanges) {
-            $userChanges = $sageService->getTasksSynchronizeOrder_User($order, $mainFDocentete);
+            $userChanges = $sageService->getTasksSynchronizeOrder_User($wcOrder, $mainFDocentete);
             $result['syncChanges'] = [...$result['syncChanges'], ...$userChanges];
         }
         if ($getPaymentChanges) {
-            $paymentChanges = $sageService->getTasksSynchronizeOrder_Payment($order, $mainFDocentete);
+            $paymentChanges = $sageService->getTasksSynchronizeOrder_Payment($wcOrder, $mainFDocentete);
             $result['syncChanges'] = [...$result['syncChanges'], ...$paymentChanges];
         }
 
@@ -309,7 +309,7 @@ class WoocommerceService
         return $result;
     }
 
-    public function applyTasksSynchronizeOrder(WC_Order $order, array $tasksSynchronizeOrder): array
+    public function applyTasksSynchronizeOrder(WC_Order $wcOrder, array $tasksSynchronizeOrder): array
     {
         $message = '';
         $syncChanges = $tasksSynchronizeOrder["syncChanges"];
@@ -348,56 +348,56 @@ class WoocommerceService
                 // todo use $order->add_order_note ?
                 switch ($change) {
                     case OrderUtils::ADD_PRODUCT_ACTION:
-                        $message .= $this->addProductToOrder($order, $syncChange["new"]->postId, $syncChange["new"]->quantity, $syncChange["new"], $alreadyAddedTaxes);
+                        $message .= $this->addProductToOrder($wcOrder, $syncChange["new"]->postId, $syncChange["new"]->quantity, $syncChange["new"], $alreadyAddedTaxes);
                         break;
                     case OrderUtils::CHANGE_PRICE_PRODUCT_ACTION:
-                        $message .= $this->changePriceProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->linePriceHt);
+                        $message .= $this->changePriceProductOrder($wcOrder, $syncChange["old"]->itemId, $syncChange["new"]->linePriceHt);
                         break;
                     case OrderUtils::CHANGE_TAXES_PRODUCT_ACTION:
-                        $message .= $this->changeTaxesProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->taxes, $alreadyAddedTaxes);
+                        $message .= $this->changeTaxesProductOrder($wcOrder, $syncChange["old"]->itemId, $syncChange["new"]->taxes, $alreadyAddedTaxes);
                         break;
                     case OrderUtils::CHANGE_SERIAL_PRODUCT_OUT_ACTION:
-                        $message .= $this->changeSerialOutProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->fLotseriesOut);
+                        $message .= $this->changeSerialOutProductOrder($wcOrder, $syncChange["old"]->itemId, $syncChange["new"]->fLotseriesOut);
                         break;
                     case OrderUtils::REPLACE_PRODUCT_ACTION:
-                        $message .= $this->replaceProductToOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->postId, $syncChange["new"], $alreadyAddedTaxes);
+                        $message .= $this->replaceProductToOrder($wcOrder, $syncChange["old"]->itemId, $syncChange["new"]->postId, $syncChange["new"], $alreadyAddedTaxes);
                         break;
                     case OrderUtils::ADD_SHIPPING_ACTION:
-                        $message .= $this->addShippingToOrder($order, $syncChange["new"], $alreadyAddedTaxes);
+                        $message .= $this->addShippingToOrder($wcOrder, $syncChange["new"], $alreadyAddedTaxes);
                         break;
                     case OrderUtils::REMOVE_SHIPPING_ACTION:
-                        $message .= $this->removeShippingToOrder($order, $syncChange["old"]->id);
+                        $message .= $this->removeShippingToOrder($wcOrder, $syncChange["old"]->id);
                         break;
                     case OrderUtils::UPDATE_WC_ORDER_ITEM_TAX_ACTION:
-                        $message .= $this->updateWcOrderItemTaxToOrder($order, $syncChange["new"], $alreadyAddedTaxes);
+                        $message .= $this->updateWcOrderItemTaxToOrder($wcOrder, $syncChange["new"], $alreadyAddedTaxes);
                         break;
                     case OrderUtils::REMOVE_PRODUCT_ACTION:
-                        $message .= $this->removeProductOrder($order, $syncChange["old"]->itemId);
+                        $message .= $this->removeProductOrder($wcOrder, $syncChange["old"]->itemId);
                         break;
                     case OrderUtils::CHANGE_QUANTITY_PRODUCT_ACTION:
-                        $message .= $this->changeQuantityProductOrder($order, $syncChange["old"]->itemId, $syncChange["new"]->quantity);
+                        $message .= $this->changeQuantityProductOrder($wcOrder, $syncChange["old"]->itemId, $syncChange["new"]->quantity);
                         break;
                     case OrderUtils::REMOVE_FEE_ACTION:
-                        $message .= $this->removeFeeOrder($order, $syncChange["old"]->id);
+                        $message .= $this->removeFeeOrder($wcOrder, $syncChange["old"]->id);
                         break;
                     case OrderUtils::REMOVE_COUPON_ACTION:
-                        $message .= $this->removeCouponOrder($order, $syncChange["old"]->id);
+                        $message .= $this->removeCouponOrder($wcOrder, $syncChange["old"]->id);
                         break;
                     case OrderUtils::CHANGE_CUSTOMER_ACTION:
-                        $message .= $this->changeCustomerOrder($order, $syncChange["new"]);
+                        $message .= $this->changeCustomerOrder($wcOrder, $syncChange["new"]);
                         break;
                     case OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE:
                     case OrderUtils::CHANGE_USER_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE:
-                        $message .= $this->updateUserMetas($order, $syncChange["new"]);
+                        $message .= $this->updateUserMetas($wcOrder, $syncChange["new"]);
                         break;
                     case OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::BILLING_ADDRESS_TYPE:
-                        $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::BILLING_ADDRESS_TYPE);
+                        $message .= $this->updateOrderMetas($wcOrder, $syncChange["new"], OrderUtils::BILLING_ADDRESS_TYPE);
                         break;
                     case OrderUtils::CHANGE_ORDER_ADDRESS_TYPE_ACTION . '_' . OrderUtils::SHIPPING_ADDRESS_TYPE:
-                        $message .= $this->updateOrderMetas($order, $syncChange["new"], OrderUtils::SHIPPING_ADDRESS_TYPE);
+                        $message .= $this->updateOrderMetas($wcOrder, $syncChange["new"], OrderUtils::SHIPPING_ADDRESS_TYPE);
                         break;
                     case OrderUtils::CHANGE_PAYMENT_ACTION:
-                        [$order, $message2] = $this->changePaymentsOrder($order, $syncChange["new"]);
+                        [$wcOrder, $message2] = $this->changePaymentsOrder($wcOrder, $syncChange["new"]);
                         $message .= $message2;
                         break;
                     default:
@@ -409,15 +409,15 @@ class WoocommerceService
             }
         }
 
-        $message .= $this->removeDuplicateWcOrderItemTaxToOrder($order);
+        $message .= $this->removeDuplicateWcOrderItemTaxToOrder($wcOrder);
 
         // region woocommerce/includes/admin/wc-admin-functions.php:455 function wc_save_order_items
-        $order = new WC_Order($order->get_id()); // to refresh order with data in bdd
-        $order->update_taxes();
-        $order->calculate_totals(false);
+        $wcOrder = new WC_Order($wcOrder->get_id()); // to refresh order with data in bdd
+        $wcOrder->update_taxes();
+        $wcOrder->calculate_totals(false);
         // endregion
 
-        return [null, "", $message, $order];
+        return [null, "", $message, $wcOrder];
     }
 
     public function importFArticleFromSage(
@@ -534,23 +534,23 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return null;
     }
 
-    public function convertSageArticleToWoocommerce(StdClass $fArticle, Resource $resource, ?int $postId): array
+    public function convertSageArticleToWoocommerce(StdClass $stdClass, Resource $resource, ?int $postId): array
     {
         $fCatalogues = $this->createCategories(array_map(
-            fn($i) => $fArticle->{'clNo' . $i . 'Navigation'},
+            fn($i) => $stdClass->{'clNo' . $i . 'Navigation'},
             range(1, 4)
         ));
         // https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
         $result = [
-            'name' => $fArticle->arDesign,
+            'name' => $stdClass->arDesign,
             'categories' => array_map(fn(stdClass $fCatalogue) => $fCatalogue->websiteId, $fCatalogues),
             'meta_data' => [],
         ];
-        foreach ($resource->getMetadata()($fArticle) as $metadata) {
+        foreach ($resource->getMetadata()($stdClass) as $metadata) {
             $value = $metadata->getValue();
             $optionName = '_' . Sage::TOKEN . $metadata->getField();
             if (!is_null($value)) {
-                $v = $value($fArticle);
+                $v = $value($stdClass);
                 if (is_bool($v)) {
                     $v = (int)$v;
                 }
@@ -611,7 +611,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $fCatalogues;
     }
 
-    private function addProductToOrder(WC_Order $order, ?int $productId, int $quantity, stdClass $new, array &$alreadyAddedTaxes): string
+    private function addProductToOrder(WC_Order $wcOrder, ?int $productId, int $quantity, stdClass $new, array &$alreadyAddedTaxes): string
     {
         $message = '';
         if (empty($productId)) {
@@ -627,22 +627,22 @@ WHERE {$wpdb->posts}.post_type = 'product'
         }
 
         $product = wc_get_product($productId);
-        $itemId = $order->add_product($product, $qty);
-        return $message . $this->updateProductOrder($order, $itemId, $new, $alreadyAddedTaxes);
+        $itemId = $wcOrder->add_product($product, $qty);
+        return $message . $this->updateProductOrder($wcOrder, $itemId, $new, $alreadyAddedTaxes);
     }
 
-    private function updateProductOrder(WC_Order $order, int $itemId, stdClass $new, array &$alreadyAddedTaxes): string
+    private function updateProductOrder(WC_Order $wcOrder, int $itemId, stdClass $new, array &$alreadyAddedTaxes): string
     {
-        $message = $this->changeQuantityProductOrder($order, $itemId, $new->quantity, false);
-        $message .= $this->changePriceProductOrder($order, $itemId, $new->linePriceHt, false);
-        $message .= $this->changeTaxesProductOrder($order, $itemId, $new->taxes, $alreadyAddedTaxes);
-        return $message . $this->changeSerialOutProductOrder($order, $itemId, $new->fLotseriesOut);
+        $message = $this->changeQuantityProductOrder($wcOrder, $itemId, $new->quantity, false);
+        $message .= $this->changePriceProductOrder($wcOrder, $itemId, $new->linePriceHt, false);
+        $message .= $this->changeTaxesProductOrder($wcOrder, $itemId, $new->taxes, $alreadyAddedTaxes);
+        return $message . $this->changeSerialOutProductOrder($wcOrder, $itemId, $new->fLotseriesOut);
     }
 
-    private function changeQuantityProductOrder(WC_Order $order, int $itemId, int $quantity, bool $save = true): string
+    private function changeQuantityProductOrder(WC_Order $wcOrder, int $itemId, int $quantity, bool $save = true): string
     {
         $message = '';
-        $lineItems = array_values($order->get_items());
+        $lineItems = array_values($wcOrder->get_items());
 
         foreach ($lineItems as $lineItem) {
             if ($lineItem->get_id() === $itemId) {
@@ -656,9 +656,9 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    private function changePriceProductOrder(WC_Order $order, int $itemId, float $linePriceHt, bool $save = true): string
+    private function changePriceProductOrder(WC_Order $wcOrder, int $itemId, float $linePriceHt, bool $save = true): string
     {
-        $lineItems = array_values($order->get_items());
+        $lineItems = array_values($wcOrder->get_items());
         foreach ($lineItems as $lineItem) {
             if ($lineItem->get_id() === $itemId) {
                 $lineItem->set_props([
@@ -674,17 +674,17 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return '';
     }
 
-    private function changeTaxesProductOrder(WC_Order $order, int $itemId, array $taxes, array &$alreadyAddedTaxes, bool $save = true): string
+    private function changeTaxesProductOrder(WC_Order $wcOrder, int $itemId, array $taxes, array &$alreadyAddedTaxes, bool $save = true): string
     {
         $message = '';
-        $lineItems = array_values($order->get_items());
+        $lineItems = array_values($wcOrder->get_items());
 
         foreach ($lineItems as $lineItem) {
             if ($lineItem->get_id() === $itemId) {
-                foreach ($taxes as $taxe) {
-                    $alreadyAddedTaxes[] = $taxe['code'];
+                foreach ($taxes as $tax) {
+                    $alreadyAddedTaxes[] = $tax['code'];
                 }
-                $lineItem->set_taxes($this->formatTaxes($order, $taxes, $message));
+                $lineItem->set_taxes($this->formatTaxes($wcOrder, $taxes, $message));
                 if ($save) {
                     $lineItem->save();
                 }
@@ -694,28 +694,28 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    private function formatTaxes(WC_Order $order, array $taxes, string &$message, int $errorMissingTax = 0): array
+    private function formatTaxes(WC_Order $wcOrder, array $taxes, string &$message, int $errorMissingTax = 0): array
     {
-        $orderId = $order->get_id();
-        $orderItemTaxes = $order->get_taxes();
-        $orderItemTaxesRateId = array_map(static fn(WC_Order_Item_Tax $orderItemTax) => $orderItemTax->get_rate_id(), $orderItemTaxes);
+        $orderId = $wcOrder->get_id();
+        $orderItemTaxes = $wcOrder->get_taxes();
+        $orderItemTaxesRateId = array_map(static fn(WC_Order_Item_Tax $wcOrderItemTax) => $wcOrderItemTax->get_rate_id(), $orderItemTaxes);
         [$taxe, $rates] = $this->getWordpressTaxes();
         $result = ['total' => [], 'subtotal' => []];
-        foreach ($taxes as $taxe) {
-            $rate = current(array_filter($rates, static fn(stdClass $rate): bool => $rate->tax_rate_name === $taxe['code']));
+        foreach ($taxes as $tax) {
+            $rate = current(array_filter($rates, static fn(stdClass $rate): bool => $rate->tax_rate_name === $tax['code']));
             if ($rate === false) {
                 if ($errorMissingTax === 0) {
                     $errorMissingTax++;
                     $this->updateTaxes();
-                    return $this->formatTaxes($order, $taxes, $message, $errorMissingTax);
+                    return $this->formatTaxes($wcOrder, $taxes, $message, $errorMissingTax);
                 }
                 $message .= "<div class='notice notice-error is-dismissible'>
-                    <p>" . __('Il semblerait que la taxe soit manquante.', 'egas') . "[" . $taxe['code'] . "]</p>
+                    <p>" . __('Il semblerait que la taxe soit manquante.', 'egas') . "[" . $tax['code'] . "]</p>
                     </div>";
                 continue;
             }
-            $result['total'][$rate->tax_rate_id] = (string)$taxe['amount'];
-            $result['subtotal'][$rate->tax_rate_id] = (string)$taxe['amount'];
+            $result['total'][$rate->tax_rate_id] = (string)$tax['amount'];
+            $result['subtotal'][$rate->tax_rate_id] = (string)$tax['amount'];
 
             if (!in_array((int)$rate->tax_rate_id, $orderItemTaxesRateId, true)) {
                 // woocommerce/includes/class-wc-ajax.php public static function add_order_tax
@@ -813,17 +813,17 @@ WHERE {$wpdb->posts}.post_type = 'product'
         }
     }
 
-    private function changeSerialOutProductOrder(WC_Order $order, int $itemId, array|null $fLotseriesOut): string
+    private function changeSerialOutProductOrder(WC_Order $wcOrder, int $itemId, array|null $fLotseriesOut): string
     {
-        $lineItems = array_values($order->get_items());
+        $lineItems = array_values($wcOrder->get_items());
         $key = '_' . Sage::TOKEN . '_fLotseriesOut';
         foreach ($lineItems as $lineItem) {
             if ($lineItem->get_id() === $itemId) {
                 /** @var WC_Meta_Data[] $wcMetaDatas */
                 $wcMetaDatas = $lineItem->get_meta_data();
                 $found = false;
-                foreach ($wcMetaDatas as $wcMetaData) {
-                    $value = $wcMetaData->get_data();
+                foreach ($wcMetaDatas as $wcMetumData) {
+                    $value = $wcMetumData->get_data();
                     if ($value['key'] === $key) {
                         $found = true;
                         $value["value"] = json_encode($fLotseriesOut, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
@@ -841,17 +841,17 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return '';
     }
 
-    private function replaceProductToOrder(WC_Order $order, int $itemId, int $productId, stdClass $new, array &$alreadyAddedTaxes): string
+    private function replaceProductToOrder(WC_Order $wcOrder, int $itemId, int $productId, stdClass $new, array &$alreadyAddedTaxes): string
     {
         $message = '';
-        $lineItems = array_values($order->get_items());
+        $lineItems = array_values($wcOrder->get_items());
         foreach ($lineItems as $lineItem) {
             if ($lineItem->get_id() === $itemId) {
                 foreach ($new->taxes as $taxe) {
                     $alreadyAddedTaxes[] = $taxe['code'];
                 }
                 $lineItem->set_product(new WC_Product($productId));
-                $message .= $this->updateProductOrder($order, $itemId, $new, $alreadyAddedTaxes);
+                $message .= $this->updateProductOrder($wcOrder, $itemId, $new, $alreadyAddedTaxes);
                 break;
             }
         }
@@ -859,38 +859,38 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    private function addShippingToOrder(WC_Order $order, stdClass $new, array &$alreadyAddedTaxes): string
+    private function addShippingToOrder(WC_Order $wcOrder, stdClass $new, array &$alreadyAddedTaxes): string
     {
         $message = '';
         foreach ($new->taxes as $taxe) {
             $alreadyAddedTaxes[] = $taxe['code'];
         }
-        $item = new WC_Order_Item_Shipping();
-        $item->set_props(['method_title' => $new->name, 'method_id' => $new->method_id, 'total' => wc_format_decimal($new->priceHt), 'taxes' => $this->formatTaxes($order, $new->taxes, $message)]);
-        $order->add_item($item);
-        $order->save();
+        $wcOrderItemShipping = new WC_Order_Item_Shipping();
+        $wcOrderItemShipping->set_props(['method_title' => $new->name, 'method_id' => $new->method_id, 'total' => wc_format_decimal($new->priceHt), 'taxes' => $this->formatTaxes($wcOrder, $new->taxes, $message)]);
+        $wcOrder->add_item($wcOrderItemShipping);
+        $wcOrder->save();
         return $message;
     }
 
-    private function removeShippingToOrder(WC_Order $order, int $id): string
+    private function removeShippingToOrder(WC_Order $wcOrder, int $id): string
     {
         $message = '';
-        $lineItemsShipping = array_values($order->get_items('shipping'));
+        $lineItemsShipping = array_values($wcOrder->get_items('shipping'));
         foreach ($lineItemsShipping as $lineItemShipping) {
             if ($lineItemShipping->get_id() === $id) {
-                $order->remove_item($id);
-                $order->save();
+                $wcOrder->remove_item($id);
+                $wcOrder->save();
                 break;
             }
         }
         return $message;
     }
 
-    private function updateWcOrderItemTaxToOrder(WC_Order $order, array $new, array $alreadyAddedTaxes): string
+    private function updateWcOrderItemTaxToOrder(WC_Order $wcOrder, array $new, array $alreadyAddedTaxes): string
     {
         $message = '';
-        $orderId = $order->get_id();
-        [$toRemove, $toAdd] = $this->getToRemoveToAddTaxes($order, $new);
+        $orderId = $wcOrder->get_id();
+        [$toRemove, $toAdd] = $this->getToRemoveToAddTaxes($wcOrder, $new);
         $toAdd = array_diff($toAdd, $alreadyAddedTaxes);
         [$taxe, $rates] = $this->getWordpressTaxes();
         foreach ($toAdd as $codeToAdd) {
@@ -901,8 +901,8 @@ WHERE {$wpdb->posts}.post_type = 'product'
             $orderItemTax->save();
         }
         if (!empty($toRemove)) {
-            $wcOrderItemTaxs = $order->get_taxes();
-            $wcShippingItemTaxs = $order->get_shipping_methods();
+            $wcOrderItemTaxs = $wcOrder->get_taxes();
+            $wcShippingItemTaxs = $wcOrder->get_shipping_methods();
             foreach ($toRemove as $codeRemove) {
                 foreach ($wcOrderItemTaxs as $wcOrderItemTax) {
                     if ($wcOrderItemTax->get_label() === $codeRemove) {
@@ -928,34 +928,34 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    public function getToRemoveToAddTaxes(WC_Order $order, array $new): array
+    public function getToRemoveToAddTaxes(WC_Order $wcOrder, array $new): array
     {
-        $current = array_values(array_map(static fn(WC_Order_Item_Tax $wcOrderItemTax) => $wcOrderItemTax->get_label(), $order->get_taxes()));
+        $current = array_values(array_map(static fn(WC_Order_Item_Tax $wcOrderItemTax) => $wcOrderItemTax->get_label(), $wcOrder->get_taxes()));
         $toRemove = array_diff($current, $new);
         $toAdd = array_diff($new, $current);
         return [$toRemove, $toAdd];
     }
 
-    private function removeProductOrder(WC_Order $order, int $itemId): string
+    private function removeProductOrder(WC_Order $wcOrder, int $itemId): string
     {
         $message = '';
-        $lineItems = $order->get_items();
+        $lineItems = $wcOrder->get_items();
 
-        $order->remove_item($itemId);
+        $wcOrder->remove_item($itemId);
         foreach ($lineItems as $lineItem) {
             if ($lineItem->get_id() === $itemId) {
                 $lineItem->delete();
                 break;
             }
         }
-        $order->save();
+        $wcOrder->save();
         return $message;
     }
 
-    private function removeFeeOrder(WC_Order $order, int $id): string
+    private function removeFeeOrder(WC_Order $wcOrder, int $id): string
     {
         $message = '';
-        $lineItemsFee = array_values($order->get_items('fee'));
+        $lineItemsFee = array_values($wcOrder->get_items('fee'));
         foreach ($lineItemsFee as $lineItemFee) {
             if ($lineItemFee->get_id() === $id) {
                 $lineItemFee->delete();
@@ -964,10 +964,10 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    private function removeCouponOrder(WC_Order $order, int $id): string
+    private function removeCouponOrder(WC_Order $wcOrder, int $id): string
     {
         $message = '';
-        $coupons = $order->get_coupons();
+        $coupons = $wcOrder->get_coupons();
         foreach ($coupons as $coupon) {
             if ($coupon->get_id() === $id) {
                 $coupon->delete();
@@ -976,7 +976,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    private function changeCustomerOrder(WC_Order $order, stdClass $new): string
+    private function changeCustomerOrder(WC_Order $wcOrder, stdClass $new): string
     {
         $message = '';
         $userId = $new->userId;
@@ -986,10 +986,10 @@ WHERE {$wpdb->posts}.post_type = 'product'
                 return $message;
             }
         }
-        $order->set_customer_id($userId);
-        $order->save();
+        $wcOrder->set_customer_id($userId);
+        $wcOrder->save();
 
-        $fDocenteteIdentifier = $this->getFDocenteteIdentifierFromOrder($order);
+        $fDocenteteIdentifier = $this->getFDocenteteIdentifierFromOrder($wcOrder);
         $extendedFDocentetes = GraphqlService::getInstance()->getFDocentetes(
             $fDocenteteIdentifier["doPiece"],
             [$fDocenteteIdentifier["doType"]],
@@ -1006,8 +1006,8 @@ WHERE {$wpdb->posts}.post_type = 'product'
         );
 
         if (!is_string($extendedFDocentetes)) {
-            $this->applyTasksSynchronizeOrder($order, $this->getTasksSynchronizeOrder(
-                $order,
+            $this->applyTasksSynchronizeOrder($wcOrder, $this->getTasksSynchronizeOrder(
+                $wcOrder,
                 $extendedFDocentetes,
                 allChanges: false,
                 getUserChanges: true,
@@ -1019,46 +1019,46 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $message;
     }
 
-    public function getFDocenteteIdentifierFromOrder(WC_Order $order): array|null
+    public function getFDocenteteIdentifierFromOrder(WC_Order $wcOrder): array|null
     {
-        $result = $order->get_meta(FDocenteteResource::META_KEY);
+        $result = $wcOrder->get_meta(FDocenteteResource::META_KEY);
         if (!empty($result)) {
             return json_decode($result, true, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
         }
         return null;
     }
 
-    private function updateUserMetas(WC_Order $order, stdClass $new): string
+    private function updateUserMetas(WC_Order $wcOrder, stdClass $new): string
     {
         $message = '';
-        $userId = $order->get_user_id();
+        $userId = $wcOrder->get_user_id();
         foreach ((array)$new as $key => $value) {
             update_user_meta($userId, $key, $value);
         }
         return $message;
     }
 
-    private function updateOrderMetas(WC_Order $order, stdClass $new, string $addressType): string
+    private function updateOrderMetas(WC_Order $wcOrder, stdClass $new, string $addressType): string
     {
         $message = '';
         foreach ((array)$new as $key => $value) {
             if ($key === 'email') {
                 $value = WordpressService::getInstance()->getValidWordpressMail($value);
             }
-            $order->{'set_' . $addressType . '_' . $key}($value ?? ''); // doesn't accept null value
+            $wcOrder->{'set_' . $addressType . '_' . $key}($value ?? ''); // doesn't accept null value
         }
-        $order->save();
+        $wcOrder->save();
         return $message;
     }
 
-    private function changePaymentsOrder(WC_Order $order, array $new): array
+    private function changePaymentsOrder(WC_Order $wcOrder, array $new): array
     {
         $message = "";
-        $isPaid = !is_null($order->get_date_paid());
-        $refunds = $order->get_refunds();
-        $currentRefunds = array_map(fn(OrderRefund $refund): array => [
-            'id' => $refund->get_id(),
-            'amount' => round((float)$refund->get_total(), 2),
+        $isPaid = !is_null($wcOrder->get_date_paid());
+        $refunds = $wcOrder->get_refunds();
+        $currentRefunds = array_map(fn(OrderRefund $orderRefund): array => [
+            'id' => $orderRefund->get_id(),
+            'amount' => round((float)$orderRefund->get_total(), 2),
         ], $refunds);
         $currentRefundIds = array_map(static fn(array $refund): int => $refund['id'], $currentRefunds);
         $newRefundIds = array_values(array_filter(array_map(static fn(array $refund): ?int => $refund['id'], $new["refunds"])));
@@ -1067,7 +1067,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
         foreach ($currentRefunds as $refundArray) {
             if (in_array($refundArray["id"], $refundToRemove)) {
                 /** @var OrderRefund $refund */
-                $refund = current(array_filter($refunds, fn(OrderRefund $refund): bool => $refund->get_id() === $refundArray["id"]));
+                $refund = current(array_filter($refunds, fn(OrderRefund $orderRefund): bool => $orderRefund->get_id() === $refundArray["id"]));
                 $refund->delete();
             }
         }
@@ -1078,7 +1078,7 @@ WHERE {$wpdb->posts}.post_type = 'product'
             $refund = wc_create_refund([
                 'amount' => (string)abs($refundArray['amount']),
                 'reason' => '',
-                'order_id' => $order->get_id(),
+                'order_id' => $wcOrder->get_id(),
                 'line_items' => [],
                 'refund_payment' => false,
                 'restock_items' => false,
@@ -1090,15 +1090,15 @@ WHERE {$wpdb->posts}.post_type = 'product'
             }
         }
         if ($new["isPaid"] && $new["isPaid"] !== $isPaid) {
-            $order->payment_complete();
+            $wcOrder->payment_complete();
         }
-        return [wc_get_order($order->get_id()), $message];
+        return [wc_get_order($wcOrder->get_id()), $message];
     }
 
-    private function removeDuplicateWcOrderItemTaxToOrder(WC_Order $order): string
+    private function removeDuplicateWcOrderItemTaxToOrder(WC_Order $wcOrder): string
     {
         $message = '';
-        $wcOrderItemTaxs = array_values($order->get_taxes());
+        $wcOrderItemTaxs = array_values($wcOrder->get_taxes());
         foreach ($wcOrderItemTaxs as $i => $wcOrderItemTax) {
             $hasDuplicate = false;
             for ($y = $i + 1, $yMax = count($wcOrderItemTaxs); $y < $yMax; $y++) {
@@ -1217,20 +1217,20 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $value;
     }
 
-    public function desynchronizeOrder(WC_Order $order): WC_Order
+    public function desynchronizeOrder(WC_Order $wcOrder): WC_Order
     {
-        $fDocenteteIdentifier = $this->getFDocenteteIdentifierFromOrder($order);
+        $fDocenteteIdentifier = $this->getFDocenteteIdentifierFromOrder($wcOrder);
         if (!empty($fDocenteteIdentifier)) {
-            $order->add_order_note(__('Le document de vente Sage a été désynchronisé de la commande.', 'egas') . ' [' . $fDocenteteIdentifier["doPiece"] . ']');
-            $order->delete_meta_data(FDocenteteResource::META_KEY);
-            $order->delete_meta_data('_' . Sage::TOKEN . '_doPiece');
-            $order->delete_meta_data('_' . Sage::TOKEN . '_doType');
-            $order->save();
+            $wcOrder->add_order_note(__('Le document de vente Sage a été désynchronisé de la commande.', 'egas') . ' [' . $fDocenteteIdentifier["doPiece"] . ']');
+            $wcOrder->delete_meta_data(FDocenteteResource::META_KEY);
+            $wcOrder->delete_meta_data('_' . Sage::TOKEN . '_doPiece');
+            $wcOrder->delete_meta_data('_' . Sage::TOKEN . '_doType');
+            $wcOrder->save();
         }
-        return $order;
+        return $wcOrder;
     }
 
-    public function custom_price(string $price, WC_Product $product, int $userId = 0, ?bool $withTaxes = null): float|string
+    public function custom_price(string $price, WC_Product $wcProduct, int $userId = 0, ?bool $withTaxes = null): float|string
     {
         $field = 'priceHt';
         if (
@@ -1239,22 +1239,22 @@ WHERE {$wpdb->posts}.post_type = 'product'
         ) {
             $field = 'priceTtc';
         }
-        $identifier = $product->get_id() . '_' . $userId . '_' . $field;
+        $identifier = $wcProduct->get_id() . '_' . $userId . '_' . $field;
         if (array_key_exists($identifier, $this->prices)) { // performance
             return $this->prices[$identifier];
         }
-        $arRef = $product->get_meta(FArticleResource::META_KEY);
+        $arRef = $wcProduct->get_meta(FArticleResource::META_KEY);
         if (empty($arRef)) {
             $this->prices[$identifier] = $price;
             return $this->prices[$identifier];
         }
-        $prices = $this->getPricesProduct($product);
+        $prices = $this->getPricesProduct($wcProduct);
         if (empty($prices)) {
             return $price;
         }
         $flattenPrices = [];
-        foreach ($prices as $price1) {
-            foreach ($price1 as $price2) {
+        foreach ($prices as $price) {
+            foreach ($price as $price2) {
                 $flattenPrices[] = $price2;
             }
         }
@@ -1277,10 +1277,10 @@ WHERE {$wpdb->posts}.post_type = 'product'
         return $this->prices[$identifier];
     }
 
-    public function getPricesProduct(WC_Product $product, bool $flat = false): array
+    public function getPricesProduct(WC_Product $wcProduct, bool $flat = false): array
     {
         $r = [];
-        $prices = SageService::getInstance()->get_post_meta_single($product->get_id(), '_' . Sage::TOKEN . '_prices', true);
+        $prices = SageService::getInstance()->get_post_meta_single($wcProduct->get_id(), '_' . Sage::TOKEN . '_prices', true);
         if (empty($prices)) {
             return $r;
         }

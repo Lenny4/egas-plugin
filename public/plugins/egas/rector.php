@@ -21,9 +21,11 @@ return RectorConfig::configure()
         codingStyle: true,
         typeDeclarations: true,
         privatization: true,
+        naming: true,
         instanceOf: true,
         earlyReturn: true,
-//        strictBooleans: true,
+        strictBooleans: false,
+
 //        carbon: true,
 //        rectorPreset: true,
     )

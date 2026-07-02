@@ -15,7 +15,7 @@ class Sage
     public final const TARGET_PANEL = Sage::TOKEN . '_product_data';
     public static array $paginationRange = [20, 50, 100];
     public static int $defaultPagination = 20;
-    private static ?Sage $instance = null;
+    private static ?Sage $sage = null;
 
     private function __construct(public ?string $file = '')
     {
@@ -23,10 +23,10 @@ class Sage
 
     public static function getInstance(string $file = ''): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self($file);
+        if (self::$sage === null) {
+            self::$sage = new self($file);
         }
-        return self::$instance;
+        return self::$sage;
     }
 
     public function isWooCommerceActive(): bool

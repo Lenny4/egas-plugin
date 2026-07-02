@@ -23,7 +23,7 @@ class FDocenteteResource extends Resource
     public const FILTER_TYPE = 'FDocenteteFilterInput';
     public final const META_KEY = '_' . Sage::TOKEN . '_identifier';
 
-    private static ?FDocenteteResource $instance = null;
+    private static ?FDocenteteResource $fDocenteteResource = null;
 
     private function __construct()
     {
@@ -158,13 +158,13 @@ class FDocenteteResource extends Resource
             if (empty($orderId)) {
                 return [];
             }
-            $order = new WC_Order($orderId);
+            $wcOrder = new WC_Order($orderId);
             if ($clearCache) {
-                $order->init_meta_data();
+                $wcOrder->init_meta_data();
             }
             $result = [];
             /** @var WC_Meta_Data $item */
-            foreach ($order->get_meta_data() as $item) {
+            foreach ($wcOrder->get_meta_data() as $item) {
                 $data = $item->get_data();
                 $result[$data["key"]] = $data["value"];
             }
@@ -201,8 +201,8 @@ class FDocenteteResource extends Resource
         ];
         $this->import = static function (string $identifier) {
             $data = json_decode(stripslashes($identifier), false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-            [$result, $errorMessage, $message, $order] = WoocommerceService::getInstance()->importFDocenteteFromSage($data->doPiece, $data->doType);
-            return $order->get_id();
+            [$result, $errorMessage, $message, $wcOrder] = WoocommerceService::getInstance()->importFDocenteteFromSage($data->doPiece, $data->doType);
+            return $wcOrder->get_id();
         };
         $this->selectionSet = fn(): array => GraphqlService::getInstance()->_getFDocenteteSelectionSet();
         $this->getIdentifier = static fn(array $fDocentete) => json_encode(['doPiece' => $fDocentete["doPiece"], 'doType' => $fDocentete["doType"]], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
@@ -210,10 +210,10 @@ class FDocenteteResource extends Resource
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$fDocenteteResource === null) {
+            self::$fDocenteteResource = new self();
         }
-        return self::$instance;
+        return self::$fDocenteteResource;
     }
 
     public static function supports(): bool

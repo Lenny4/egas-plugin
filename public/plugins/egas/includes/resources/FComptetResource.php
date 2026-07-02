@@ -18,7 +18,7 @@ class FComptetResource extends Resource
     public const DEFAULT_SORT = 'ctNum';
     public const FILTER_TYPE = 'FComptetFilterInput';
     public final const META_KEY = '_' . Sage::TOKEN . '_ctNum';
-    private static ?FComptetResource $instance = null;
+    private static ?FComptetResource $fComptetResource = null;
 
     private function __construct()
     {
@@ -131,10 +131,10 @@ class FComptetResource extends Resource
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if (self::$fComptetResource === null) {
+            self::$fComptetResource = new self();
         }
-        return self::$instance;
+        return self::$fComptetResource;
     }
 
     public static function supports(): bool
