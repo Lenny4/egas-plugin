@@ -24,6 +24,8 @@ services:
       - 5001:5001 # sage api nove (C# server)
       - 8007:80
       - 4433:443
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - /home/alexandre/windows:/storage
       - /home/alexandre/windows_share:/data # Open 'File Explorer' and click on the 'Network' section, you will see a computer called host.lan. Double-click it and it will show a folder called Data, which can be bound to any folder on your host via the compose file:

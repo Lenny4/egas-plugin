@@ -921,38 +921,6 @@ ORDER BY {$metaTable2}.meta_key = %s DESC
         return $data;
     }
 
-    public function getWebsiteOption(): stdClass|null
-    {
-        if (is_null($this->websiteApiOption)) {
-            $this->websiteApiOption = $this->updateWebsiteOptionData();
-        }
-        if (is_null($this->websiteApiOption)) {
-            $this->websiteApiOption = get_option(Sage::TOKEN . '_website_api', null);
-            if (!empty($this->websiteApiOption)) {
-                try {
-                    $this->websiteApiOption = json_decode($this->websiteApiOption, false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-                } catch (Exception) {
-                    // nothing
-                }
-            }
-        }
-        return $this->websiteApiOption;
-    }
-
-    /**
-     * @deprecated
-     */
-    private function updateWebsiteOptionData(): stdClass|null
-    {
-        $id = get_option(Sage::TOKEN . '_website_id', null);
-        if (empty($id)) {
-            return null;
-        }
-        $website = GraphqlService::getInstance()->getWebsite($id);
-        update_option(Sage::TOKEN . '_website_api', json_encode($website, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE));
-        return $website;
-    }
-
     public function get_post_meta_single(int $post_id, string $key = '', bool $single = false): array|string
     {
         $data = get_post_meta($post_id, $key, $single);

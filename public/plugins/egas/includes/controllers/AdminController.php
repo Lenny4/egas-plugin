@@ -93,6 +93,7 @@ class AdminController
                         'type' => 'text',
                         'default' => $wpdb->dbhost,
                         'placeholder' => $wpdb->dbhost
+                        // host.docker.internal
                     ],
                     [
                         'id' => 'wordpress_db_name',
@@ -475,162 +476,159 @@ class AdminController
     public static function registerMenu(): void
     {
         $resources = SageService::getInstance()->getResources();
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $get = $_GET;
-        $args = apply_filters(
-            'egas_menu_settings',
+        $args = apply_filters('egas_menu_settings', [
             [
-                [
-                    'location' => 'menu',
-                    // Possible settings: options, menu, submenu.
-                    'page_title' => __('Egas', 'egas'),
-                    'menu_title' => __('Egas', 'egas'),
-                    'capability' => 'manage_options',
-                    'menu_slug' => Sage::TOKEN . '_settings',
-                    'function' => null,
-                    'icon_url' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents(__DIR__ . '/../../dist/images/icon.svg')),
-                    'position' => 55.5,
-                ],
-                [
-                    'location' => 'submenu',
-                    // Possible settings: options, menu, submenu.
-                    'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __('Settings', 'egas'),
-                    'menu_title' => __('Settings', 'egas'),
-                    'capability' => 'manage_options',
-                    'menu_slug' => Sage::TOKEN . '_settings',
-                    'function' => function (): void {
-                        // Build page HTML.
-                        $html = TwigService::getInstance()->render('base.html.twig');
-                        $html .= '<div class="wrap" id="' . Sage::TOKEN . '_settings">' . "\n";
-                        $html .= '<h2>' . __('Egas', 'egas') . '</h2>' . "\n";
+                'location' => 'menu',
+                // Possible settings: options, menu, submenu.
+                'page_title' => __('Egas', 'egas'),
+                'menu_title' => __('Egas', 'egas'),
+                'capability' => 'manage_options',
+                'menu_slug' => Sage::TOKEN . '_settings',
+                'function' => null,
+                'icon_url' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents(__DIR__ . '/../../dist/images/icon.svg')),
+                'position' => 55.5,
+            ],
+            [
+                'location' => 'submenu',
+                // Possible settings: options, menu, submenu.
+                'parent_slug' => Sage::TOKEN . '_settings',
+                'page_title' => __('Settings', 'egas'),
+                'menu_title' => __('Settings', 'egas'),
+                'capability' => 'manage_options',
+                'menu_slug' => Sage::TOKEN . '_settings',
+                'function' => function (): void {
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                    $get = $_GET;
+                    // Build page HTML.
+                    $html = TwigService::getInstance()->render('base.html.twig');
+                    $html .= '<div class="wrap" id="' . Sage::TOKEN . '_settings">' . "\n";
+                    $html .= '<h2>' . __('Egas', 'egas') . '</h2>' . "\n";
 
-                        $tab = '';
-                        if (isset($get['tab']) && $get['tab']) {
-                            $tab .= $get['tab'];
-                        }
+                    $tab = '';
+                    if (isset($get['tab']) && $get['tab']) {
+                        $tab .= $get['tab'];
+                    }
 
-                        $settings = self::getSettings();
-                        // Show page tabs.
-                        if (1 < count($settings)) {
+                    $settings = self::getSettings();
+                    // Show page tabs.
+                    if (1 < count($settings)) {
 
-                            $html .= '<h2 class="nav-tab-wrapper">' . "\n";
+                        $html .= '<h2 class="nav-tab-wrapper">' . "\n";
 
-                            $c = 0;
-                            foreach ($settings as $section => $data) {
+                        $c = 0;
+                        foreach ($settings as $section => $data) {
 
-                                // Set tab class.
-                                $class = 'nav-tab';
-                                if (!isset($get['tab'])) {
-                                    if (0 === $c) {
-                                        $class .= ' nav-tab-active';
-                                    }
-                                } elseif ($section == $get['tab']) {
+                            // Set tab class.
+                            $class = 'nav-tab';
+                            if (!isset($get['tab'])) {
+                                if (0 === $c) {
                                     $class .= ' nav-tab-active';
                                 }
-
-                                // Set tab link.
-                                $tab_link = add_query_arg(['tab' => $section]);
-                                if (isset($get['settings-updated'])) {
-                                    $tab_link = remove_query_arg('settings-updated', $tab_link);
-                                }
-
-                                // Output tab.
-                                $html .= '<a href="' . $tab_link . '" class="' . esc_attr($class) . '">' . esc_html($data['title']) . '</a>' . "\n";
-
-                                ++$c;
+                            } elseif ($section == $get['tab']) {
+                                $class .= ' nav-tab-active';
                             }
 
-                            $html .= '</h2>' . "\n";
+                            // Set tab link.
+                            $tab_link = add_query_arg(['tab' => $section]);
+                            if (isset($get['settings-updated'])) {
+                                $tab_link = remove_query_arg('settings-updated', $tab_link);
+                            }
+
+                            // Output tab.
+                            $html .= '<a href="' . $tab_link . '" class="' . esc_attr($class) . '">' . esc_html($data['title']) . '</a>' . "\n";
+
+                            ++$c;
                         }
 
-                        $html .= '<form method="post" id="form_settings_' . Sage::TOKEN . '" action="options.php" enctype="multipart/form-data">';
+                        $html .= '</h2>' . "\n";
+                    }
 
-                        // Get settings fields.
-                        ob_start();
-                        settings_fields(Sage::TOKEN . '_settings');
-                        do_settings_sections(Sage::TOKEN . '_settings');
-                        $html .= ob_get_clean();
+                    $html .= '<form method="post" id="form_settings_' . Sage::TOKEN . '" action="options.php" enctype="multipart/form-data">';
 
-                        $html .= '<p class="submit">' . "\n";
-                        $html .= '<input type="hidden" name="tab" value="' . esc_attr($tab) . '" />' . "\n";
-                        $html .= '<input name="Submit" type="submit" class="button-primary" value="' . esc_attr(__('Sauvegarder', 'egas')) . '" />' . "\n";
-                        $html .= '</p>' . "\n";
-                        $html .= '</form>' . "\n";
-                        $html .= '</div>' . "\n";
+                    // Get settings fields.
+                    ob_start();
+                    settings_fields(Sage::TOKEN . '_settings');
+                    do_settings_sections(Sage::TOKEN . '_settings');
+                    $html .= ob_get_clean();
 
+                    $html .= '<p class="submit">' . "\n";
+                    $html .= '<input type="hidden" name="tab" value="' . esc_attr($tab) . '" />' . "\n";
+                    $html .= '<input name="Submit" type="submit" class="button-primary" value="' . esc_attr(__('Sauvegarder', 'egas')) . '" />' . "\n";
+                    $html .= '</p>' . "\n";
+                    $html .= '</form>' . "\n";
+                    $html .= '</div>' . "\n";
+
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo $html;
+                },
+                'position' => null,
+            ],
+            ...array_map(static fn(Resource $resource): array => [
+                'location' => 'submenu',
+                // Possible settings: options, menu, submenu.
+                'parent_slug' => Sage::TOKEN . '_settings',
+                'page_title' => $resource->getTitle(),
+                'menu_title' => $resource->getTitle(),
+                'capability' => 'manage_options',
+                'menu_slug' => Sage::TOKEN . '_' . $resource->getEntityName(),
+                'function' => static function () use ($resource): void {
+                    [
+                        $data,
+                        $showFields,
+                        $filterFields,
+                        $hideFields,
+                        $perPage,
+                        $queryParams,
+                    ] = GraphqlService::getInstance()->getResourceWithQuery($resource, getData: false);
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo TwigService::getInstance()->render('sage/list.html.twig', [
                         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                        echo $html;
-                    },
-                    'position' => null,
-                ],
-                ...array_map(static fn(Resource $resource): array => [
-                    'location' => 'submenu',
-                    // Possible settings: options, menu, submenu.
-                    'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => $resource->getTitle(),
-                    'menu_title' => $resource->getTitle(),
-                    'capability' => 'manage_options',
-                    'menu_slug' => Sage::TOKEN . '_' . $resource->getEntityName(),
-                    'function' => static function () use ($resource): void {
-                        [
-                            $data,
-                            $showFields,
-                            $filterFields,
-                            $hideFields,
-                            $perPage,
-                            $queryParams,
-                        ] = GraphqlService::getInstance()->getResourceWithQuery($resource, getData: false);
+                        'showFields' => $showFields,
+                        'resourceFilter' => [
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                            ...self::getResourceFilter($resource, $filterFields),
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                            'initFilter' => $resource::getDefaultResourceFilter(),
+                        ],
                         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                        echo TwigService::getInstance()->render('sage/list.html.twig', [
-                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                            'showFields' => $showFields,
-                            'resourceFilter' => [
-                                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                                ...self::getResourceFilter($resource, $filterFields),
-                                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                                'initFilter' => $resource::getDefaultResourceFilter(),
-                            ],
-                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                            'perPage' => $perPage,
-                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                            'hideFields' => $hideFields,
-                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                            'mandatoryFields' => $resource->getMandatoryFields(),
-                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                            'sageEntityName' => $resource->getEntityName(),
-                        ]);
-                    },
-                    'position' => null,
-                ], $resources),
-                [
-                    'location' => 'submenu',
-                    // Possible settings: options, menu, submenu.
-                    'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __('À propos', 'egas'),
-                    'menu_title' => __('À propos', 'egas'),
-                    'capability' => 'manage_options',
-                    'menu_slug' => Sage::TOKEN . '_about',
-                    'function' => static function (): void {
-                        echo 'about page';
-                    },
-                    'position' => null,
-                ],
-                [
-                    'location' => 'submenu',
-                    // Possible settings: options, menu, submenu.
-                    'parent_slug' => Sage::TOKEN . '_settings',
-                    'page_title' => __('Logs', 'egas'),
-                    'menu_title' => __('Logs', 'egas'),
-                    'capability' => 'manage_options',
-                    'menu_slug' => Sage::TOKEN . '_log',
-                    'function' => static function (): void {
-                        echo 'logs page';
-                    },
-                    'position' => null,
-                ],
-            ]
-        );
+                        'perPage' => $perPage,
+                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        'hideFields' => $hideFields,
+                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        'mandatoryFields' => $resource->getMandatoryFields(),
+                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        'sageEntityName' => $resource->getEntityName(),
+                    ]);
+                },
+                'position' => null,
+            ], $resources),
+            [
+                'location' => 'submenu',
+                // Possible settings: options, menu, submenu.
+                'parent_slug' => Sage::TOKEN . '_settings',
+                'page_title' => __('À propos', 'egas'),
+                'menu_title' => __('À propos', 'egas'),
+                'capability' => 'manage_options',
+                'menu_slug' => Sage::TOKEN . '_about',
+                'function' => static function (): void {
+                    echo 'about page';
+                },
+                'position' => null,
+            ],
+            [
+                'location' => 'submenu',
+                // Possible settings: options, menu, submenu.
+                'parent_slug' => Sage::TOKEN . '_settings',
+                'page_title' => __('Logs', 'egas'),
+                'menu_title' => __('Logs', 'egas'),
+                'capability' => 'manage_options',
+                'menu_slug' => Sage::TOKEN . '_log',
+                'function' => static function (): void {
+                    echo 'logs page';
+                },
+                'position' => null,
+            ],
+        ]);
         foreach ($args as $arg) {
             // Do nothing if wrong location key is set.
             if (is_array($arg) && isset($arg['location']) && function_exists('add_' . $arg['location'] . '_page')) {

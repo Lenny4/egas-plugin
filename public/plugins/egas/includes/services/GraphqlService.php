@@ -95,7 +95,7 @@ class GraphqlService
         if (!is_null($message)) {
             AdminController::adminNotices("
             <div class='notice notice-info'>
-                <p>" . esc_html($message) . "</p>
+                <p>" . $message . "</p>
             </div>
         ");
             return;
@@ -202,6 +202,7 @@ class GraphqlService
                     'authorization',
                 ]
             );
+        global $wpdb;
         $variables = [
             'websiteDto' => [
                 'name' => get_bloginfo(),
@@ -211,11 +212,11 @@ class GraphqlService
                 'host' => $wordpressHostUrl["host"],
                 'protocol' => $wordpressHostUrl["scheme"],
                 'forceSsl' => filter_var(get_option(Sage::TOKEN . '_activate_https_verification_wordpress', false), FILTER_VALIDATE_BOOLEAN),
-                'dbHost' => get_option(Sage::TOKEN . '_wordpress_db_host'),
-                'dbUsername' => get_option(Sage::TOKEN . '_wordpress_db_username'),
-                'dbPassword' => get_option(Sage::TOKEN . '_wordpress_db_password'),
+                'dbHost' => WP_DEBUG ? get_option(Sage::TOKEN . '_wordpress_db_host') : $wpdb->dbhost,
+                'dbUsername' => WP_DEBUG ? get_option(Sage::TOKEN . '_wordpress_db_username') : $wpdb->dbuser,
+                'dbPassword' => WP_DEBUG ? get_option(Sage::TOKEN . '_wordpress_db_password') : $wpdb->dbpassword,
                 'tablePrefix' => $wpdb->prefix,
-                'dbName' => get_option(Sage::TOKEN . '_wordpress_db_name'),
+                'dbName' => WP_DEBUG ? get_option(Sage::TOKEN . '_wordpress_db_name') : $wpdb->dbname,
                 'pluginVersion' => get_plugin_data(Sage::getInstance()->file)['Version'],
                 'paymentJoNum' => get_option(Sage::TOKEN . '_journal_payment_' . FDocenteteResource::ENTITY_NAME) ?: null,
                 'paymentPReglementCbIndice' => (int)get_option(Sage::TOKEN . '_reglement_payment_' . FDocenteteResource::ENTITY_NAME) ?: null,
@@ -1656,8 +1657,11 @@ class GraphqlService
         return $fDoclignes;
     }
 
-    public function getFComptet(string $ctNum): StdClass|null
+    public function getFComptet(?string $ctNum): StdClass|null
     {
+        if(is_null($ctNum)) {
+            return null;
+        }
         $fComptet = $this->searchEntities(
             FComptetResource::ENTITY_NAME,
             [

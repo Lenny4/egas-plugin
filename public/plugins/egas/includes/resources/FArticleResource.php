@@ -46,8 +46,6 @@ class FArticleResource extends Resource
         $this->filterType = self::FILTER_TYPE;
         $this->transDomain = SageTranslationUtils::TRANS_FARTICLES;
         $this->options = function (): array {
-            // todo
-//            $websiteApi = SageService::getInstance()->getWebsiteOption();
             $initFilter = self::getDefaultResourceFilter();
             $initFilterJson = json_encode($initFilter, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
             return [
