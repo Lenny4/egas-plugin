@@ -1,11 +1,11 @@
 // https://react.dev/learn/add-react-to-an-existing-project#using-react-for-a-part-of-your-existing-page
-import { createRoot } from "react-dom/client";
-import React, { RefObject, useImperativeHandle } from "react";
+import {createRoot} from "react-dom/client";
+import React, {RefObject, useImperativeHandle} from "react";
 import Box from "@mui/material/Box";
-import { getTranslations } from "../../../../functions/translations";
-import { InputInterface } from "../../../../interface/InputInterface";
-import { Tooltip } from "@mui/material";
-import { BrowserRouter, useSearchParams } from "react-router-dom";
+import {getTranslations} from "../../../../functions/translations";
+import {InputInterface} from "../../../../interface/InputInterface";
+import {Tooltip} from "@mui/material";
+import {BrowserRouter, useSearchParams} from "react-router-dom";
 
 let translations: any = getTranslations();
 
@@ -201,7 +201,7 @@ const FilterInputComponent = React.forwardRef(
                   v.condition.value = thisFilterType.values[0];
                   v.value.value = "";
                 }
-                return { ...v };
+                return {...v};
               });
             }}
           >
@@ -237,7 +237,7 @@ const FilterInputComponent = React.forwardRef(
                 if (filterType.key !== "DateTimeOperationFilterInput") {
                   v.value.value = "";
                 }
-                return { ...v };
+                return {...v};
               });
             }}
           >
@@ -292,7 +292,7 @@ const FilterInputComponent = React.forwardRef(
                     } else {
                       v.value.value = selected[0];
                     }
-                    return { ...v };
+                    return {...v};
                   });
                 }}
               >
@@ -300,8 +300,8 @@ const FilterInputComponent = React.forwardRef(
                   {translations.words.selectOption}
                 </option>
                 {(Array.isArray(filterField.values)
-                  ? filterField.values.map((v, i) => [i, v] as const)
-                  : Object.entries(filterField.values)
+                    ? filterField.values.map((v, i) => [i, v] as const)
+                    : Object.entries(filterField.values)
                 ).map(([keyOption, option]) => {
                   let disabled = filterValue.editable === false;
                   if (isMultiple) {
@@ -338,7 +338,7 @@ const FilterInputComponent = React.forwardRef(
                       return v;
                     }
                     v.value.value = e.target.value === "1";
-                    return { ...v };
+                    return {...v};
                   });
                 }}
               >
@@ -380,14 +380,14 @@ const FilterInputComponent = React.forwardRef(
                     return v;
                   }
                   v.value.value = e.target.value;
-                  return { ...v };
+                  return {...v};
                 });
               }}
             />
           )}
         </div>
         {filterValue.deletable !== false && (
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{display: "flex", alignItems: "center"}}>
             <Tooltip
               title={translations.words.removeFilter}
               arrow
@@ -454,7 +454,7 @@ const _ResourceFilterComponent = React.forwardRef(
         },
         subFilter: {
           value: filter.subFilter
-            ? { ...filter.subFilter, ref: React.createRef() }
+            ? {...filter.subFilter, ref: React.createRef()}
             : null,
           error: "",
         },
@@ -478,12 +478,12 @@ const _ResourceFilterComponent = React.forwardRef(
       ) {
         setParentValues((v) => {
           v.subFilter.value = undefined;
-          return { ...v };
+          return {...v};
         });
       } else {
         setValues((v) => {
           v.values.value[index] = undefined;
-          return { ...v };
+          return {...v};
         });
       }
     };
@@ -500,7 +500,7 @@ const _ResourceFilterComponent = React.forwardRef(
     const addFilterValue = () => {
       setValues((v) => {
         v.values.value.push(getNewFilterValue());
-        return { ...v };
+        return {...v};
       });
     };
 
@@ -511,7 +511,7 @@ const _ResourceFilterComponent = React.forwardRef(
           values: [getNewFilterValue()],
           ref: React.createRef(),
         } as FilterInterface;
-        return { ...v };
+        return {...v};
       });
     };
 
@@ -581,7 +581,7 @@ const _ResourceFilterComponent = React.forwardRef(
     return (
       <>
         <div
-          style={{ display: "flex", alignItems: "stretch", marginTop: "1rem" }}
+          style={{display: "flex", alignItems: "stretch", marginTop: "1rem"}}
         >
           {values.subFilter.value && (
             <div
@@ -598,7 +598,7 @@ const _ResourceFilterComponent = React.forwardRef(
                 onChange={(e) => {
                   setValues((v) => {
                     v.condition.value = e.target.value;
-                    return { ...v };
+                    return {...v};
                   });
                 }}
               >
@@ -618,7 +618,7 @@ const _ResourceFilterComponent = React.forwardRef(
             </div>
           )}
           <div>
-            <div style={{ display: "flex" }}>
+            <div style={{display: "flex"}}>
               <div>
                 {values.values.value.map(
                   (
@@ -640,7 +640,7 @@ const _ResourceFilterComponent = React.forwardRef(
                     </React.Fragment>
                   ),
                 )}
-                <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
+                <div style={{textAlign: "center", marginBottom: "0.5rem"}}>
                   {values.values.value.filter(
                     (filterValue: FilterValueInterface) => filterValue,
                   ).length > 0 ? (
@@ -702,7 +702,7 @@ const _ResourceFilterComponent = React.forwardRef(
                       onChange={(e) => {
                         setValues((v) => {
                           v.conditionValues.value = e.target.value;
-                          return { ...v };
+                          return {...v};
                         });
                       }}
                     >
@@ -741,13 +741,13 @@ const _ResourceFilterComponent = React.forwardRef(
 );
 
 export const ResourceFilterComponent: React.FC<State> = ({
-  resourceFilter,
-  textInput,
-  checkboxInput,
-  withUrl,
-  allowEditImportCondition,
-  onDispatch,
-}) => {
+                                                           resourceFilter,
+                                                           textInput,
+                                                           checkboxInput,
+                                                           withUrl,
+                                                           allowEditImportCondition,
+                                                           onDispatch,
+                                                         }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [show, setShow] = React.useState<boolean>(
     checkboxInput?.checked ?? true,
@@ -878,7 +878,7 @@ export const ResourceFilterComponent: React.FC<State> = ({
   return (
     <>
       {show && filter && (
-        <Box sx={{ width: "100%" }}>
+        <Box sx={{width: "100%"}}>
           <_ResourceFilterComponent
             ref={filter.ref}
             filter={filter}

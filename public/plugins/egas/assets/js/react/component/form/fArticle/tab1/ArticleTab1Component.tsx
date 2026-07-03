@@ -1,30 +1,22 @@
 // https://react.dev/learn/add-react-to-an-existing-project#using-react-for-a-part-of-your-existing-page
-import React, { useImperativeHandle, useRef } from "react";
-import { getSageMetadata } from "../../../../../functions/getMetadata";
-import { getTranslations } from "../../../../../functions/translations";
-import { MetadataInterface } from "../../../../../interface/WordpressInterface";
-import {
-  FormInterface,
-  FormValidInterface,
-  TriggerFormContentChanged,
-} from "../../../../../interface/InputInterface";
-import {
-  createFormContent,
-  handleFormIsValid,
-  transformOptionsObject,
-} from "../../../../../functions/form";
-import { DividerText } from "../../../DividerText";
-import { ArRefInput } from "../inputs/ArRefInput";
-import { ArPrixVenInput } from "../inputs/ArPrixVenInput";
-import { ArticleCatTarifComponent } from "./ArticleCatTarifComponent";
-import { ArticleFournisseursComponent } from "./ArticleFournisseursComponent";
+import React, {useImperativeHandle, useRef} from "react";
+import {getSageMetadata} from "../../../../../functions/getMetadata";
+import {getTranslations} from "../../../../../functions/translations";
+import {MetadataInterface} from "../../../../../interface/WordpressInterface";
+import {FormInterface, FormValidInterface, TriggerFormContentChanged,} from "../../../../../interface/InputInterface";
+import {createFormContent, handleFormIsValid, transformOptionsObject,} from "../../../../../functions/form";
+import {DividerText} from "../../../DividerText";
+import {ArRefInput} from "../inputs/ArRefInput";
+import {ArPrixVenInput} from "../inputs/ArPrixVenInput";
+import {ArticleCatTarifComponent} from "./ArticleCatTarifComponent";
+import {ArticleFournisseursComponent} from "./ArticleFournisseursComponent";
 import Grid from "@mui/material/Grid";
-import { FormContentComponent } from "../../FormContentComponent";
-import { FormInput } from "../../fields/FormInput";
-import { FormSelect } from "../../fields/FormSelect";
-import { numberValidator } from "../../../../../functions/validator";
-import { TOKEN } from "../../../../../token";
-import { ArDesignInput } from "../inputs/ArDesignInput";
+import {FormContentComponent} from "../../FormContentComponent";
+import {FormInput} from "../../fields/FormInput";
+import {FormSelect} from "../../fields/FormSelect";
+import {numberValidator} from "../../../../../functions/validator";
+import {TOKEN} from "../../../../../token";
+import {ArDesignInput} from "../inputs/ArDesignInput";
 
 let translations: any = getTranslations();
 const articleMeta: MetadataInterface[] = JSON.parse(
@@ -72,12 +64,12 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
         props: {
           container: true,
           spacing: 1,
-          sx: { p: 1 },
+          sx: {p: 1},
         },
         children: [
           {
             props: {
-              size: { xs: 12 },
+              size: {xs: 12},
             },
             Dom: (
               <DividerText
@@ -88,7 +80,7 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
           },
           {
             Dom: (
-              <ArRefInput isNew={isNew} defaultValue={arRef} ref={arRefRef} />
+              <ArRefInput isNew={isNew} defaultValue={arRef} ref={arRefRef}/>
             ),
           },
           {
@@ -116,7 +108,7 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
           },
           {
             props: {
-              size: { xs: 12 },
+              size: {xs: 12},
             },
             Dom: (
               <ArDesignInput
@@ -184,7 +176,7 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
           },
           {
             props: {
-              size: { xs: 12 },
+              size: {xs: 12},
             },
             Dom: (
               <DividerText
@@ -234,7 +226,7 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
                 children: [
                   {
                     props: {
-                      size: { xs: 12, md: 8 },
+                      size: {xs: 12, md: 8},
                     },
                     Dom: (
                       <ArPrixVenInput
@@ -251,7 +243,7 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
                   },
                   {
                     props: {
-                      size: { xs: 12, md: 4 },
+                      size: {xs: 12, md: 4},
                       sx: {
                         paddingTop: "19px",
                       },
@@ -323,7 +315,7 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
           },
           {
             props: {
-              size: { xs: 12 },
+              size: {xs: 12},
             },
             formTab: {
               id: "tab1-sub",
@@ -331,13 +323,13 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
                 {
                   label: translations.words.nCatTarif,
                   Component: ArticleCatTarifComponent,
-                  props: { arPrixAch: arPrixAch, arCoef: arCoef },
+                  props: {arPrixAch: arPrixAch, arCoef: arCoef},
                 },
                 {
                   label: translations.words.suppliers,
                   Component: ArticleFournisseursComponent,
                 },
-              ].map(({ label, Component, props }) => {
+              ].map(({label, Component, props}) => {
                 const ref = React.createRef();
                 return {
                   label,
@@ -365,8 +357,8 @@ export const ArticleTab1Component = React.forwardRef((props, ref) => {
 
   return (
     <Grid container>
-      <Grid size={{ xs: 12 }}>
-        <FormContentComponent content={form.content} transPrefix="fArticles" />
+      <Grid size={{xs: 12}}>
+        <FormContentComponent content={form.content} transPrefix="fArticles"/>
       </Grid>
       <input
         type="hidden"

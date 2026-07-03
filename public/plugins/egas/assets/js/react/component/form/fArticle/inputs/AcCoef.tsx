@@ -1,15 +1,11 @@
 import * as React from "react";
-import { useImperativeHandle, useRef } from "react";
-import { Tooltip } from "@mui/material";
-import { getTranslations } from "../../../../../functions/translations";
-import {
-  FormValidInterface,
-  InputInterface,
-  TriggerFormContentChanged,
-} from "../../../../../interface/InputInterface";
-import { handleChangeInputGeneric } from "../../../../../functions/form";
-import { TOKEN } from "../../../../../token";
-import { numberValidator } from "../../../../../functions/validator";
+import {useImperativeHandle, useRef} from "react";
+import {Tooltip} from "@mui/material";
+import {getTranslations} from "../../../../../functions/translations";
+import {FormValidInterface, InputInterface, TriggerFormContentChanged,} from "../../../../../interface/InputInterface";
+import {handleChangeInputGeneric} from "../../../../../functions/form";
+import {TOKEN} from "../../../../../token";
+import {numberValidator} from "../../../../../functions/validator";
 
 let translations: any = getTranslations();
 
@@ -43,30 +39,30 @@ export const AcCoefInput = React.forwardRef(
       const v = defaultValue ?? 0;
       const acCoef = Number(v) === 0 ? arCoef : Number(v);
       return {
-        acCoef: { value: acCoef },
-        realAcCoef: { value: v.toString() },
-        valueLock: { value: acCoef > 0 && acCoef !== arCoef },
+        acCoef: {value: acCoef},
+        realAcCoef: {value: v.toString()},
+        valueLock: {value: acCoef > 0 && acCoef !== arCoef},
       };
     };
     const [values, setValues] = React.useState<FormState>(getDefaultValue());
 
     const handleChange =
       (prop: keyof FormState) =>
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (prop === "acCoef") {
-          setValues((v) => {
-            const newValue = Number(event.target.value);
-            return {
-              ...v,
-              valueLock: {
-                ...v.valueLock,
-                value: newValue > 0 && newValue !== arCoef,
-              },
-            };
-          });
-        }
-        handleChangeInputGeneric(event, prop, setValues);
-      };
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+          if (prop === "acCoef") {
+            setValues((v) => {
+              const newValue = Number(event.target.value);
+              return {
+                ...v,
+                valueLock: {
+                  ...v.valueLock,
+                  value: newValue > 0 && newValue !== arCoef,
+                },
+              };
+            });
+          }
+          handleChangeInputGeneric(event, prop, setValues);
+        };
 
     const handleRealAcCoef = () => {
       setValues((v) => {
@@ -162,8 +158,8 @@ export const AcCoefInput = React.forwardRef(
             <span>{translations["fArticles"]["acCoef"]}</span>
           </Tooltip>
         </label>
-        <div style={{ display: "flex", alignItems: "flex-start" }}>
-          <div style={{ position: "relative", flex: 1 }}>
+        <div style={{display: "flex", alignItems: "flex-start"}}>
+          <div style={{position: "relative", flex: 1}}>
             <input
               id={`_${TOKEN}_fArtclients[${acCategorie}][acCoef]`}
               name={`_${TOKEN}_fArtclients[${acCategorie}][acCoef]`}
@@ -174,7 +170,7 @@ export const AcCoefInput = React.forwardRef(
               type={"number"}
               value={values.acCoef.value}
               onChange={handleChange("acCoef")}
-              style={{ width: "100%" }}
+              style={{width: "100%"}}
               ref={inputRef}
               onBlur={() => {
                 if (Number(values.acCoef.value) === 0) {

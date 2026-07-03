@@ -1,30 +1,22 @@
 // https://react.dev/learn/add-react-to-an-existing-project#using-react-for-a-part-of-your-existing-page
-import React, { useImperativeHandle } from "react";
-import { ArticlePricesComponent } from "../ArticlePricesComponent";
-import { getTranslations } from "../../../../../functions/translations";
-import { MetadataInterface } from "../../../../../interface/WordpressInterface";
-import { FArticleClientInterface } from "../../../../../interface/FArticleInterface";
-import {
-  getListObjectSageMetadata,
-  getSageMetadata,
-  toBoolean,
-} from "../../../../../functions/getMetadata";
+import React, {useImperativeHandle} from "react";
+import {ArticlePricesComponent} from "../ArticlePricesComponent";
+import {getTranslations} from "../../../../../functions/translations";
+import {MetadataInterface} from "../../../../../interface/WordpressInterface";
+import {FArticleClientInterface} from "../../../../../interface/FArticleInterface";
+import {getListObjectSageMetadata, getSageMetadata, toBoolean,} from "../../../../../functions/getMetadata";
 import {
   FormInterface,
   FormValidInterface,
   TableLineItemInterface,
   TriggerFormContentChanged,
 } from "../../../../../interface/InputInterface";
-import { AcPrixVenInput } from "../inputs/AcPrixVenInput";
-import { FormContentComponent } from "../../FormContentComponent";
-import {
-  createFormContent,
-  getKeyFromName,
-  handleFormIsValid,
-} from "../../../../../functions/form";
-import { TOKEN } from "../../../../../token";
-import { AcCoefInput } from "../inputs/AcCoef";
-import { AcRemiseInput } from "../inputs/AcRemiseInput";
+import {AcPrixVenInput} from "../inputs/AcPrixVenInput";
+import {FormContentComponent} from "../../FormContentComponent";
+import {createFormContent, getKeyFromName, handleFormIsValid,} from "../../../../../functions/form";
+import {TOKEN} from "../../../../../token";
+import {AcCoefInput} from "../inputs/AcCoef";
+import {AcRemiseInput} from "../inputs/AcRemiseInput";
 
 let translations: any = getTranslations();
 
@@ -44,7 +36,7 @@ const pCattarifs: any[] = Object.values(
 );
 
 export const ArticleCatTarifComponent = React.forwardRef(
-  ({ arPrixAch, arCoef }: State, ref) => {
+  ({arPrixAch, arCoef}: State, ref) => {
     const prefix = "fArtclients";
     const [fArtclients] = React.useState<FArticleClientInterface[]>(() => {
       const result: FArticleClientInterface[] = getListObjectSageMetadata(
@@ -102,12 +94,12 @@ export const ArticleCatTarifComponent = React.forwardRef(
           props: {
             container: true,
             spacing: 1,
-            sx: { p: 1 },
+            sx: {p: 1},
           },
           children: [
             {
               props: {
-                size: { xs: 12 },
+                size: {xs: 12},
               },
               table: {
                 headers: [
@@ -226,8 +218,8 @@ export const ArticleCatTarifComponent = React.forwardRef(
 
     return (
       <>
-        <FormContentComponent content={form.content} transPrefix="fArticles" />
-        <ArticlePricesComponent />
+        <FormContentComponent content={form.content} transPrefix="fArticles"/>
+        <ArticlePricesComponent/>
       </>
     );
   },
