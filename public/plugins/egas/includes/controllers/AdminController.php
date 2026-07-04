@@ -602,32 +602,6 @@ class AdminController
                 },
                 'position' => null,
             ], $resources),
-            [
-                'location' => 'submenu',
-                // Possible settings: options, menu, submenu.
-                'parent_slug' => Sage::TOKEN . '_settings',
-                'page_title' => __('À propos', 'egas'),
-                'menu_title' => __('À propos', 'egas'),
-                'capability' => 'manage_options',
-                'menu_slug' => Sage::TOKEN . '_about',
-                'function' => static function (): void {
-                    echo 'about page';
-                },
-                'position' => null,
-            ],
-            [
-                'location' => 'submenu',
-                // Possible settings: options, menu, submenu.
-                'parent_slug' => Sage::TOKEN . '_settings',
-                'page_title' => __('Logs', 'egas'),
-                'menu_title' => __('Logs', 'egas'),
-                'capability' => 'manage_options',
-                'menu_slug' => Sage::TOKEN . '_log',
-                'function' => static function (): void {
-                    echo 'logs page';
-                },
-                'position' => null,
-            ],
         ]);
         foreach ($args as $arg) {
             // Do nothing if wrong location key is set.

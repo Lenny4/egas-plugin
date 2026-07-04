@@ -343,7 +343,7 @@ class WordpressService
         return OrderUtil::custom_orders_table_usage_is_enabled() ? wc_get_page_screen_id('shop-order') : 'shop_order';
     }
 
-    public function saveCustomerUserMetaFields(int $userId, bool $isNew): void
+    public function onCreateUpdateUser(int $userId, bool $isNew): void
     {
         $post = wp_unslash($_POST);
         $create_nonce = $post['_wpnonce_create-user'] ?? '';
@@ -390,6 +390,9 @@ class WordpressService
                 $value = trim((string)preg_replace('/\s{2,}/', ' ', (string)$value));
                 if ($key === FComptetResource::META_KEY) {
                     $value = strtoupper($value);
+                }
+                if ($key === '_' . Sage::TOKEN . '_auto_generate_ctnum' && $value) {
+                    update_user_meta($userId, '_' . Sage::TOKEN . '_createApi', (new DateTime())->format('Y-m-d H:i:s'));
                 }
                 update_user_meta($userId, $key, $value);
                 $nbUpdatedMeta++;

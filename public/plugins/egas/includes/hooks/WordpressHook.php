@@ -141,18 +141,17 @@ class WordpressHook
             ]);
         });
         add_action('profile_update', function (int $userId): void {
-            WordpressService::getInstance()->saveCustomerUserMetaFields($userId, false);
+            WordpressService::getInstance()->onCreateUpdateUser($userId, false);
         });
         add_action('user_register', function (int $userId): void {
-            WordpressService::getInstance()->saveCustomerUserMetaFields($userId, true);
+            WordpressService::getInstance()->onCreateUpdateUser($userId, true);
         });
         // endregion
         // Add settings link to plugins page.
         add_filter('plugin_action_links_' . plugin_basename($sage->file), static function (array $links): array {
             $links[] = '<a href="options-general.php?page=' . Sage::TOKEN . '_settings">' . __('Settings', 'egas') . '</a>';
             return $links;
-        }
-        );
+        });
         // Configure placement of plugin settings page. See readme for implementation.
         add_filter(Sage::TOKEN . '_menu_settings', static fn(array $settings = []): array => $settings);
         // region user
@@ -230,6 +229,8 @@ LIMIT 1
             if (
                 $creating &&
                 filter_var(get_option(Sage::TOKEN . '_mail_website_create_new_' . FComptetResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN) &&
+                filter_var($wpUser->user_email, FILTER_VALIDATE_EMAIL) &&
+                // maybe check that, Send the new user an email about their account is not checked
                 !str_ends_with($wpUser->user_email, '@nomail.com')
             ) {
                 // Accepts only 'user', 'admin' , 'both' or default '' as $notify.

@@ -1,10 +1,10 @@
 // https://react.dev/learn/add-react-to-an-existing-project#using-react-for-a-part-of-your-existing-page
-import { createRoot } from "react-dom/client";
-import React, { ChangeEvent } from "react";
-import { getTranslations } from "../../../../functions/translations";
-import { InputInterface } from "../../../../interface/InputInterface";
-import { stringValidator } from "../../../../functions/validator";
-import { TOKEN } from "../../../../token";
+import {createRoot} from "react-dom/client";
+import React, {ChangeEvent} from "react";
+import {getTranslations} from "../../../../functions/translations";
+import {InputInterface} from "../../../../interface/InputInterface";
+import {stringValidator} from "../../../../functions/validator";
+import {TOKEN} from "../../../../token";
 
 const containerSelector = `#${TOKEN}_user`;
 const siteUrl = $(`[data-${TOKEN}-site-url]`).attr(`data-${TOKEN}-site-url`);
@@ -61,11 +61,11 @@ const getMetadataValue = (prop: string, ignoreCase: boolean = true): string => {
 };
 
 const UserComptaComponent: React.FC<State> = ({
-  fComptet,
-  prop,
-  list,
-  field,
-}) => {
+                                                fComptet,
+                                                prop,
+                                                list,
+                                                field,
+                                              }) => {
   const [userHasCtNum, setUserHasCtNum] = React.useState<boolean>(
     getMetadataValue("ctNum") !== "",
   );
@@ -84,7 +84,7 @@ const UserComptaComponent: React.FC<State> = ({
       }
     }
     return {
-      nCompta: { value: value },
+      nCompta: {value: value},
     };
   };
   const [values, setValues] = React.useState<FormState2>(getDefaultValue());
@@ -154,8 +154,8 @@ const UserComponent = () => {
   const getDefaultValue = (): FormState => {
     const ctNum = getMetadataValue("ctNum");
     return {
-      ctNum: { value: ctNum },
-      autoGenerateCtNum: { value: true },
+      ctNum: {value: ctNum},
+      autoGenerateCtNum: {value: true},
       creationType: {
         value:
           initUser && !userHasCtNum
@@ -178,7 +178,7 @@ const UserComponent = () => {
       setValues((v) => {
         return {
           ...v,
-          [prop]: { ...v[prop], value: event.target.value, error: "" },
+          [prop]: {...v[prop], value: event.target.value, error: ""},
         };
       });
     };
@@ -188,7 +188,7 @@ const UserComponent = () => {
       setValues((v) => {
         return {
           ...v,
-          [prop]: { ...v[prop], value: event.target.value, error: "" },
+          [prop]: {...v[prop], value: event.target.value, error: ""},
         };
       });
     };
@@ -198,7 +198,7 @@ const UserComponent = () => {
       setValues((v) => {
         return {
           ...v,
-          [prop]: { ...v[prop], value: event.target.checked, error: "" },
+          [prop]: {...v[prop], value: event.target.checked, error: ""},
         };
       });
     };
@@ -212,10 +212,10 @@ const UserComponent = () => {
     currentCtNumSearch = ctNum;
     const response = await fetch(
       siteUrl +
-        "/index.php?rest_route=" +
-        encodeURIComponent(`/${TOKEN}/v1/user/` + ctNum) +
-        "&_wpnonce=" +
-        wpnonce,
+      "/index.php?rest_route=" +
+      encodeURIComponent(`/${TOKEN}/v1/user/` + ctNum) +
+      "&_wpnonce=" +
+      wpnonce,
     );
     if (response.status === 200) {
       if (currentCtNumSearch === ctNum) {
@@ -252,7 +252,7 @@ const UserComponent = () => {
   const showSageForm =
     (!!initUser && userHasCtNum) ||
     ((values.creationType.value === "link" ||
-      values.creationType.value === "new") &&
+        values.creationType.value === "new") &&
       validCtNum);
 
   const validateForm = async (): Promise<boolean> => {
@@ -300,13 +300,13 @@ const UserComponent = () => {
     if (
       !userHasCtNum &&
       ((values.autoGenerateCtNum.value &&
-        values.creationType.value === "new") ||
+          values.creationType.value === "new") ||
         values.creationType.value === "none")
     ) {
       setValues((v) => {
         v.ctNum.value = "";
         v.ctNum.error = "";
-        return { ...v };
+        return {...v};
       });
       setFComptet(undefined);
       setUser(undefined);
@@ -335,211 +335,239 @@ const UserComponent = () => {
   return (
     <table className="form-table" role="presentation">
       <tbody>
-        <tr>
-          <th style={{ padding: 0 }}>
-            <h2>Sage</h2>
-          </th>
-        </tr>
-        {showCreationType && (
-          <>
-            <tr>
-              <th>
-                <label htmlFor={`_${TOKEN}_creationType`}>
-                  Type d'utilisateur
-                </label>
-              </th>
-              <td>
-                <label htmlFor={`_${TOKEN}_creationType_none`}>
-                  <input
-                    type="radio"
-                    name={`_${TOKEN}_creationType`}
-                    value="none"
-                    id={`_${TOKEN}_creationType_none`}
-                    checked={values.creationType.value === "none"}
-                    onChange={handleChangeRadio("creationType")}
-                  />
-                  Ne pas créer de compte Sage
-                </label>
-                <br />
-                <br />
-                {/*todo checker cette option si _sage_create_new_*/}
-                <label htmlFor={`_${TOKEN}_creationType_new`}>
-                  <input
-                    type="radio"
-                    name={`_${TOKEN}_creationType`}
-                    value="new"
-                    id={`_${TOKEN}_creationType_new`}
-                    checked={values.creationType.value === "new"}
-                    onChange={handleChangeRadio("creationType")}
-                  />
-                  Créer un nouveau compte Sage
-                </label>
-                <br />
-                <br />
-                <label htmlFor={`_${TOKEN}_creationType_link`}>
-                  <input
-                    type="radio"
-                    name={`_${TOKEN}_creationType`}
-                    value="link"
-                    id={`_${TOKEN}_creationType_link`}
-                    checked={values.creationType.value === "link"}
-                    onChange={handleChangeRadio("creationType")}
-                  />
-                  Lier à un compte Sage déjà existant
-                </label>
-              </td>
-            </tr>
-            {values.creationType.value === "new" && (
-              <tr>
-                <th>
-                  <label htmlFor={`_${TOKEN}_auto_generate_ctnum`}>
-                    Générer le code client
-                  </label>
-                </th>
-                <td>
-                  <input
-                    type="hidden"
-                    name={`_${TOKEN}_auto_generate_ctnum`}
-                    id={`_${TOKEN}_auto_generate_ctnum`}
-                    value={checked ? "1" : "0"}
-                  />
-                  <input
-                    type="checkbox"
-                    value="1"
-                    checked={checked}
-                    onChange={handleChangeCheckbox("autoGenerateCtNum")}
-                  />
-                  <label htmlFor={`_${TOKEN}_auto_generate_ctnum`}>
-                    Laisser Egas générer le code client automatiquement.
-                  </label>
-                </td>
-              </tr>
-            )}
-          </>
-        )}
-        {showCtNumField && (
+      <tr>
+        <th style={{padding: 0}}>
+          <h2>Sage</h2>
+        </th>
+      </tr>
+      {showCreationType && (
+        <>
           <tr>
             <th>
-              <label htmlFor={`_${TOKEN}_ctNum`}>
-                {translations.fComptets.ctNum}
+              <label htmlFor={`_${TOKEN}_creationType`}>
+                Type d'utilisateur
               </label>
             </th>
             <td>
-              <div style={{ position: "relative" }}>
+              <label htmlFor={`_${TOKEN}_creationType_none`}>
                 <input
-                  type="text"
-                  name={`_${TOKEN}_ctNum`}
-                  id={`_${TOKEN}_ctNum`}
-                  readOnly={userHasCtNum}
-                  style={{
-                    ...(!userHasCtNum &&
-                      values.ctNum.error !== "" && {
-                        borderColor: "#d63638",
-                      }),
-                  }}
-                  value={values.ctNum.value}
-                  onChange={handleChange("ctNum")}
+                  disabled={autoCreateSageFcomptet}
+                  type="radio"
+                  name={`_${TOKEN}_creationType`}
+                  value="none"
+                  id={`_${TOKEN}_creationType_none`}
+                  checked={values.creationType.value === "none"}
+                  onChange={handleChangeRadio("creationType")}
                 />
-                {loadingSearchFComptet && (
-                  <svg className="svg-spinner" viewBox="0 0 50 50">
-                    <circle
-                      className="path"
-                      cx="25"
-                      cy="25"
-                      r="20"
-                      fill="none"
-                      strokeWidth="5"
-                    ></circle>
-                  </svg>
-                )}
-                {validCtNum && (
-                  <>
-                    <span
-                      className="dashicons dashicons-yes endDashiconsInput"
-                      style={{ color: "green" }}
-                    ></span>
-                    <span>{fComptet?.ctIntitule}</span>
-                  </>
-                )}
-                {(notValidCtNumExists || notValidCtNumAlreadyLink) && (
-                  <>
-                    <span
-                      className="dashicons dashicons-no endDashiconsInput"
-                      style={{ color: "red" }}
-                    ></span>
-                    {notValidCtNumExists && (
-                      <>
-                        <span>Ce compte Sage n'existe pas</span>
-                      </>
-                    )}
-                    {notValidCtNumAlreadyLink && (
-                      <>
-                        {values.creationType.value === "link" && (
-                          <>
-                            <span>Ce compte Sage est déjà lié à </span>
-                          </>
-                        )}
-                        {values.creationType.value === "new" && (
-                          <>
-                            <span>Ce compte Sage existe déjà </span>
-                          </>
-                        )}
-                        {user ? (
-                          <a
-                            href={
-                              siteUrl +
-                              "/wp-admin/user-edit.php?user_id=" +
-                              user.ID
-                            }
-                          >
-                            {user.data.display_name}
-                          </a>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              className="button"
-                              onClick={() => {
-                                setValues((v) => {
-                                  return {
-                                    ...v,
-                                    creationType: {
-                                      ...v.creationType,
-                                      value: "link",
-                                      error: "",
-                                    },
-                                  };
-                                });
-                              }}
-                            >
-                              Lier à ce compte
-                            </button>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
+                Ne pas créer de compte Sage
+              </label>
+              {autoCreateSageFcomptet && (
+                <div style={{fontSize: "0.85em", color: "#888", marginTop: 4}}>
+                  Vous devez désactiver l’option "Créer le compte dans Sage" sur la page de configuration
+                  <br/>
+                  <a
+                    href="https://caddy/wordpress/wp-admin/admin.php?page=egas_settings&tab=fComptets"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Ouvrir la configuration
+                  </a>
+                </div>
+              )}
+              <br/>
+              <br/>
+              <label htmlFor={`_${TOKEN}_creationType_new`}>
+                <input
+                  disabled={!autoCreateSageFcomptet}
+                  type="radio"
+                  name={`_${TOKEN}_creationType`}
+                  value="new"
+                  id={`_${TOKEN}_creationType_new`}
+                  checked={values.creationType.value === "new"}
+                  onChange={handleChangeRadio("creationType")}
+                />
+                Créer un nouveau compte Sage
+              </label>
+
+              {!autoCreateSageFcomptet && (
+                <div style={{fontSize: "0.85em", color: "#888", marginTop: 4}}>
+                  Vous devez activer l’option "Créer le compte dans Sage" sur la page de configuration
+                  <br/>
+                  <a
+                    href="https://caddy/wordpress/wp-admin/admin.php?page=egas_settings&tab=fComptets"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Ouvrir la configuration
+                  </a>
+                </div>
+              )}
+              <br/>
+              <br/>
+              <label htmlFor={`_${TOKEN}_creationType_link`}>
+                <input
+                  type="radio"
+                  name={`_${TOKEN}_creationType`}
+                  value="link"
+                  id={`_${TOKEN}_creationType_link`}
+                  checked={values.creationType.value === "link"}
+                  onChange={handleChangeRadio("creationType")}
+                />
+                Lier à un compte Sage déjà existant
+              </label>
             </td>
           </tr>
-        )}
-        {showSageForm && (
-          <>
-            <UserComptaComponent
-              fComptet={fComptet}
-              prop="nCatTarif"
-              field="ctIntitule"
-              list={pCattarifs}
-            />
-            <UserComptaComponent
-              fComptet={fComptet}
-              prop="nCatCompta"
-              field="label"
-              list={pCatComptas}
-            />
-          </>
-        )}
+          {values.creationType.value === "new" && (
+            <tr>
+              <th>
+                <label htmlFor={`_${TOKEN}_auto_generate_ctnum`}>
+                  Générer le code client
+                </label>
+              </th>
+              <td>
+                <input
+                  type="hidden"
+                  name={`_${TOKEN}_auto_generate_ctnum`}
+                  id={`_${TOKEN}_auto_generate_ctnum`}
+                  value={checked ? "1" : "0"}
+                />
+                <input
+                  type="checkbox"
+                  value="1"
+                  checked={checked}
+                  onChange={handleChangeCheckbox("autoGenerateCtNum")}
+                />
+                <label htmlFor={`_${TOKEN}_auto_generate_ctnum`}>
+                  Laisser Egas générer le code client automatiquement.
+                </label>
+              </td>
+            </tr>
+          )}
+        </>
+      )}
+      {showCtNumField && (
+        <tr>
+          <th>
+            <label htmlFor={`_${TOKEN}_ctNum`}>
+              {translations.fComptets.ctNum}
+            </label>
+          </th>
+          <td>
+            <div style={{position: "relative"}}>
+              <input
+                type="text"
+                name={`_${TOKEN}_ctNum`}
+                id={`_${TOKEN}_ctNum`}
+                readOnly={userHasCtNum}
+                style={{
+                  ...(!userHasCtNum &&
+                    values.ctNum.error !== "" && {
+                      borderColor: "#d63638",
+                    }),
+                }}
+                value={values.ctNum.value}
+                onChange={handleChange("ctNum")}
+              />
+              {loadingSearchFComptet && (
+                <svg className="svg-spinner" viewBox="0 0 50 50">
+                  <circle
+                    className="path"
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    strokeWidth="5"
+                  ></circle>
+                </svg>
+              )}
+              {validCtNum && (
+                <>
+                    <span
+                      className="dashicons dashicons-yes endDashiconsInput"
+                      style={{color: "green"}}
+                    ></span>
+                  <span>{fComptet?.ctIntitule}</span>
+                </>
+              )}
+              {(notValidCtNumExists || notValidCtNumAlreadyLink) && (
+                <>
+                    <span
+                      className="dashicons dashicons-no endDashiconsInput"
+                      style={{color: "red"}}
+                    ></span>
+                  {notValidCtNumExists && (
+                    <>
+                      <span>Ce compte Sage n'existe pas</span>
+                    </>
+                  )}
+                  {notValidCtNumAlreadyLink && (
+                    <>
+                      {values.creationType.value === "link" && (
+                        <>
+                          <span>Ce compte Sage est déjà lié à </span>
+                        </>
+                      )}
+                      {values.creationType.value === "new" && (
+                        <>
+                          <span>Ce compte Sage existe déjà </span>
+                        </>
+                      )}
+                      {user ? (
+                        <a
+                          href={
+                            siteUrl +
+                            "/wp-admin/user-edit.php?user_id=" +
+                            user.ID
+                          }
+                        >
+                          {user.data.display_name}
+                        </a>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="button"
+                            onClick={() => {
+                              setValues((v) => {
+                                return {
+                                  ...v,
+                                  creationType: {
+                                    ...v.creationType,
+                                    value: "link",
+                                    error: "",
+                                  },
+                                };
+                              });
+                            }}
+                          >
+                            Lier à ce compte
+                          </button>
+                        </>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+      {showSageForm && (
+        <>
+          <UserComptaComponent
+            fComptet={fComptet}
+            prop="nCatTarif"
+            field="ctIntitule"
+            list={pCattarifs}
+          />
+          <UserComptaComponent
+            fComptet={fComptet}
+            prop="nCatCompta"
+            field="label"
+            list={pCatComptas}
+          />
+        </>
+      )}
       </tbody>
     </table>
   );
@@ -548,5 +576,5 @@ const UserComponent = () => {
 const dom = document.querySelector(containerSelector);
 if (dom) {
   const root = createRoot(dom);
-  root.render(<UserComponent />);
+  root.render(<UserComponent/>);
 }
