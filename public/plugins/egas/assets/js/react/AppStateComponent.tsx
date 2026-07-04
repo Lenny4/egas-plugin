@@ -260,7 +260,9 @@ const AppStateComponent = () => {
             } else {
               // ping worked
               if ($(appStateSelector).hasClass("notice-error")) {
-                $(appStateSelector).addClass("hidden");
+                if (appState.SubscriptionDto !== null) {
+                  $(appStateSelector).addClass("hidden");
+                }
                 setErrorWebsocket(null);
               }
             }
@@ -347,18 +349,43 @@ const AppStateComponent = () => {
 
   React.useEffect(() => {
     if (appState) {
-      if (appState.SyncWebsiteJob?.Show) {
-        $(appStateSelector).removeClass("notice-error");
-        $(appStateSelector).addClass("notice-info");
+      if (appState.SubscriptionDto === null) {
+        $(appStateSelector).addClass("notice-error");
+        $(appStateSelector).removeClass("notice-info");
         $(appStateSelector).removeClass("hidden");
       } else {
-        $(appStateSelector).addClass("hidden");
+        if (appState.SyncWebsiteJob?.Show) {
+          $(appStateSelector).removeClass("notice-error");
+          $(appStateSelector).addClass("notice-info");
+          $(appStateSelector).removeClass("hidden");
+        } else {
+          $(appStateSelector).addClass("hidden");
+        }
       }
     }
   }, [appState]);
 
   return (
     <div>
+      {appState?.SubscriptionDto === null && (
+        <>
+          <h3>Egas licence invalide</h3>
+          <p>
+            Aucune licence valide n'a été détectée. En conséquence, toutes les fonctionnalités de synchronisation sont
+            actuellement désactivées.
+          </p>
+          <p>
+            Vous pouvez obtenir une licence sur :
+            <a href="https://egas-solutions.com/" target="_blank" rel="noopener noreferrer">
+              egas-solutions.com
+            </a>
+          </p>
+          <p>
+            Si vous disposez déjà d'une licence, assurez-vous que le compte utilisé pour vous connecter à <strong>EGAS
+            Manager</strong> est bien celui auquel la licence active est associée.
+          </p>
+        </>
+      )}
       {errorWebsocket !== null ? (
         <div>
           <p>

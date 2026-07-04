@@ -3,6 +3,22 @@ import { TaskJobTypeEnum } from "../enum/TaskJobTypeEnum";
 
 export interface AppStateInterface {
   SyncWebsiteJob: SyncWebsiteJobInterface;
+  SubscriptionDto: SubscriptionDto | null;
+}
+
+export interface SubscriptionDto {
+  id?: string;
+  status?: string;
+  expiration_date?: string | Date | null;
+  meta: SubscriptionMetaDto;
+}
+
+export interface SubscriptionMetaDto {
+  host?: string;
+  port_http?: number | null;
+  port_https?: number | null;
+  api_key?: string;
+  key?: string;
 }
 
 export interface SyncWebsiteJobInterface {

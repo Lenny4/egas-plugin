@@ -136,7 +136,7 @@ class AdminController
                         ],
                         [
                             'id' => 'api_host_url',
-                            'label' => __("Adresse de l'API Sage", 'egas'),
+                            'label' => __("Adresse de l'API Sage (EGAS Manager)", 'egas'),
                             'description' => __("Renseignez le nom de domaine (s'il est configuré) ou l'adresse de votre API Sage.", 'egas'),
                             'type' => 'text',
                             'default' => '',

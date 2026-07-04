@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Egas\hooks;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
+use DateTime;
 use Egas\class\SageShippingMethod__index__;
 use Egas\class\term\WC_Product_Egas;
 use Egas\controllers\AdminController;
