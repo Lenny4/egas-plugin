@@ -228,21 +228,21 @@ class GraphqlService
                 'sageUpdateFComptet' => filter_var(get_option(Sage::TOKEN . '_sage_update_' . FComptetResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'websiteCreateNewUser' => $this->getOptionResource(Sage::TOKEN . '_website_create_new_' . FComptetResource::ENTITY_NAME),
                 'websiteCreateOldUser' => $this->getOptionResource(Sage::TOKEN . '_website_create_old_' . FComptetResource::ENTITY_NAME),
-                'websiteUpdateUser' => filter_var(get_option(Sage::TOKEN . '_website_update_' . FComptetResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
+                'websiteUpdateUser' => $this->getOptionResource(Sage::TOKEN . '_website_update_' . FComptetResource::ENTITY_NAME) ,
 
                 'sageCreateNewFArticle' => filter_var(get_option(Sage::TOKEN . '_sage_create_new_' . FArticleResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'sageCreateOldFArticle' => filter_var(get_option(Sage::TOKEN . '_sage_create_old_' . FArticleResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'sageUpdateFArticle' => filter_var(get_option(Sage::TOKEN . '_sage_update_' . FArticleResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'websiteCreateNewProduct' => $this->getOptionResource(Sage::TOKEN . '_website_create_new_' . FArticleResource::ENTITY_NAME),
                 'websiteCreateOldProduct' => $this->getOptionResource(Sage::TOKEN . '_website_create_old_' . FArticleResource::ENTITY_NAME),
-                'websiteUpdateProduct' => filter_var(get_option(Sage::TOKEN . '_website_update_' . FArticleResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
+                'websiteUpdateProduct' => $this->getOptionResource(Sage::TOKEN . '_website_update_' . FArticleResource::ENTITY_NAME),
 
                 'sageCreateNewFDocentete' => filter_var(get_option(Sage::TOKEN . '_sage_create_new_' . FDocenteteResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'sageCreateOldFDocentete' => filter_var(get_option(Sage::TOKEN . '_sage_create_old_' . FDocenteteResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'sageUpdateFDocentete' => filter_var(get_option(Sage::TOKEN . '_sage_update_' . FDocenteteResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'websiteCreateNewOrder' => $this->getOptionResource(Sage::TOKEN . '_website_create_new_' . FDocenteteResource::ENTITY_NAME),
                 'websiteCreateOldOrder' => $this->getOptionResource(Sage::TOKEN . '_website_create_old_' . FDocenteteResource::ENTITY_NAME),
-                'websiteUpdateOrder' => filter_var(get_option(Sage::TOKEN . '_website_update_' . FDocenteteResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
+                'websiteUpdateOrder' => $this->getOptionResource(Sage::TOKEN . '_website_update_' . FDocenteteResource::ENTITY_NAME),
             ]
         ];
         return $this->runQuery($query, $getError, $variables);

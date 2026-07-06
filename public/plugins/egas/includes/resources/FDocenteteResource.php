@@ -119,8 +119,8 @@ class FDocenteteResource extends Resource
                     'id' => 'website_update_' . self::ENTITY_NAME,
                     'label' => __("Met à jour la commande Woocommerce.", 'egas'),
                     'description' => __("Met à jour la commande Woocommerce lorsque le document de vente Sage qui lui est lié est modifié.", 'egas'),
-                    'type' => 'checkbox',
-                    'default' => 'off',
+                    'type' => 'resource',
+                    'default' => '',
                 ],
                 [
                     'id' => 'journal_payment_' . self::ENTITY_NAME,

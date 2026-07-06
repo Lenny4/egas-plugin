@@ -82,8 +82,8 @@ class FComptetResource extends Resource
                 'id' => 'website_update_' . self::ENTITY_NAME,
                 'label' => __("Met à jour l'utilisateur Woocommerce.", 'egas'),
                 'description' => __("Met à jour l'utilisateur Woocommerce lorsque le compte Sage qui lui est lié est modifié.", 'egas'),
-                'type' => 'checkbox',
-                'default' => 'off',
+                'type' => 'resource',
+                'default' => '',
             ],
             [
                 'id' => 'mail_website_create_new_' . self::ENTITY_NAME,

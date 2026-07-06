@@ -99,8 +99,9 @@ class FArticleResource extends Resource
                     'id' => 'website_update_' . self::ENTITY_NAME,
                     'label' => __("Met à jour le produit Woocommerce.", 'egas'),
                     'description' => __("Met à jour le produit Woocommerce lorsque l'article Sage qui lui est lié est modifié.", 'egas'),
-                    'type' => 'checkbox',
-                    'default' => 'off',
+                    'type' => 'resource',
+                    'initFilter' => $initFilterJson,
+                    'default' => '',
                 ],
                 // todo ajouter une option pour considérer les catalogues comme des catégories
             ];
