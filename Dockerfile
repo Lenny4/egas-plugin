@@ -29,9 +29,7 @@ RUN apt-get update -y && \
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x wp-cli.phar && \
-    mv wp-cli.phar /usr/local/bin/wp && \
-    wp plugin install plugin-check --activate --allow-root && \
-    wp plugin install woocommerce --activate --allow-root
+    mv wp-cli.phar /usr/local/bin/wp
 
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

@@ -12,7 +12,11 @@ if [ "${WP_ENVIRONMENT_TYPE}" != "production" ]; then
   yarn --cwd /var/www/html/public/plugins/egas install
   echo "--cwd /var/www/html/public/plugins/egas watch & ...";
   yarn --cwd /var/www/html/public/plugins/egas watch &
-  echo "--cwd /var/www/html/public/plugins/egas watch done";
+  echo "wp plugin install plugin-check --activate --allow-root ...";
+  wp plugin install plugin-check --activate --allow-root
+  echo "plugin install woocommerce --activate --allow-root ...";
+  wp plugin install woocommerce --activate --allow-root
+  echo "docker-entrypoint.sh done !";
 fi
 
 exec "$@"
