@@ -16,7 +16,7 @@ if [ "${WP_ENVIRONMENT_TYPE}" != "production" ]; then
   wp plugin install plugin-check --activate --allow-root
   echo "plugin install woocommerce --activate --allow-root ...";
   wp plugin install woocommerce --activate --allow-root
-  echo "docker-entrypoint.sh done !";
+  echo "visit https://egas-plugin:4435/wp-admin";
 fi
 
 exec "$@"

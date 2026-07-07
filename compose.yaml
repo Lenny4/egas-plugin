@@ -20,8 +20,8 @@ services:
     depends_on:
       - db
     ports:
-      - 80:80
-      - 443:443
+      - 8080:80
+      - 4435:443
 
   db:
     image: mysql
