@@ -41,7 +41,18 @@ class TwigHook
         $twig->addFunction(new TwigFunction('getAllFilterType', static fn(): array => SageService::getInstance()->getAllFilterType()));
         $twig->addFunction(new TwigFunction('getPaginationRange', static fn(): array => Sage::$paginationRange));
         $twig->addFunction(new TwigFunction('get_site_url', static fn() => get_site_url()));
-        $twig->addFunction(new TwigFunction('get_option', static fn(string $option): string => get_option($option)));
+        $twig->addFunction(new TwigFunction('get_option', function (string $option): string {
+            $v = get_option($option);
+            if ($v === false) {
+                error_log(json_encode([
+                    'level' => 'warn',
+                    'ts' => microtime(true),
+                    'msg' => sprintf('get_option("%s") returned false', $option),
+                    'syslog_level' => 'warning',
+                ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE));
+            }
+            return (string)$v;
+        }));
         $twig->addFunction(new TwigFunction('get_woocommerce_currency_symbol', static fn(): string => html_entity_decode(get_woocommerce_currency_symbol())));
         $twig->addFunction(new TwigFunction('get_woocommerce_currency', static fn(): string => get_woocommerce_currency()));
         $twig->addFunction(new TwigFunction('order_get_currency', static fn(): string => html_entity_decode(get_woocommerce_currency_symbol())));
