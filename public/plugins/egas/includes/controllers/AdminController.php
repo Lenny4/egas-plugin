@@ -82,6 +82,13 @@ class AdminController
         if (is_null(self::$settings)) {
             $url = wp_parse_url(get_site_url());
             $defaultWordpressUrl = $url["scheme"] . '://' . $url["host"];
+            if (
+                isset($url['port']) &&
+                !(($url['scheme'] === 'http'  && $url['port'] == 80) ||
+                    ($url['scheme'] === 'https' && $url['port'] == 443))
+            ) {
+                $defaultWordpressUrl .= ':' . $url['port'];
+            }
             global $wpdb;
             $devFields = [];
             if (WP_DEBUG) {
