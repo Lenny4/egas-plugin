@@ -3,8 +3,8 @@
  * Plugin Name: Egas – Sage Synchronization Tool
  * Plugin URI: https://egas-solutions.com/
  * Description: A plugin to use Sage on your WordPress website.
- * Version: 1.4.3
- * Author: Alexandre Beaujour
+ * Version: 1.4.4
+ * Author: Egas Solutions
  * Author URI: https://egas-solutions.com/
  *
  * Requires at least: 6.9

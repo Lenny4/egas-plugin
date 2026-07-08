@@ -2273,7 +2273,7 @@ class GraphqlService
                             ),
                     ]
                 );
-            $rawFields = $this->runQuery($query1)?->data?->__type?->fields;
+            $rawFields = $this->runQuery($query1)?->data?->__type?->fields ?? [];
             $fields = array_map(fn(stdClass $field) => $field->name, $rawFields);
             $query2 = (new Query('__type'))
                 ->setArguments(['name' => $object . 'FilterInput'])
