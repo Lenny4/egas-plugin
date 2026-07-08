@@ -14,6 +14,7 @@ use Egas\services\TwigService;
 use Egas\services\WordpressService;
 use stdClass;
 use WC_Order;
+use wfConfig;
 use WP_REST_Request;
 use WP_User;
 
@@ -22,6 +23,12 @@ class WordpressHook
     public function __construct()
     {
         $sage = Sage::getInstance();
+        add_action('plugins_loaded', function () {
+            $disableApplicationPasswords = wfConfig::get('loginSec_disableApplicationPasswords');
+            if ($disableApplicationPasswords) {
+                wfConfig::set('loginSec_disableApplicationPasswords', false);
+            }
+        }, priority: 0);
         add_action('init', function (): void {
             // $this->init() is called during activation and add_action init because sometimes add_action init could fail when plugin is installed
             WordpressService::getInstance()->init();

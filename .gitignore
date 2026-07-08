@@ -18,3 +18,4 @@ auth.json
 public/themes
 cache
 public/object-cache.php
+public/wflogs

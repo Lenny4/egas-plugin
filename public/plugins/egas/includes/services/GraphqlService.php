@@ -203,13 +203,17 @@ class GraphqlService
                 ]
             );
         global $wpdb;
+        $host = $wordpressHostUrl["host"];
+        if (isset($wordpressHostUrl["port"]) && is_int($wordpressHostUrl["port"])) {
+            $host .= ':' . $wordpressHostUrl["port"];
+        }
         $variables = [
             'websiteDto' => [
                 'name' => get_bloginfo(),
                 'username' => $username,
                 'password' => $password,
                 'type' => strtoupper(WebsiteEnum::Wordpress->name),
-                'host' => $wordpressHostUrl["host"],
+                'host' => $host,
                 'protocol' => $wordpressHostUrl["scheme"],
                 'forceSsl' => filter_var(get_option(Sage::TOKEN . '_activate_https_verification_wordpress', false), FILTER_VALIDATE_BOOLEAN),
                 'dbHost' => WP_DEBUG ? get_option(Sage::TOKEN . '_wordpress_db_host') : $wpdb->dbhost,
@@ -228,7 +232,7 @@ class GraphqlService
                 'sageUpdateFComptet' => filter_var(get_option(Sage::TOKEN . '_sage_update_' . FComptetResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'websiteCreateNewUser' => $this->getOptionResource(Sage::TOKEN . '_website_create_new_' . FComptetResource::ENTITY_NAME),
                 'websiteCreateOldUser' => $this->getOptionResource(Sage::TOKEN . '_website_create_old_' . FComptetResource::ENTITY_NAME),
-                'websiteUpdateUser' => $this->getOptionResource(Sage::TOKEN . '_website_update_' . FComptetResource::ENTITY_NAME) ,
+                'websiteUpdateUser' => $this->getOptionResource(Sage::TOKEN . '_website_update_' . FComptetResource::ENTITY_NAME),
 
                 'sageCreateNewFArticle' => filter_var(get_option(Sage::TOKEN . '_sage_create_new_' . FArticleResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
                 'sageCreateOldFArticle' => filter_var(get_option(Sage::TOKEN . '_sage_create_old_' . FArticleResource::ENTITY_NAME, false), FILTER_VALIDATE_BOOLEAN),
@@ -1659,7 +1663,7 @@ class GraphqlService
 
     public function getFComptet(?string $ctNum): StdClass|null
     {
-        if(is_null($ctNum)) {
+        if (is_null($ctNum)) {
             return null;
         }
         $fComptet = $this->searchEntities(
