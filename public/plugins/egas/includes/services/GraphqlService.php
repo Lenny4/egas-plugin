@@ -82,15 +82,22 @@ class GraphqlService
             return;
         }
         $hostUrl = get_option(Sage::TOKEN . '_api_host_url');
+        $wordpressUrl = get_option(Sage::TOKEN . '_wordpress_host_url');
         $link = "<strong><span style='display: block; clear: both;'><a href='" .
             get_admin_url() . "admin.php?page=" . Sage::TOKEN . "_settings'>" .
             __("Modifier", 'egas') .
             "</a></span></strong>";
         $message = null;
         if (!is_string($hostUrl) || $hostUrl === '' || $hostUrl === '0') {
-            $message = __("Veuillez renseigner l'host du serveur Sage. ", 'egas') . $link;
+            $message = __("Veuillez renseigner l'adresse de l'API Sage. ", 'egas') . $link;
         } elseif (filter_var($hostUrl, FILTER_VALIDATE_URL) === false) {
-            $message = __("L'host du serveur Sage n'est pas une url valide. ", 'egas') . $link;
+            $message = __("L'adresse de l'API Sage n'est pas une url valide. ", 'egas') . $link;
+        } elseif (!is_string($wordpressUrl) || $wordpressUrl === '' || $wordpressUrl === '0') {
+            $message = __("Veuillez renseigner l'adresse de WordPress. ", 'egas') . $link;
+        } elseif (filter_var($wordpressUrl, FILTER_VALIDATE_URL) === false) {
+            $message = __("L'adresse de WordPress n'est pas une url valide. ", 'egas') . $link;
+        } elseif (empty(get_option(Sage::TOKEN . '_api_key'))) {
+            $message = __("Veuillez renseigner une clé API. ", 'egas') . $link;
         }
         if (!is_null($message)) {
             AdminController::adminNotices("
@@ -170,7 +177,6 @@ class GraphqlService
         bool   $getError = false,
     ): StdClass|null|string
     {
-        global $wpdb;
         $hasError = false;
         $wordpressHostUrl = wp_parse_url((string)get_option(Sage::TOKEN . '_wordpress_host_url'));
         if (!array_key_exists("scheme", $wordpressHostUrl)) {

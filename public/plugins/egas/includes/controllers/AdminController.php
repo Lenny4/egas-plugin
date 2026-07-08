@@ -84,8 +84,7 @@ class AdminController
             $defaultWordpressUrl = $url["scheme"] . '://' . $url["host"];
             if (
                 isset($url['port']) &&
-                !(($url['scheme'] === 'http'  && $url['port'] == 80) ||
-                    ($url['scheme'] === 'https' && $url['port'] == 443))
+                (!($url['scheme'] === 'http' && $url['port'] == 80) && !($url['scheme'] === 'https' && $url['port'] == 443))
             ) {
                 $defaultWordpressUrl .= ':' . $url['port'];
             }

@@ -23,7 +23,8 @@ class WordpressHook
     public function __construct()
     {
         $sage = Sage::getInstance();
-        add_action('plugins_loaded', function () {
+        add_filter('wp_is_application_passwords_available', fn(): true => true);
+        add_action('plugins_loaded', function (): void {
             $disableApplicationPasswords = wfConfig::get('loginSec_disableApplicationPasswords');
             if ($disableApplicationPasswords) {
                 wfConfig::set('loginSec_disableApplicationPasswords', false);
