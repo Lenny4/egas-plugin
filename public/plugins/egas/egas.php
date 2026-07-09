@@ -2,10 +2,11 @@
 /**
  * Plugin Name: Egas – Sage Synchronization Tool
  * Plugin URI: https://egas-solutions.com/
- * Description: A plugin to use Sage on your WordPress website.
+ * Description: Synchronize Sage ERP data with your WordPress website and WooCommerce store.
  * Version: 1.5.0
  * Author: Egas Solutions
  * Author URI: https://egas-solutions.com/
+ * Copyright: © 2026 Egas Solutions
  *
  * Requires at least: 6.9
  * Tested up to: 6.9

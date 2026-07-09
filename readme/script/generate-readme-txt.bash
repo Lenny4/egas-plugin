@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+rm -f "$SCRIPT_DIR/../../public/plugins/egas/readme.txt"
+cp "$SCRIPT_DIR/../readme.txt" "$SCRIPT_DIR/../../public/plugins/egas/"
+
+"$SCRIPT_DIR/pluginHeader.bash"

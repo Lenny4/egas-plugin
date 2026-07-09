@@ -1,0 +1,21 @@
+{
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "changes": [
+        {
+          "added": [
+            "Can configure the plugin to connect to the Sage API",
+            "Synchronize articles from WordPress to Sage and from Sage to WordPress",
+            "Synchronize clients from WordPress to Sage and from Sage to WordPress",
+            "Synchronize sales documents from WordPress to Sage and from Sage to WordPress",
+            "Can select the journal in which payments are stored",
+            "Can select the payment terms type",
+            "Synchronize payments from WordPress to Sage and from Sage to WordPress",
+            "Can choose whether an advance payment document is created for advance payment documents"
+          ]
+        }
+      ]
+    }
+  ]
+}

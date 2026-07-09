@@ -1,0 +1,11 @@
+Added
+Changed
+Deprecated
+Removed
+Fixed
+Security
+Performance
+Documentation
+Compatibility
+Internationalization
+Developer
