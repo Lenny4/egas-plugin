@@ -49,36 +49,37 @@ if not container:
     print(f"Erreur : sélecteur introuvable {selector}", file=sys.stderr)
     sys.exit(1)
 
-
 faq_items = container.select(".gb-accordion__item")
 
 if not faq_items:
     print("Erreur : aucun élément FAQ trouvé", file=sys.stderr)
     sys.exit(1)
 
-
 output = []
 
 for item in faq_items:
 
     question = item.select_one(".gb-accordion__toggle h3")
-
     answer = item.select_one(".gb-accordion__content p")
 
     if not question or not answer:
         continue
 
     q = question.get_text(" ", strip=True)
-
-    # conserve le gras Markdown simple
     a = answer.get_text(" ", strip=True)
 
+    if not q or not a:
+        continue
+
     output.append(
-        f"= {q} =\\n\\n{a}\\n"
+        f"= {q} =\n\n{a}\n"
     )
 
+if not output:
+    print("Erreur : aucune FAQ valide extraite", file=sys.stderr)
+    sys.exit(1)
 
-print("\\n".join(output))
+print("\n".join(output))
 
 PYTHON
 )
