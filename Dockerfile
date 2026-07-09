@@ -19,13 +19,16 @@ RUN install-php-extensions xdebug-stable
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs procps less iputils-ping && \
+    apt-get install -y nodejs procps less iputils-ping python3 python3-pip && \
     npm install --global yarn && \
     yarn add -D webpack-cli && \
     XDEBUG_MODE=off composer install && \
     XDEBUG_MODE=off composer install --working-dir=/var/www/html/public/plugins/egas --no-dev --optimize-autoloader && \
     yarn --cwd /var/www/html/public/plugins/egas install && \
-    yarn --cwd /var/www/html/public/plugins/egas build
+    yarn --cwd /var/www/html/public/plugins/egas build && \
+    pip3 install --break-system-packages beautifulsoup4 requests
+
+RUN bash readme/script/generate-readme-txt.bash
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x wp-cli.phar && \
