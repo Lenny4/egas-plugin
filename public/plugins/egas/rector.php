@@ -33,9 +33,6 @@ return RectorConfig::configure()
     ->withRules([
         JsonUnescapedUnicodeRector::class,
     ])
-    ->withRules([
-        DeclareStrictTypesRector::class,
-    ])
     ->withSkip([
         DisallowedEmptyRuleFixerRector::class,
         FlipTypeControlToUseExclusiveTypeRector::class,
