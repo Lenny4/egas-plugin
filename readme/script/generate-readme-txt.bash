@@ -8,3 +8,4 @@ rm -f "$SCRIPT_DIR/../../public/plugins/egas/readme.txt"
 cp "$SCRIPT_DIR/../readme.txt" "$SCRIPT_DIR/../../public/plugins/egas/"
 
 "$SCRIPT_DIR/pluginHeader.bash"
+"$SCRIPT_DIR/faq.bash" "https://egas-solutions.com/" "#faq-readme"
