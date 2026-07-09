@@ -77,14 +77,14 @@ class AdminController
         }
     }
 
-    private static function getSettings(): ?array
+    private static function getSettings(): array
     {
         if (is_null(self::$settings)) {
             $url = wp_parse_url(get_site_url());
             $defaultWordpressUrl = $url["scheme"] . '://' . $url["host"];
             if (
                 isset($url['port']) &&
-                (!($url['scheme'] === 'http' && $url['port'] == 80) && !($url['scheme'] === 'https' && $url['port'] == 443))
+                (($url['scheme'] !== 'http' || $url['port'] != 80) && ($url['scheme'] !== 'https' || $url['port'] != 443))
             ) {
                 $defaultWordpressUrl .= ':' . $url['port'];
             }
@@ -221,7 +221,7 @@ class AdminController
                     ],
                     ...$resource->getOptions()(),
                 ];
-                $resource->setOptions(fn() => $options);
+                $resource->setOptions(fn(): array => $options);
                 $settings[$resource->getEntityName()] = [
                     'title' => $resource->getTitle(),
                     'description' => $resource->getDescription(),

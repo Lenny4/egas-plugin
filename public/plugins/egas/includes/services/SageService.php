@@ -111,7 +111,7 @@ WHERE user_login LIKE %s
                 return $a->doType <=> $b->doType;
             }
             if ($a->doPiece !== $b->doPiece) {
-                return strcmp($b->doPiece, $a->doPiece);
+                return strcmp((string) $b->doPiece, (string) $a->doPiece);
             }
             return $a->dlLigne <=> $b->dlLigne;
         });
@@ -658,10 +658,10 @@ WHERE user_login LIKE %s
             if ($filterType->kind !== 'INPUT_OBJECT') {
                 continue;
             }
-            if (!str_contains($filterType->name, 'Operation')) {
+            if (!str_contains((string) $filterType->name, 'Operation')) {
                 continue;
             }
-            $result[$filterType->name] = array_values(array_filter(array_map(fn(stdClass $value) => $value->name, $filterType->inputFields), fn(string $item): bool => !in_array($item, ["and", "or"])));
+            $result[$filterType->name] = array_values(array_filter(array_map(fn(stdClass $value) => $value->name, $filterType->inputFields), fn(string $item): bool => !in_array($item, ["and", "or"], true)));
         }
         return $result;
     }
@@ -677,7 +677,7 @@ WHERE user_login LIKE %s
         if (!is_null($deleteKey) && !is_null($deleteValue)) {
             WordpressService::getInstance()->deleteMetaTrashResource($deleteKey, $deleteValue);
         }
-        $response = RequestService::getInstance()->selfRequest($url, [
+        $wprestResponse = RequestService::getInstance()->selfRequest($url, [
             'headers' => [
                 'Content-Type' => 'application/json',
                 'authorization' => "Basic " . get_option(Sage::TOKEN . '_authorization'),
@@ -686,20 +686,20 @@ WHERE user_login LIKE %s
             'body' => $body,
         ]);
         $responseError = null;
-        if ($response->is_error()) {
-            $error = $response->as_error(); // WP_Error
+        if ($wprestResponse->is_error()) {
+            $error = $wprestResponse->as_error(); // WP_Error
             $responseError = "<div class='notice notice-error is-dismissible'>
                             <pre>" . $error->get_error_code() . "</pre>
                             <pre>" . $error->get_error_message() . "</pre>
                             <pre>" . json_encode($error->get_error_data(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) . "</pre>
                             </div>";
-        } elseif (!in_array($response->get_status(), [Response::HTTP_OK, Response::HTTP_CREATED], true)) {
+        } elseif (!in_array($wprestResponse->get_status(), [Response::HTTP_OK, Response::HTTP_CREATED], true)) {
             $responseError = "<div class='notice notice-error is-dismissible'>
-                            <pre>" . $response->get_status() . "</pre>
-                            <pre>" . json_encode($response->get_data(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) . "</pre>
+                            <pre>" . $wprestResponse->get_status() . "</pre>
+                            <pre>" . json_encode($wprestResponse->get_data(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) . "</pre>
                             </div>";
         }
-        return [$response, $responseError];
+        return [$wprestResponse, $responseError];
     }
 
     /**

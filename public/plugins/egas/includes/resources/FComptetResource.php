@@ -109,7 +109,7 @@ class FComptetResource extends Resource
             return SageService::getInstance()->get_user_meta_single($userId);
         };
         $this->sageEntity = fn(?string $ctNum): StdClass|null => GraphqlService::getInstance()->getFComptet($ctNum);
-        $this->importFromSage = fn(?string $ctNum, stdClass|string|null $fComptet = null, $showSuccessMessage = true): array|string => SageService::getInstance()->importFComptetFromSage($ctNum, $fComptet, $showSuccessMessage);
+        $this->importFromSage = fn(?string $ctNum, stdClass|string|null $fComptet = null, bool $showSuccessMessage = true): array => SageService::getInstance()->importFComptetFromSage($ctNum, $fComptet, $showSuccessMessage);
         $this->metaKeyIdentifier = self::META_KEY;
         $this->table = $wpdb->users;
         $this->metaTable = $wpdb->usermeta;

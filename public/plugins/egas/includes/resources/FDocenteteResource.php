@@ -65,8 +65,8 @@ class FDocenteteResource extends Resource
             if (is_array($pReglements)) {
                 usort($pReglements, function (stdClass $a, stdClass $b): int {
                     $word = 'carte';
-                    similar_text($a->rIntitule, $word, $percA);
-                    similar_text($b->rIntitule, $word, $percB);
+                    similar_text((string) $a->rIntitule, $word, $percA);
+                    similar_text((string) $b->rIntitule, $word, $percB);
                     return $percB <=> $percA;
                 });
             }
@@ -178,7 +178,7 @@ class FDocenteteResource extends Resource
             }
             return $results[0];
         };
-        $this->importFromSage = function (?string $identifier, stdClass|string|null $fDocentete = null, $showSuccessMessage = true): array|string {
+        $this->importFromSage = function (?string $identifier, stdClass|string|null $fDocentete = null, $showSuccessMessage = true): array {
             $data = json_decode($identifier, false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
             return WoocommerceService::getInstance()->importFDocenteteFromSage($data->doPiece, $data->doType);
         };
@@ -205,7 +205,7 @@ class FDocenteteResource extends Resource
             return $wcOrder->get_id();
         };
         $this->selectionSet = fn(): array => GraphqlService::getInstance()->_getFDocenteteSelectionSet();
-        $this->getIdentifier = static fn(array $fDocentete) => json_encode(['doPiece' => $fDocentete["doPiece"], 'doType' => $fDocentete["doType"]], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+        $this->getIdentifier = static fn(array $fDocentete): string => json_encode(['doPiece' => $fDocentete["doPiece"], 'doType' => $fDocentete["doType"]], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
     }
 
     public static function getInstance(): self

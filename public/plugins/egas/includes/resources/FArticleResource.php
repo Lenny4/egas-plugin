@@ -109,8 +109,8 @@ class FArticleResource extends Resource
         $this->metadata = function (?stdClass $obj = null): array {
             $result = [
                 ...$this->getMandatoryMetadata(),
-                new SageEntityMetadata(field: '_prices', value: static fn(StdClass $stdClass) => json_encode($stdClass->prices, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
-                new SageEntityMetadata(field: '_max_price', value: static fn(StdClass $stdClass) => json_encode(WoocommerceService::getInstance()->getMaxPrice($stdClass->prices), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
+                new SageEntityMetadata(field: '_prices', value: static fn(StdClass $stdClass): string => json_encode($stdClass->prices, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
+                new SageEntityMetadata(field: '_max_price', value: static fn(StdClass $stdClass): string => json_encode(WoocommerceService::getInstance()->getMaxPrice($stdClass->prices), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)),
                 new SageEntityMetadata(field: '_canEditArSuiviStock', value: static fn(StdClass $stdClass) => $stdClass->canEditArSuiviStock),
             ];
             return SageService::getInstance()->addSelectionSetAsMetadata(GraphqlService::getInstance()->_getFArticleSelectionSet(), $result, $obj);
@@ -125,7 +125,7 @@ class FArticleResource extends Resource
             return SageService::getInstance()->get_post_meta_single($productId);
         };
         $this->sageEntity = fn(?string $arRef): StdClass|null => GraphqlService::getInstance()->getFArticle($arRef);
-        $this->importFromSage = fn(?string $arRef, stdClass|string|null $fArticle = null, $showSuccessMessage = true): array|string => WoocommerceService::getInstance()->importFArticleFromSage($arRef, showSuccessMessage: $showSuccessMessage);
+        $this->importFromSage = fn(?string $arRef, stdClass|string|null $fArticle = null, $showSuccessMessage = true): array => WoocommerceService::getInstance()->importFArticleFromSage($arRef, showSuccessMessage: $showSuccessMessage);
         $this->metaKeyIdentifier = self::META_KEY;
         $this->table = $wpdb->posts;
         $this->metaTable = $wpdb->postmeta;

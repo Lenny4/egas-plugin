@@ -72,7 +72,7 @@ class WoocommerceHook
         add_action('woocommerce_order_refunded', function (int $orderId) use ($updateApiOrder): void {
             $updateApiOrder($orderId);
         });
-        add_filter('woocommerce_orders_table_query_sql', fn(string $sql, OrdersTableQuery $ordersTableQuery, array $args): string|array|null => preg_replace(
+        add_filter('woocommerce_orders_table_query_sql', fn(string $sql, OrdersTableQuery $ordersTableQuery, array $args): ?string => preg_replace(
             "/IN\s*\(\s*('_billing_address_index'\s*,\s*'_shipping_address_index')\s*\)/",
             "IN ($1, '_" . Sage::TOKEN . "_doPiece')",
             $sql
@@ -119,12 +119,13 @@ class WoocommerceHook
             }
             return $classname;
         }, accepted_args: 2);
-        add_filter('woocommerce_product_data_tabs', static function (array $tabs) { // Code to Create Tab in the Backend
+        add_filter('woocommerce_product_data_tabs', static function (array $tabs): array { // Code to Create Tab in the Backend
             foreach (array_keys($tabs) as $tabName) {
                 if (!in_array($tabName, [
                     'linked_product',
                     'advanced',
-                ])) {
+                ],
+                true)) {
                     $tabs[$tabName]["class"][] = 'hide_if_' . Sage::TOKEN;
                 }
             }
@@ -277,14 +278,14 @@ class WoocommerceHook
 
         // region edit woocommerce price
         // https://stackoverflow.com/a/45807054/6824121
-        add_filter('woocommerce_get_price_including_tax', fn($price, $quantity, $product): float|string => WoocommerceService::getInstance()->custom_price($price, $product, get_current_user_id(), true), 99, 3);
-        add_filter('woocommerce_get_price_excluding_tax', fn($price, $quantity, $product): float|string => WoocommerceService::getInstance()->custom_price($price, $product, get_current_user_id(), false), 99, 3);
+        add_filter('woocommerce_get_price_including_tax', fn(string|float|int $price, $quantity, WC_Product $wcProduct): float|string => WoocommerceService::getInstance()->custom_price($price, $wcProduct, get_current_user_id(), true), 99, 3);
+        add_filter('woocommerce_get_price_excluding_tax', fn(string|float|int $price, $quantity, WC_Product $wcProduct): float|string => WoocommerceService::getInstance()->custom_price($price, $wcProduct, get_current_user_id(), false), 99, 3);
         // Simple, grouped and external products
-        add_filter('woocommerce_product_get_price', fn($price, $product): float|string => WoocommerceService::getInstance()->custom_price($price, $product, get_current_user_id()), 99, 2);
-        add_filter('woocommerce_product_get_regular_price', fn($price, $product): float|string => WoocommerceService::getInstance()->custom_price($price, $product, get_current_user_id()), 99, 2);
+        add_filter('woocommerce_product_get_price', fn(string|float|int $price, WC_Product $wcProduct): float|string => WoocommerceService::getInstance()->custom_price($price, $wcProduct, get_current_user_id()), 99, 2);
+        add_filter('woocommerce_product_get_regular_price', fn(string|float|int $price, WC_Product $wcProduct): float|string => WoocommerceService::getInstance()->custom_price($price, $wcProduct, get_current_user_id()), 99, 2);
         // Variations
-        add_filter('woocommerce_product_variation_get_regular_price', fn($price, $product): float|string => WoocommerceService::getInstance()->custom_price($price, $product, get_current_user_id()), 99, 2);
-        add_filter('woocommerce_product_variation_get_price', fn($price, $product): float|string => WoocommerceService::getInstance()->custom_price($price, $product, get_current_user_id()), 99, 2);
+        add_filter('woocommerce_product_variation_get_regular_price', fn(string|float|int $price, WC_Product $wcProduct): float|string => WoocommerceService::getInstance()->custom_price($price, $wcProduct, get_current_user_id()), 99, 2);
+        add_filter('woocommerce_product_variation_get_price', fn(string|float|int $price, WC_Product $wcProduct): float|string => WoocommerceService::getInstance()->custom_price($price, $wcProduct, get_current_user_id()), 99, 2);
         // Variable (price range)
 //        add_filter('woocommerce_variation_prices_price', fn($price, $variation, $product) => $this->custom_variable_price($price, $variation, $product), 99, 3);
 //        add_filter('woocommerce_variation_prices_regular_price', fn($price, $variation, $product) => $this->custom_variable_price($price, $variation, $product), 99, 3);
@@ -309,7 +310,7 @@ class WoocommerceHook
         // endregion
 
         // region add column to product list
-        add_filter('manage_edit-product_columns', function (array $columns) { // https://stackoverflow.com/a/44702012/6824121
+        add_filter('manage_edit-product_columns', function (array $columns): array { // https://stackoverflow.com/a/44702012/6824121
             $columns[Sage::TOKEN] = __('Sage', 'egas');
             return $columns;
         }, 10, 1);
@@ -339,7 +340,7 @@ class WoocommerceHook
             return $value;
         }, accepted_args: 3);
 
-        add_filter('manage_edit-product_cat_columns', function (array $columns) {
+        add_filter('manage_edit-product_cat_columns', function (array $columns): array {
             // Ajouter la colonne 'Egas' après le nom
             $columns[Sage::TOKEN] = __("Sage", 'egas');
             return $columns;

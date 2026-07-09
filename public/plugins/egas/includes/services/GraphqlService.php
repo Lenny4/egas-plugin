@@ -1390,7 +1390,7 @@ class GraphqlService
             }
         }
         if ($getWordpressIds) {
-            $values = array_map(static fn(stdClass $fDocentete) => json_encode([
+            $values = array_map(static fn(stdClass $fDocentete): string => json_encode([
                 'doPiece' => $fDocentete->doPiece,
                 'doType' => $fDocentete->doType,
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), $fDocentetes);
@@ -1407,7 +1407,7 @@ class GraphqlService
             foreach ($fDocentetes as $fDocentete) {
                 $fDocentete->wordpressIds = [];
                 foreach ($r as $wcOrdersMeta) {
-                    $data = json_decode($wcOrdersMeta->meta_value, false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+                    $data = json_decode((string) $wcOrdersMeta->meta_value, false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
                     if ($data->doPiece === $fDocentete->doPiece &&
                         $data->doType === $fDocentete->doType) {
                         $fDocentete->wordpressIds[] = (int)$wcOrdersMeta->order_id;
@@ -1640,7 +1640,7 @@ class GraphqlService
     {
         global $wpdb;
         $arRefs = array_values(array_unique(array_map(static fn(stdClass $fDocligne) => $fDocligne->arRef, $fDoclignes)));
-        if (!$arRefs) {
+        if ($arRefs === []) {
             return [];
         }
         $placeholders = implode(',', array_fill(0, count($arRefs), '%s'));
@@ -2028,7 +2028,7 @@ class GraphqlService
             // Check if the method name starts with "get"
             if (str_starts_with($methodName, 'get')) {
                 $parameters = $reflectionMethod->getParameters();
-                $paramNames = array_map(fn($param): string => $param->getName(), $parameters);
+                $paramNames = array_map(fn(\ReflectionParameter $reflectionParameter): string => $reflectionParameter->getName(), $parameters);
 
                 // Check if both 'useCache' and 'getFromSage' are in the parameter list
                 if (
@@ -2183,7 +2183,7 @@ class GraphqlService
                 , JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), true, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
             $data = SageService::getInstance()->populateMetaDatas($data, $showFields, $resource);
         }
-        $hideFields = array_map(static fn(string $hideField): string|array => str_replace(Sage::PREFIX_META_DATA, '', $hideField), $hideFields);
+        $hideFields = array_map(static fn(string $hideField): string => str_replace(Sage::PREFIX_META_DATA, '', $hideField), $hideFields);
         return [
             $data,
             $showFields,

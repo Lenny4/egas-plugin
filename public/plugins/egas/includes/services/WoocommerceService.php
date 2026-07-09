@@ -62,7 +62,7 @@ class WoocommerceService
         $address = [];
         $fPays = GraphqlService::getInstance()->getFPays(false);
         foreach (OrderUtils::ALL_ADDRESS_TYPE as $addressType) {
-            $thisAdress = current(array_filter($stdClass->fLivraisons, static function (StdClass $stdClass) use ($addressType, $fComptetAddress): bool {
+            $thisAdress = current(array_filter($stdClass->fLivraisons, static function (StdClass $stdClass) use ($addressType): bool {
                 if ($addressType === OrderUtils::BILLING_ADDRESS_TYPE) {
                     return $stdClass->liAdresseFact === 1;
                 }
@@ -482,14 +482,14 @@ class WoocommerceService
             $oldMetadata = SageService::getInstance()->get_post_meta_single($articlePostId);
             $allMetadataNames = array_map(static fn(array $meta) => $meta['key'], $article["meta_data"]);
             foreach ($oldMetadata as $key => $value) {
-                if (!in_array($key, $allMetadataNames, true) && str_starts_with($key, '_' . Sage::TOKEN)) {
+                if (!in_array($key, $allMetadataNames, true) && str_starts_with((string) $key, '_' . Sage::TOKEN)) {
                     delete_post_meta($articlePostId, $key);
                 }
             }
             foreach ($article["meta_data"] as $meta) {
                 update_post_meta($articlePostId, $meta['key'], $meta['value']);
             }
-            $response = new WP_REST_Response(['id' => $articlePostId], 200);
+            $wprestResponse = new WP_REST_Response(['id' => $articlePostId], 200);
             $responseError = null;
             $urlArticle = str_replace('%id%', (string)$articlePostId, $urlArticle);
             if ($showSuccessMessage) {
@@ -506,7 +506,7 @@ class WoocommerceService
             $wcProduct->set_sku($arRef); // for woocommerce to able to search the product
             $wcProduct->save();
         }
-        return [$response, $responseError, $message, $articlePostId];
+        return [$wprestResponse, $responseError, $message, $articlePostId];
     }
 
     public function getWooCommerceIdArticle(string $arRef): ?int
@@ -534,7 +534,7 @@ class WoocommerceService
     public function convertSageArticleToWoocommerce(StdClass $stdClass, Resource $resource, ?int $postId): array
     {
         $fCatalogues = $this->createCategories(array_map(
-            fn($i) => $stdClass->{'clNo' . $i . 'Navigation'},
+            fn(int $i) => $stdClass->{'clNo' . $i . 'Navigation'},
             range(1, 4)
         ));
         // https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
@@ -1190,7 +1190,7 @@ class WoocommerceService
     /**
      * Copy paste of applyTaxes of the sage api
      */
-    private function applyTaxes(float $value, stdClass $price, bool $addOrRemove): float|null
+    private function applyTaxes(float $value, stdClass $price, bool $addOrRemove): float
     {
         $initPrice = $value;
         foreach ($price->taxes as $taxe) {
