@@ -39,6 +39,7 @@ TEXT_DOMAIN="$(extract_value "Text Domain")"
 
 PLUGIN_HEADER=$(cat <<EOF
 === ${PLUGIN_NAME} ===
+
 Contributors: ${AUTHOR}
 Tags: sage, wordpress, woocommerce, synchronization, erp
 Requires at least: ${REQUIRES_WP}
@@ -48,10 +49,6 @@ Stable tag: ${VERSION}
 License: ${LICENSE}
 License URI: ${LICENSE_URI}
 
-== Description ==
-
-${DESCRIPTION}
-
 EOF
 )
 
@@ -59,7 +56,7 @@ EOF
 awk -v header="$PLUGIN_HEADER" '
 {
     if ($0 == "%pluginHeader%") {
-        printf "%s", header
+        printf "%s\n", header
     } else {
         print
     }
