@@ -9,7 +9,6 @@
  * Copyright: © 2026 Egas Solutions
  *
  * Requires at least: 6.9
- * Tested up to: 6.9
  * Requires PHP: 8.2
  * Requires Plugins: woocommerce
  *
@@ -41,13 +40,13 @@ if (WP_DEBUG) {
     });
 }
 
-$sage = Sage::getInstance(__FILE__);
-if (!$sage->isWooCommerceActive()) {
+$egas = Sage::getInstance(__FILE__);
+if (!$egas->isWooCommerceActive()) {
     add_action('admin_notices', function () {
         echo '<div class="notice notice-error"><p>' .
             esc_html__('Egas a besoin de Woocommerce pour fonctionner.', 'egas') .
             '</p></div>';
     });
 } else {
-    $sage->registerHooks();
+    $egas->registerHooks();
 }

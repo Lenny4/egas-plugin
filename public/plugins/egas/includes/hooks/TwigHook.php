@@ -43,7 +43,7 @@ class TwigHook
         $twig->addFunction(new TwigFunction('get_site_url', static fn() => get_site_url()));
         $twig->addFunction(new TwigFunction('get_option', function (string $option): string {
             $v = get_option($option);
-            if ($v === false) {
+            if ($v === false && defined('WP_DEBUG') && WP_DEBUG) {
                 error_log(json_encode([
                     'level' => 'warn',
                     'ts' => microtime(true),

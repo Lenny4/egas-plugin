@@ -26,7 +26,7 @@ RUN apt-get update -y && \
     XDEBUG_MODE=off composer install --working-dir=/var/www/html/public/plugins/egas --no-dev --optimize-autoloader && \
     yarn --cwd /var/www/html/public/plugins/egas install && \
     yarn --cwd /var/www/html/public/plugins/egas build && \
-    pip3 install --break-system-packages beautifulsoup4 requests
+    pip3 install --break-system-packages beautifulsoup4 requests deep-translator
 
 RUN bash readme/script/generate-readme-txt.bash
 

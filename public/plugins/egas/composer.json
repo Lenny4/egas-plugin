@@ -25,7 +25,7 @@
         "wp-coding-standards/wpcs": "^3.0.0",
         "squizlabs/php_codesniffer": "^3.3.1",
         "wp-cli/wp-cli-bundle": "*",
-        "rector/rector": "^1.2"
+        "rector/rector": "^2.5"
     },
     "config": {
         "allow-plugins": {

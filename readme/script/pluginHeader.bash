@@ -41,7 +41,7 @@ PLUGIN_HEADER=$(cat <<EOF
 === ${PLUGIN_NAME} ===
 
 Contributors: ${AUTHOR}
-Tags: sage, wordpress, woocommerce, synchronization, erp
+Tags: sage, woocommerce, synchronization, erp
 Requires at least: ${REQUIRES_WP}
 Tested up to: ${TESTED_UP_TO}
 Requires PHP: ${REQUIRES_PHP}

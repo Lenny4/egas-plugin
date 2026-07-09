@@ -1,56 +1,56 @@
 %pluginHeader%
 
-Tout ce dont vous avez besoin pour connecter votre boutique WordPress à Sage en toute simplicité. De vos premières synchronisations à la gestion de milliers de données, notre plugin vous accompagne pour automatiser vos échanges et faire évoluer votre activité.
+Connect your WordPress store to Sage and automate your data exchanges to manage your information simply and efficiently.
 
 == Description ==
 
-= Avertissement =
+= Disclaimer =
 
-Ce plugin n’est pas un produit officiel de Sage et n’est pas affilié à Sage. Sage est une marque déposée de ses propriétaires respectifs. Ce plugin est une solution tierce permettant la connexion et la synchronisation avec les services Sage.
+This plugin is not an official Sage product and is not affiliated with Sage. Sage is a registered trademark of its respective owners. This plugin is a third-party solution that enables connection and synchronization with Sage services.
 
-= Synchronisez WordPress et Sage en toute simplicité =
+= Easily Synchronize WordPress and Sage =
 
-Connectez votre site WordPress à Sage grâce à un plugin puissant, flexible et conçu pour automatiser vos échanges de données. Synchronisez vos articles, clients, documents de vente et paiements entre vos deux environnements pour simplifier votre gestion quotidienne.
+Connect your WordPress website to Sage with a powerful, flexible plugin designed to automate your data exchanges. Synchronize your products, customers, sales documents, and payments between both environments to simplify your daily management.
 
-Que vous soyez une entreprise utilisant WordPress pour votre activité en ligne ou un développeur souhaitant proposer une solution fiable à vos clients, ce plugin vous permet de garder vos données synchronisées et toujours à jour.
+Whether you are a business using WordPress for your online activity or a developer looking to provide a reliable solution to your clients, this plugin helps you keep your data synchronized and always up to date.
 
-= UNE CONNEXION FLUIDE ENTRE WORDPRESS ET SAGE =
+= A SEAMLESS CONNECTION BETWEEN WORDPRESS AND SAGE =
 
-Notre plugin vous offre une synchronisation bidirectionnelle entre WordPress et Sage, vous permettant de choisir le sens des échanges selon vos besoins.
+Our plugin provides two-way synchronization between WordPress and Sage, allowing you to choose the direction of data exchanges according to your needs.
 
-* **Synchronisez vos articles** entre WordPress et Sage afin de maintenir votre catalogue à jour.
-* **Synchronisez vos clients** pour éviter les doublons et centraliser vos informations commerciales.
-* **Synchronisez vos documents de vente** pour faciliter le suivi de vos opérations commerciales.
-* **Synchronisez vos paiements** et choisissez le journal Sage dans lequel ils seront enregistrés.
-* **Configurez vos paramètres comptables** comme le type de règlement utilisé pour vos transactions.
-* **Gérez les documents d’acompte** en choisissant si leur création doit être automatisée.
+* **Synchronize your products** between WordPress and Sage to keep your catalog up to date.
+* **Synchronize your customers** to prevent duplicates and centralize your business information.
+* **Synchronize your sales documents** to simplify the tracking of your commercial operations.
+* **Synchronize your payments** and choose the Sage journal where they will be recorded.
+* **Configure your accounting settings** such as the payment method used for your transactions.
+* **Manage deposit documents** by choosing whether their creation should be automated.
 
-= UNE CONFIGURATION SIMPLE ET ADAPTÉE À VOS BESOINS =
+= A SIMPLE CONFIGURATION TAILORED TO YOUR NEEDS =
 
-Le plugin est conçu pour s’adapter à votre environnement Sage et à vos processus métier.
+The plugin is designed to adapt to your Sage environment and your business processes.
 
-* Connectez facilement votre instance Sage via l’API.
-* Configurez les règles de synchronisation selon vos besoins.
-* Contrôlez les données échangées entre WordPress et Sage.
-* Automatisez vos tâches répétitives pour gagner du temps au quotidien.
+* Easily connect your Sage instance via the API.
+* Configure synchronization rules according to your requirements.
+* Control the data exchanged between WordPress and Sage.
+* Automate repetitive tasks to save time every day.
 
-= GAGNEZ EN PRODUCTIVITÉ =
+= BOOST YOUR PRODUCTIVITY =
 
-Grâce à l’automatisation des échanges entre vos outils, réduisez les saisies manuelles et limitez les erreurs liées aux manipulations de données.
+By automating exchanges between your tools, reduce manual data entry and minimize errors caused by data handling.
 
-Votre équipe peut continuer à utiliser WordPress et Sage tout en bénéficiant d’un système connecté, fiable et évolutif.
+Your team can continue using WordPress and Sage while benefiting from a connected, reliable, and scalable system.
 
-= UNE SOLUTION PENSÉE POUR LES ENTREPRISES ET LES DÉVELOPPEURS =
+= A SOLUTION DESIGNED FOR BUSINESSES AND DEVELOPERS =
 
-Que vous soyez une entreprise souhaitant améliorer ses processus internes ou un développeur créant des solutions personnalisées pour vos clients, ce plugin fournit une base solide pour construire une intégration WordPress/Sage adaptée.
+Whether you are a company looking to improve your internal processes or a developer creating customized solutions for your clients, this plugin provides a solid foundation for building a WordPress/Sage integration tailored to your needs.
 
-Profitez d’une architecture flexible permettant d’étendre les fonctionnalités et d’intégrer le plugin à vos workflows existants.
+Benefit from a flexible architecture that allows you to extend features and integrate the plugin into your existing workflows.
 
-= GARDEZ LE CONTRÔLE DE VOS DONNÉES =
+= KEEP CONTROL OF YOUR DATA =
 
-Vos données restent dans vos environnements WordPress et Sage. Le plugin facilite leur synchronisation sans dépendre d’une plateforme externe.
+Your data remains within your WordPress and Sage environments. The plugin makes synchronization easier without relying on an external platform.
 
-Vous gardez la maîtrise de vos informations commerciales et comptables tout en profitant d’une automatisation efficace.
+You retain control over your business and accounting information while benefiting from efficient automation.
 
 == Frequently Asked Questions ==
 
