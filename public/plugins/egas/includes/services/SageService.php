@@ -17,7 +17,6 @@ use Egas\utils\OrderUtils;
 use Egas\utils\PathUtils;
 use Egas\utils\RoundUtils;
 use Egas\utils\SageTranslationUtils;
-use Exception;
 use StdClass;
 use Swaggest\JsonDiff\JsonDiff;
 use Symfony\Component\HttpFoundation\Response;
@@ -684,20 +683,21 @@ WHERE user_login LIKE %s
                 'authorization' => "Basic " . get_option(Sage::TOKEN . '_authorization'),
             ],
             'method' => $method,
-            'body' => json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE),
+            'body' => $body,
         ]);
         $responseError = null;
-        if ($response instanceof WP_Error) {
+        if ($response->is_error()) {
+            $error = $response->as_error(); // WP_Error
             $responseError = "<div class='notice notice-error is-dismissible'>
-                                <pre>" . $response->get_error_code() . "</pre>
-                                <pre>" . $response->get_error_message() . "</pre>
-                                <pre>" . json_encode($response, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) . "</pre>
-                                </div>";
-        } elseif (!in_array($response["response"]["code"], [Response::HTTP_OK, Response::HTTP_CREATED], true)) {
+                            <pre>" . $error->get_error_code() . "</pre>
+                            <pre>" . $error->get_error_message() . "</pre>
+                            <pre>" . json_encode($error->get_error_data(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) . "</pre>
+                            </div>";
+        } elseif (!in_array($response->get_status(), [Response::HTTP_OK, Response::HTTP_CREATED], true)) {
             $responseError = "<div class='notice notice-error is-dismissible'>
-                                <pre>" . $response['response']['code'] . "</pre>
-                                <pre>" . $response['body'] . "</pre>
-                                </div>";
+                            <pre>" . $response->get_status() . "</pre>
+                            <pre>" . json_encode($response->get_data(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE) . "</pre>
+                            </div>";
         }
         return [$response, $responseError];
     }

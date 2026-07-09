@@ -366,7 +366,7 @@ const UserComponent = () => {
                   Vous devez désactiver l’option "Créer le compte dans Sage" sur la page de configuration
                   <br/>
                   <a
-                    href="https://caddy/wordpress/wp-admin/admin.php?page=egas_settings&tab=fComptets"
+                    href={siteUrl + "/wp-admin/admin.php?page=egas_settings&tab=fComptets"}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -394,7 +394,7 @@ const UserComponent = () => {
                   Vous devez activer l’option "Créer le compte dans Sage" sur la page de configuration
                   <br/>
                   <a
-                    href="https://caddy/wordpress/wp-admin/admin.php?page=egas_settings&tab=fComptets"
+                    href={siteUrl + "/wp-admin/admin.php?page=egas_settings&tab=fComptets"}
                     target="_blank"
                     rel="noreferrer"
                   >

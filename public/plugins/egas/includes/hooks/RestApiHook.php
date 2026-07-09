@@ -136,22 +136,22 @@ class RestApiHook
                         $arRef,
                     );
                     if ($wprestRequest->get_param('json') === '1') {
-                        if ($response instanceof WP_Error) {
-                            $body = json_encode($response->get_error_messages(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-                            $code = $response->get_error_code();
+                        if ($response instanceof WP_REST_Response && $response->is_error()) {
+                            $error = $response->as_error();
+                            $body = json_encode($error->get_error_messages(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+                            $code = $error->get_error_code();
+                            if (!is_numeric($code)) {
+                                $code = 500;
+                            }
                         } elseif (is_null($response) || is_int($response)) {
                             return new WP_REST_Response(json_encode([
                                 'responseError' => $responseError,
                                 'message' => $message,
                             ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), is_int($response) ? $response : Response::HTTP_INTERNAL_SERVER_ERROR);
                         } else {
-                            $body = $response["body"];
-                            $code = $response['response']['code'];
-                            try {
-                                $body = json_decode($body, false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-                            } catch (Throwable) {
-                                // nothing
-                            }
+                            // $response est un WP_REST_Response valide (succès ou erreur HTTP non-WP_Error)
+                            $body = $response->get_data();
+                            $code = $response->get_status();
                         }
                         return new WP_REST_Response($body, $code);
                     }
@@ -161,7 +161,7 @@ class RestApiHook
                             $order,
                             message: $message,
                         )
-                    ], is_int($response) ? $response : $response['response']['code']);
+                    ], is_int($response) ? $response : $response->get_status());
                 },
                 'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);

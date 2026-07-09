@@ -1,6 +1,6 @@
 services:
 
-  caddy:
+  egas-plugin:
     container_name: wordpress
     build:
       context: .

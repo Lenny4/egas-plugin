@@ -30,6 +30,7 @@ use WC_Product_Simple;
 use WC_Shipping_Rate;
 use WC_Tax;
 use WP_Error;
+use WP_REST_Response;
 use WP_Term;
 use WP_User;
 
@@ -431,15 +432,15 @@ class WoocommerceService
         }
         if (is_null($fArticle)) {
             return [null, null, "<div class='error'>
-                        " . __("L'article n'a pas pu être importé", 'egas') . "
-                                </div>", 0];
+                    " . __("L'article n'a pas pu être importé", 'egas') . "
+                            </div>", 0];
         }
         $resource = SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME);
         $canImportFArticle = $resource->getCanImport()($fArticle);
         if (!empty($canImportFArticle)) {
             return [Response::HTTP_CONFLICT, null, "<div class='error'>
-                        " . implode(' ', $canImportFArticle) . "
-                                </div>", 0];
+                    " . implode(' ', $canImportFArticle) . "
+                            </div>", 0];
         }
         $articlePostId = $this->getWooCommerceIdArticle($arRef);
         $article = $this->convertSageArticleToWoocommerce($fArticle, SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME), $articlePostId);
@@ -464,18 +465,18 @@ class WoocommerceService
             );
             if (is_string($responseError)) {
                 $message = $responseError;
-            } elseif ($response["response"]["code"] === 201) {
-                $body = json_decode((string)$response["body"], false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-                $urlArticle = str_replace('%id%', (string)$body->id, $urlArticle);
-                $articlePostId = $body->id;
+            } elseif ($response->get_status() === 201) {
+                $body = $response->get_data();
+                $urlArticle = str_replace('%id%', (string)$body['id'], $urlArticle);
+                $articlePostId = $body['id'];
                 if ($showSuccessMessage) {
                     $message = "<div class='notice notice-success is-dismissible'>
-                    <p>" . __('Article créé: ', 'egas') . $body->name . "</p>" . $urlArticle . "
-                    {$dismissNotice}
-                            </div>";
+                <p>" . __('Article créé: ', 'egas') . $body['name'] . "</p>" . $urlArticle . "
+                {$dismissNotice}
+                        </div>";
                 }
             } else {
-                $message = $response["body"];
+                $message = json_encode($response->get_data(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
             }
         } else {
             $oldMetadata = SageService::getInstance()->get_post_meta_single($articlePostId);
@@ -488,21 +489,14 @@ class WoocommerceService
             foreach ($article["meta_data"] as $meta) {
                 update_post_meta($articlePostId, $meta['key'], $meta['value']);
             }
-            $response = [
-                'body' => [
-                    'id' => $articlePostId,
-                ],
-                'response' => [
-                    'code' => 200,
-                ]
-            ];
+            $response = new WP_REST_Response(['id' => $articlePostId], 200);
             $responseError = null;
             $urlArticle = str_replace('%id%', (string)$articlePostId, $urlArticle);
             if ($showSuccessMessage) {
                 $message = "<div class='notice notice-success is-dismissible'>
-                    <p>" . __('Article mis à jour: ', 'egas') . $article["name"] . "</p>" . $urlArticle . "
-                    {$dismissNotice}
-                            </div>";
+                <p>" . __('Article mis à jour: ', 'egas') . $article["name"] . "</p>" . $urlArticle . "
+                {$dismissNotice}
+                        </div>";
             }
         }
         if (!empty($articlePostId)) {
@@ -623,10 +617,10 @@ class WoocommerceService
         $qty = wc_stock_amount($quantity);
         if (is_null($new->postId)) {
             [$response, $responseError, $message2, $postId] = $this->importFArticleFromSage($new->arRef);
-            if ($response["response"]["code"] !== 201 && $response["response"]["code"] !== 200) {
+            if ($response->get_status() !== 201 && $response->get_status() !== 200) {
                 return $message2;
             }
-            $productId = json_decode((string)$response["body"], false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)->id;
+            $productId = $response->get_data()['id'];
         }
 
         $product = wc_get_product($productId);

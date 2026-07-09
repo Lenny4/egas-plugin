@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Egas\services;
 
-use WP_Error;
-use WP_Http;
+use WP_REST_Request;
+use WP_REST_Response;
 
 class RequestService
 {
@@ -19,19 +19,26 @@ class RequestService
         return self::$requestService;
     }
 
-    public function selfRequest(
-        string $url,
-        array  $params,
-    ): WP_Error|array
+    public function selfRequest(string $route, array $params = []): WP_REST_Response
     {
-        // https://developer.wordpress.org/rest-api/key-concepts/
-        // If you are using non-pretty permalinks, you should pass the REST API route as a query string parameter. The route http://oursite.com/wp-json/ in the example above would hence be http://oursite.com/?rest_route=/.
-        $url = wp_nonce_url(home_url('/index.php', is_ssl() ? 'https' : 'http'), 'wp_rest') . '&rest_route=' . urlencode($url);
-        return (new WP_Http)->request($url, [
-            'timeout' => 30,
-            'cookies' => $_COOKIE,
-            'sslverify' => false, // no ssl verification required for local request
-            ...$params,
-        ]);
+        // $route is the REST route, e.g. '/wc/v3/products'
+        // $params can include: 'method', 'body' (array), 'headers' (array)
+        $method = $params['method'] ?? 'GET';
+        $request = new WP_REST_Request($method, $route);
+        // Query params / body params — WP_REST_Request doesn't care whether
+        // they came from the query string or POST body, set_param() handles both
+        // and the route's own arg schema (validate/sanitize callbacks) still runs.
+        if (!empty($params['body']) && is_array($params['body'])) {
+            foreach ($params['body'] as $key => $value) {
+                $request->set_param($key, $value);
+            }
+        }
+        // Headers, if the callback reads them via $request->get_header()
+        if (!empty($params['headers']) && is_array($params['headers'])) {
+            foreach ($params['headers'] as $key => $value) {
+                $request->set_header($key, $value);
+            }
+        }
+        return rest_do_request($request);
     }
 }
