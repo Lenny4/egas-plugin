@@ -65,8 +65,8 @@ class FDocenteteResource extends Resource
             if (is_array($pReglements)) {
                 usort($pReglements, function (stdClass $a, stdClass $b): int {
                     $word = 'carte';
-                    similar_text((string) $a->rIntitule, $word, $percA);
-                    similar_text((string) $b->rIntitule, $word, $percB);
+                    similar_text((string)$a->rIntitule, $word, $percA);
+                    similar_text((string)$b->rIntitule, $word, $percB);
                     return $percB <=> $percA;
                 });
             }

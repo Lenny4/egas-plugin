@@ -84,7 +84,7 @@ class WordpressService
         // woocommerce/includes/admin/class-wc-admin-meta-boxes.php:134 add_meta_box( 'woocommerce-product-data
         if (
             !$force && (
-            !$this->isOptionFormSubmitted() || !current_user_can('manage_options')
+                !$this->isOptionFormSubmitted() || !current_user_can('manage_options')
             )
         ) {
             return false;
@@ -227,7 +227,7 @@ class WordpressService
             $zone = new WC_Shipping_Zone($zoneId);
             $oldSlugs = [];
             foreach ($zone->get_shipping_methods() as $shippingMethod) {
-                if (!str_starts_with((string) $shippingMethod->id, Sage::TOKEN . '-')) {
+                if (!str_starts_with((string)$shippingMethod->id, Sage::TOKEN . '-')) {
                     continue;
                 }
                 $oldSlugs[] = $shippingMethod->id;
@@ -327,7 +327,7 @@ class WordpressService
                 }
             }
             foreach ($flatPost as $key => $value) {
-                if (str_starts_with((string) $key, '_' . Sage::TOKEN)) {
+                if (str_starts_with((string)$key, '_' . Sage::TOKEN)) {
                     update_post_meta($postId, $key, $value);
                 }
             }
@@ -386,7 +386,7 @@ class WordpressService
             }
         }
         foreach ($post as $key => $value) {
-            if (str_starts_with((string) $key, '_' . Sage::TOKEN)) {
+            if (str_starts_with((string)$key, '_' . Sage::TOKEN)) {
                 $value = trim((string)preg_replace('/\s{2,}/', ' ', (string)$value));
                 if ($key === FComptetResource::META_KEY) {
                     $value = strtoupper($value);

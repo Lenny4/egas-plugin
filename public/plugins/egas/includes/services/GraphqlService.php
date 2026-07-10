@@ -39,6 +39,7 @@ use GraphQL\RawObject;
 use GraphQL\Variable;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionParameter;
 use RuntimeException;
 use stdClass;
 use Throwable;
@@ -1407,7 +1408,7 @@ class GraphqlService
             foreach ($fDocentetes as $fDocentete) {
                 $fDocentete->wordpressIds = [];
                 foreach ($r as $wcOrdersMeta) {
-                    $data = json_decode((string) $wcOrdersMeta->meta_value, false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+                    $data = json_decode((string)$wcOrdersMeta->meta_value, false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
                     if ($data->doPiece === $fDocentete->doPiece &&
                         $data->doType === $fDocentete->doType) {
                         $fDocentete->wordpressIds[] = (int)$wcOrdersMeta->order_id;
@@ -2028,7 +2029,7 @@ class GraphqlService
             // Check if the method name starts with "get"
             if (str_starts_with($methodName, 'get')) {
                 $parameters = $reflectionMethod->getParameters();
-                $paramNames = array_map(fn(\ReflectionParameter $reflectionParameter): string => $reflectionParameter->getName(), $parameters);
+                $paramNames = array_map(fn(ReflectionParameter $reflectionParameter): string => $reflectionParameter->getName(), $parameters);
 
                 // Check if both 'useCache' and 'getFromSage' are in the parameter list
                 if (

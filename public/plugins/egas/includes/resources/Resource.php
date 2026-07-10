@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Egas\resources;
 
-use Egas\class\SageEntityMetadata;
 use Closure;
 use DateTime;
+use Egas\class\SageEntityMetadata;
 use stdClass;
 
 abstract class Resource

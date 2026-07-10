@@ -51,7 +51,7 @@ final class PathUtils
     {
         $result = [];
         foreach ($post as $key => $value) {
-            if (is_array($value) && (str_starts_with((string) $key, '_' . Sage::TOKEN . '_') || !empty($prefix))) {
+            if (is_array($value) && (str_starts_with((string)$key, '_' . Sage::TOKEN . '_') || !empty($prefix))) {
                 foreach ($value as $k => $v) {
                     $result = [
                         ...$result,

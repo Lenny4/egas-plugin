@@ -16,9 +16,7 @@ use Egas\services\WoocommerceService;
 use Egas\services\WordpressService;
 use Egas\utils\FDocenteteUtils;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 use WC_Order;
-use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 

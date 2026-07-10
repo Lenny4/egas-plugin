@@ -482,7 +482,7 @@ class WoocommerceService
             $oldMetadata = SageService::getInstance()->get_post_meta_single($articlePostId);
             $allMetadataNames = array_map(static fn(array $meta) => $meta['key'], $article["meta_data"]);
             foreach ($oldMetadata as $key => $value) {
-                if (!in_array($key, $allMetadataNames, true) && str_starts_with((string) $key, '_' . Sage::TOKEN)) {
+                if (!in_array($key, $allMetadataNames, true) && str_starts_with((string)$key, '_' . Sage::TOKEN)) {
                     delete_post_meta($articlePostId, $key);
                 }
             }

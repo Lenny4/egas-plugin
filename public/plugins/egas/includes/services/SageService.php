@@ -111,7 +111,7 @@ WHERE user_login LIKE %s
                 return $a->doType <=> $b->doType;
             }
             if ($a->doPiece !== $b->doPiece) {
-                return strcmp((string) $b->doPiece, (string) $a->doPiece);
+                return strcmp((string)$b->doPiece, (string)$a->doPiece);
             }
             return $a->dlLigne <=> $b->dlLigne;
         });
@@ -658,7 +658,7 @@ WHERE user_login LIKE %s
             if ($filterType->kind !== 'INPUT_OBJECT') {
                 continue;
             }
-            if (!str_contains((string) $filterType->name, 'Operation')) {
+            if (!str_contains((string)$filterType->name, 'Operation')) {
                 continue;
             }
             $result[$filterType->name] = array_values(array_filter(array_map(fn(stdClass $value) => $value->name, $filterType->inputFields), fn(string $item): bool => !in_array($item, ["and", "or"], true)));

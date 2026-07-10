@@ -125,7 +125,7 @@ class WoocommerceHook
                     'linked_product',
                     'advanced',
                 ],
-                true)) {
+                    true)) {
                     $tabs[$tabName]["class"][] = 'hide_if_' . Sage::TOKEN;
                 }
             }
