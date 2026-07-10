@@ -22,6 +22,8 @@ extract_value() {
     grep -E "^\s*\*\s+${key}:" "$PLUGIN_FILE" \
         | sed -E "s/^\s*\*\s+${key}:\s*//" \
         | head -n1
+
+    return 0
 }
 
 PLUGIN_NAME="$(extract_value "Plugin Name")"
