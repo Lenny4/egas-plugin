@@ -5,7 +5,6 @@
  * Description: Synchronize Sage ERP data with your WordPress website and WooCommerce store.
  * Version: 1.0.0
  * Author: Egas Solutions
- * Author URI: https://egas-solutions.com/
  * Copyright: © 2026 Egas Solutions
  *
  * Requires at least: 6.9
