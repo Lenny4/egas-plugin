@@ -19,7 +19,7 @@ echo "FAQ selector : $SELECTOR"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-README_FILE="$SCRIPT_DIR/../../public/plugins/egas/readme.txt"
+README_FILE="$SCRIPT_DIR/../../public/plugins/egas-data-sync-for-sage/readme.txt"
 TMP_FILE="$(mktemp)"
 
 trap 'rm -f "$TMP_FILE"' EXIT

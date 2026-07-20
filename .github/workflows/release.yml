@@ -19,7 +19,7 @@ jobs:
       - name: Read version from egas-data-sync-for-sage.php
         id: version
         run: |
-          VERSION=$(grep -i "^ \* Version:" public/plugins/egas/egas-data-sync-for-sage.php | sed 's/.*Version: *//')
+          VERSION=$(grep -i "^ \* Version:" public/plugins/egas-data-sync-for-sage.php | sed 's/.*Version: *//')
 
           if [ -z "$VERSION" ]; then
             echo "No version found in egas-data-sync-for-sage.php"
@@ -58,7 +58,7 @@ jobs:
           CONTAINER_ID=$(docker create ghcr.io/$IMAGE_NAME:${{ steps.version.outputs.version }})
 
           mkdir -p plugin_extract
-          docker cp $CONTAINER_ID:/var/www/html/public/plugins/egas plugin_extract/egas
+          docker cp $CONTAINER_ID:/var/www/html/public/plugins/egas-data-sync-for-sage plugin_extract/egas-data-sync-for-sage
 
           docker rm $CONTAINER_ID
 

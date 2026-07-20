@@ -23,9 +23,9 @@ RUN apt-get update -y && \
     npm install --global yarn && \
     yarn add -D webpack-cli && \
     XDEBUG_MODE=off composer install && \
-    XDEBUG_MODE=off composer install --working-dir=/var/www/html/public/plugins/egas --no-dev --optimize-autoloader && \
-    yarn --cwd /var/www/html/public/plugins/egas install && \
-    yarn --cwd /var/www/html/public/plugins/egas build && \
+    XDEBUG_MODE=off composer install --working-dir=/var/www/html/public/plugins/egas-data-sync-for-sage --no-dev --optimize-autoloader && \
+    yarn --cwd /var/www/html/public/plugins/egas-data-sync-for-sage install && \
+    yarn --cwd /var/www/html/public/plugins/egas-data-sync-for-sage build && \
     pip3 install --break-system-packages beautifulsoup4 requests deep-translator
 
 RUN bash readme/script/generate-readme-txt.bash

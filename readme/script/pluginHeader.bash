@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-PLUGIN_FILE="$(dirname "$0")/../../public/plugins/egas/egas-data-sync-for-sage.php"
-README_FILE="$(dirname "$0")/../../public/plugins/egas/readme.txt"
+PLUGIN_FILE="$(dirname "$0")/../../public/plugins/egas-data-sync-for-sage/egas-data-sync-for-sage.php"
+README_FILE="$(dirname "$0")/../../public/plugins/egas-data-sync-for-sage/readme.txt"
 TMP_FILE="$(mktemp)"
 
 if [[ ! -f "$PLUGIN_FILE" ]]; then
