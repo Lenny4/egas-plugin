@@ -346,8 +346,8 @@ class WordpressService
     public function onCreateUpdateUser(int $userId, bool $isNew): void
     {
         $post = wp_unslash($_POST);
-        $create_nonce = $post['_wpnonce_create-user'] ?? '';
-        $update_nonce = $post['_wpnonce'] ?? '';
+        $create_nonce = sanitize_text_field(wp_unslash($post['_wpnonce_create-user'] ?? ''));
+        $update_nonce = sanitize_text_field(wp_unslash($post['_wpnonce'] ?? ''));
         if (
             !wp_verify_nonce($create_nonce, 'create-user') &&
             !wp_verify_nonce($update_nonce, 'update-user_' . $userId)

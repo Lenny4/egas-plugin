@@ -8,6 +8,12 @@ Connect your WordPress store to Sage and automate your data exchanges to manage 
 
 This plugin is not an official Sage product and is not affiliated with Sage. Sage is a registered trademark of its respective owners. This plugin is a third-party solution that enables connection and synchronization with Sage services.
 
+Terms:
+https://egas-solutions.com/terms-of-service/
+
+Privacy:
+https://egas-solutions.com/privacy-policy/
+
 = Easily Synchronize WordPress and Sage =
 
 Connect your WordPress website to Sage with a powerful, flexible plugin designed to automate your data exchanges. Synchronize your products, customers, sales documents, and payments between both environments to simplify your daily management.

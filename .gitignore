@@ -14,9 +14,9 @@
 /vendor
 auth.json
 .idea
-!public/plugins/egas
+!public/plugins/egas-data-sync-for-sage
 public/themes
 cache
 public/object-cache.php
 public/wflogs
-public/plugins/egas/readme.txt
+public/plugins/egas-data-sync-for-sage/readme.txt
