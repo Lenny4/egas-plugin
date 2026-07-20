@@ -4,8 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-rm -f "$SCRIPT_DIR/../../public/plugins/egas/readme.txt"
-cp "$SCRIPT_DIR/../readme.txt" "$SCRIPT_DIR/../../public/plugins/egas/"
+rm -f "$SCRIPT_DIR/../../public/plugins/egas-data-sync-for-sage/readme.txt"
+cp "$SCRIPT_DIR/../readme.txt" "$SCRIPT_DIR/../../public/plugins/egas-data-sync-for-sage/"
 
 "$SCRIPT_DIR/changelog.bash"
 "$SCRIPT_DIR/pluginHeader.bash"

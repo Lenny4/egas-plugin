@@ -16,13 +16,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read version from egas.php
+      - name: Read version from egas-data-sync-for-sage.php
         id: version
         run: |
-          VERSION=$(grep -i "^ \* Version:" public/plugins/egas/egas.php | sed 's/.*Version: *//')
+          VERSION=$(grep -i "^ \* Version:" public/plugins/egas/egas-data-sync-for-sage.php | sed 's/.*Version: *//')
 
           if [ -z "$VERSION" ]; then
-            echo "No version found in egas.php"
+            echo "No version found in egas-data-sync-for-sage.php"
             exit 1
           fi
 

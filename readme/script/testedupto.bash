@@ -3,7 +3,7 @@
 set -euo pipefail
 
 API_URL="https://api.wordpress.org/core/version-check/1.7/"
-PLUGIN_FILE="$(dirname "$0")/../../public/plugins/egas/egas.php"
+PLUGIN_FILE="$(dirname "$0")/../../public/plugins/egas-data-sync-for-sage/egas-data-sync-for-sage.php"
 
 if [[ ! -f "$PLUGIN_FILE" ]]; then
     echo "Error: plugin file not found: $PLUGIN_FILE" >&2

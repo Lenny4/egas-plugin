@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PLUGIN_FILE="$(dirname "$0")/../../public/plugins/egas/egas.php"
+PLUGIN_FILE="$(dirname "$0")/../../public/plugins/egas/egas-data-sync-for-sage.php"
 README_FILE="$(dirname "$0")/../../public/plugins/egas/readme.txt"
 TMP_FILE="$(mktemp)"
 

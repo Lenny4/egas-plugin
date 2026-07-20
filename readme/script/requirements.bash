@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 README_FILE="$SCRIPT_DIR/../../public/plugins/egas/readme.txt"
-PLUGIN_FILE="$SCRIPT_DIR/../../public/plugins/egas/egas.php"
+PLUGIN_FILE="$SCRIPT_DIR/../../public/plugins/egas/egas-data-sync-for-sage.php"
 TMP_FILE="$(mktemp)"
 
 if [[ ! -f "$PLUGIN_FILE" ]]; then

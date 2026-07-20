@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-PLUGIN_FILE="$SCRIPT_DIR/../../public/plugins/egas/egas.php"
+PLUGIN_FILE="$SCRIPT_DIR/../../public/plugins/egas/egas-data-sync-for-sage.php"
 README_FILE="$SCRIPT_DIR/../../public/plugins/egas/readme.txt"
 CHANGELOG_FILE="$SCRIPT_DIR/../changelog.json"
 
