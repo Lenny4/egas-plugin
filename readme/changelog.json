@@ -1,6 +1,16 @@
 {
   "changelog": [
     {
+      "version": "1.0.1",
+      "changes": [
+        {
+          "changed": [
+            "Changed plugin name from egas to egas-data-sync-for-sage"
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.0",
       "changes": [
         {
