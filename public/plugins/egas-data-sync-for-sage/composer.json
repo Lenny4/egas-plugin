@@ -13,7 +13,8 @@
         "symfony/translation-contracts": "^3.5",
         "swaggest/json-diff": "^3.12",
         "symfony/dom-crawler": "^7.4",
-        "symfony/css-selector": "^7.4"
+        "symfony/css-selector": "^7.4",
+        "yahnis-elsts/plugin-update-checker": "^5.7"
     },
     "autoload": {
         "psr-4": {
