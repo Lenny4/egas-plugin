@@ -66,19 +66,19 @@ jobs:
         run: |
           cd plugin_extract
 
-          mkdir -p staging1/egas
-          cp -r egas/. staging1/egas/
-          rm -rf staging1/egas/assets
-          rm -rf staging1/egas/utils
-          rm -f  staging1/egas/runc
-          rm -f  staging1/egas/.gitignore
-          rm -rf  staging1/egas/node_modules
-          rm -f  staging1/egas/webpack.config.js
-          rm -f  staging1/egas/tsconfig.json
-          rm -f  staging1/egas/package.json
-          rm -f  staging1/egas/yarn.lock
-          rm -f  staging1/egas/rector.php
-          (cd staging1 && zip -r ../egas-${{ steps.version.outputs.version }}.zip egas)
+          mkdir -p staging1/egas-data-sync-for-sage
+          cp -r egas-data-sync-for-sage/. staging1/egas-data-sync-for-sage/
+          rm -rf staging1/egas-data-sync-for-sage/assets
+          rm -rf staging1/egas-data-sync-for-sage/utils
+          rm -f  staging1/egas-data-sync-for-sage/runc
+          rm -f  staging1/egas-data-sync-for-sage/.gitignore
+          rm -rf  staging1/egas-data-sync-for-sage/node_modules
+          rm -f  staging1/egas-data-sync-for-sage/webpack.config.js
+          rm -f  staging1/egas-data-sync-for-sage/tsconfig.json
+          rm -f  staging1/egas-data-sync-for-sage/package.json
+          rm -f  staging1/egas-data-sync-for-sage/yarn.lock
+          rm -f  staging1/egas-data-sync-for-sage/rector.php
+          (cd staging1 && zip -r ../egas-data-sync-for-sage-${{ steps.version.outputs.version }}.zip egas-data-sync-for-sage)
 
       - name: Create git tag
         run: |
@@ -96,6 +96,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
           files: |
-            plugin_extract/egas-${{ steps.version.outputs.version }}.zip
+            plugin_extract/egas-data-sync-for-sage-${{ steps.version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
