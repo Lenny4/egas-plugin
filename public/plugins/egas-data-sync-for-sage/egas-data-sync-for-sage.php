@@ -44,7 +44,7 @@ $egas = Sage::getInstance(__FILE__);
 if (!$egas->isWooCommerceActive()) {
     add_action('admin_notices', function () {
         echo '<div class="notice notice-error"><p>' .
-            esc_html__('Egas a besoin de Woocommerce pour fonctionner.', 'egas') .
+            esc_html__('Egas a besoin de Woocommerce pour fonctionner.', 'egas-data-sync-for-sage') .
             '</p></div>';
     });
 } else {

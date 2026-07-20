@@ -157,7 +157,7 @@ class WordpressHook
         // endregion
         // Add settings link to plugins page.
         add_filter('plugin_action_links_' . plugin_basename($sage->file), static function (array $links): array {
-            $links[] = '<a href="options-general.php?page=' . Sage::TOKEN . '_settings">' . __('Settings', 'egas') . '</a>';
+            $links[] = '<a href="options-general.php?page=' . Sage::TOKEN . '_settings">' . __('Settings', 'egas-data-sync-for-sage') . '</a>';
             return $links;
         });
         // Configure placement of plugin settings page. See readme for implementation.
@@ -198,7 +198,7 @@ LIMIT 1
                     ) {
                         $message = sprintf(
                         /* translators: 1: Sage account number, 2: WordPress username, 3: WordPress user ID */
-                            __('Le compte Sage [%1$s] est déjà lié au compte Wordpress [%2$s (id: %3$s)]', 'egas'),
+                            __('Le compte Sage [%1$s] est déjà lié au compte Wordpress [%2$s (id: %3$s)]', 'egas-data-sync-for-sage'),
                             $ctNum,
                             $r[0]->user_login,
                             $r[0]->ID
@@ -248,7 +248,7 @@ LIMIT 1
         // endregion
         // region user show Sage id: https://wordpress.stackexchange.com/a/160423/201039
         add_filter('manage_users_columns', static function (array $columns): array {
-            $columns[Sage::TOKEN] = __("Sage", 'egas');
+            $columns[Sage::TOKEN] = __("Sage", 'egas-data-sync-for-sage');
             return $columns;
         });
         add_filter('manage_users_custom_column', static fn(string $val, string $columnName, int $userId): string => WordpressService::getInstance()->getUserWordpressIdForSage($userId) ?? '', accepted_args: 3);

@@ -156,7 +156,7 @@ class WordpressService
         $this->updateShippingMethodsWithSage();
         AdminController::adminNotices("
 <div class='notice notice-success is-dismissible'>
-    <p>" . __('Connexion réussie à l\'API. Les paramètres ont été mis à jour.', 'egas') . "</p>
+    <p>" . __('Connexion réussie à l\'API. Les paramètres ont été mis à jour.', 'egas-data-sync-for-sage') . "</p>
 </div>
 ");
         return true;
@@ -173,7 +173,7 @@ class WordpressService
             if ($showMessage && $taxeChanges !== []) {
                 ?>
                 <div class="notice notice-success is-dismissible">
-                    <p><strong><?php echo esc_html__("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
+                    <p><strong><?php echo esc_html__("Les taxes Sage ont été mises à jour.", 'egas-data-sync-for-sage') ?></strong></p>
                 </div>
                 <?php
             }

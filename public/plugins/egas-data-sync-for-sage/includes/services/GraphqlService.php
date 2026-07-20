@@ -86,19 +86,19 @@ class GraphqlService
         $wordpressUrl = get_option(Sage::TOKEN . '_wordpress_host_url');
         $link = "<strong><span style='display: block; clear: both;'><a href='" .
             get_admin_url() . "admin.php?page=" . Sage::TOKEN . "_settings'>" .
-            __("Modifier", 'egas') .
+            __("Modifier", 'egas-data-sync-for-sage') .
             "</a></span></strong>";
         $message = null;
         if (!is_string($hostUrl) || $hostUrl === '' || $hostUrl === '0') {
-            $message = __("Veuillez renseigner l'adresse de l'API Sage. ", 'egas') . $link;
+            $message = __("Veuillez renseigner l'adresse de l'API Sage. ", 'egas-data-sync-for-sage') . $link;
         } elseif (filter_var($hostUrl, FILTER_VALIDATE_URL) === false) {
-            $message = __("L'adresse de l'API Sage n'est pas une url valide. ", 'egas') . $link;
+            $message = __("L'adresse de l'API Sage n'est pas une url valide. ", 'egas-data-sync-for-sage') . $link;
         } elseif (!is_string($wordpressUrl) || $wordpressUrl === '' || $wordpressUrl === '0') {
-            $message = __("Veuillez renseigner l'adresse de WordPress. ", 'egas') . $link;
+            $message = __("Veuillez renseigner l'adresse de WordPress. ", 'egas-data-sync-for-sage') . $link;
         } elseif (filter_var($wordpressUrl, FILTER_VALIDATE_URL) === false) {
-            $message = __("L'adresse de WordPress n'est pas une url valide. ", 'egas') . $link;
+            $message = __("L'adresse de WordPress n'est pas une url valide. ", 'egas-data-sync-for-sage') . $link;
         } elseif (empty(get_option(Sage::TOKEN . '_api_key'))) {
-            $message = __("Veuillez renseigner une clé API. ", 'egas') . $link;
+            $message = __("Veuillez renseigner une clé API. ", 'egas-data-sync-for-sage') . $link;
         }
         if (!is_null($message)) {
             AdminController::adminNotices("
@@ -162,9 +162,9 @@ class GraphqlService
         if (!$this->pingApi) {
             AdminController::adminNotices(
                 "<div id='" . Sage::TOKEN . "_join_api' class='error'><p>" .
-                __("L'API Sage n'est pas joignable. Avez-vous lancé le serveur ?", 'egas') .
+                __("L'API Sage n'est pas joignable. Avez-vous lancé le serveur ?", 'egas-data-sync-for-sage') .
                 ($errorMsg
-                    ? "<br>" . __('Erreur', 'egas') . ": " . esc_html($errorMsg)
+                    ? "<br>" . __('Erreur', 'egas-data-sync-for-sage') . ": " . esc_html($errorMsg)
                     : ""
                 ) .
                 "</p></div>"
@@ -183,7 +183,7 @@ class GraphqlService
         if (!array_key_exists("scheme", $wordpressHostUrl)) {
             AdminController::adminNotices("
 <div class='error'>
-    <p>" . __("Wordpress host url doit commencer par 'http://' ou 'https://'", 'egas') . "</p>
+    <p>" . __("Wordpress host url doit commencer par 'http://' ou 'https://'", 'egas-data-sync-for-sage') . "</p>
 </div>
 ");
             $hasError = true;
@@ -192,7 +192,7 @@ class GraphqlService
         if (!array_key_exists("scheme", $apiHostUrl)) {
             AdminController::adminNotices("
 <div class='error'>
-    <p>" . __("Api host url doit commencer par 'http://' ou 'https://'", 'egas') . "</p>
+    <p>" . __("Api host url doit commencer par 'http://' ou 'https://'", 'egas-data-sync-for-sage') . "</p>
 </div>
 ");
             $hasError = true;

@@ -403,7 +403,7 @@ class WoocommerceService
                         break;
                     default:
                         $message .= "<div class='notice notice-error is-dismissible'>
-    <p>" . __('Aucune action définie pour', 'egas') . ': ' . esc_html(json_encode($syncChange['changes'], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)) . "</p>
+    <p>" . __('Aucune action définie pour', 'egas-data-sync-for-sage') . ': ' . esc_html(json_encode($syncChange['changes'], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE)) . "</p>
 </div>";
                         break;
                 }
@@ -432,7 +432,7 @@ class WoocommerceService
         }
         if (is_null($fArticle)) {
             return [null, null, "<div class='error'>
-                    " . __("L'article n'a pas pu être importé", 'egas') . "
+                    " . __("L'article n'a pas pu être importé", 'egas-data-sync-for-sage') . "
                             </div>", 0];
         }
         $resource = SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME);
@@ -444,8 +444,8 @@ class WoocommerceService
         }
         $articlePostId = $this->getWooCommerceIdArticle($arRef);
         $article = $this->convertSageArticleToWoocommerce($fArticle, SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME), $articlePostId);
-        $dismissNotice = "<button type='button' class='notice-dismiss " . Sage::TOKEN . "-notice-dismiss'><span class='screen-reader-text'>" . __('Ignorer cet avis.', 'egas') . "</span></button>";
-        $urlArticle = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "post.php?post=%id%&action=edit'>" . __("Voir l'article", 'egas') . "</a></span></strong>";
+        $dismissNotice = "<button type='button' class='notice-dismiss " . Sage::TOKEN . "-notice-dismiss'><span class='screen-reader-text'>" . __('Ignorer cet avis.', 'egas-data-sync-for-sage') . "</span></button>";
+        $urlArticle = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "post.php?post=%id%&action=edit'>" . __("Voir l'article", 'egas-data-sync-for-sage') . "</a></span></strong>";
         $message = '';
         if (is_null($articlePostId)) {
             // cannot create an article without request
@@ -471,7 +471,7 @@ class WoocommerceService
                 $articlePostId = $body['id'];
                 if ($showSuccessMessage) {
                     $message = "<div class='notice notice-success is-dismissible'>
-                <p>" . __('Article créé: ', 'egas') . $body['name'] . "</p>" . $urlArticle . "
+                <p>" . __('Article créé: ', 'egas-data-sync-for-sage') . $body['name'] . "</p>" . $urlArticle . "
                 {$dismissNotice}
                         </div>";
                 }
@@ -494,7 +494,7 @@ class WoocommerceService
             $urlArticle = str_replace('%id%', (string)$articlePostId, $urlArticle);
             if ($showSuccessMessage) {
                 $message = "<div class='notice notice-success is-dismissible'>
-                <p>" . __('Article mis à jour: ', 'egas') . $article["name"] . "</p>" . $urlArticle . "
+                <p>" . __('Article mis à jour: ', 'egas-data-sync-for-sage') . $article["name"] . "</p>" . $urlArticle . "
                 {$dismissNotice}
                         </div>";
             }
@@ -707,7 +707,7 @@ class WoocommerceService
                     return $this->formatTaxes($wcOrder, $taxes, $message, $errorMissingTax);
                 }
                 $message .= "<div class='notice notice-error is-dismissible'>
-                    <p>" . __('Il semblerait que la taxe soit manquante.', 'egas') . "[" . $tax['code'] . "]</p>
+                    <p>" . __('Il semblerait que la taxe soit manquante.', 'egas-data-sync-for-sage') . "[" . $tax['code'] . "]</p>
                     </div>";
                 continue;
             }
@@ -730,7 +730,7 @@ class WoocommerceService
         $taxes = WC_Tax::get_tax_rate_classes();
         $taxe = current(array_filter($taxes, static fn(stdClass $taxe): bool => $taxe->slug === Sage::TOKEN));
         if ($taxe === false) {
-            WC_Tax::create_tax_class(__('Egas', 'egas'), Sage::TOKEN);
+            WC_Tax::create_tax_class(__('Egas', 'egas-data-sync-for-sage'), Sage::TOKEN);
             $taxes = WC_Tax::get_tax_rate_classes();
             $taxe = current(array_filter($taxes, static fn(stdClass $taxe): bool => $taxe->slug === Sage::TOKEN));
         }
@@ -748,7 +748,7 @@ class WoocommerceService
             if ($showMessage && $taxeChanges !== []) {
                 ?>
                 <div class="notice notice-success is-dismissible">
-                    <p><strong><?php echo esc_html__("Les taxes Sage ont été mises à jour.", 'egas') ?></strong></p>
+                    <p><strong><?php echo esc_html__("Les taxes Sage ont été mises à jour.", 'egas-data-sync-for-sage') ?></strong></p>
                 </div>
                 <?php
             }
@@ -1218,7 +1218,7 @@ class WoocommerceService
     {
         $fDocenteteIdentifier = $this->getFDocenteteIdentifierFromOrder($wcOrder);
         if (!empty($fDocenteteIdentifier)) {
-            $wcOrder->add_order_note(__('Le document de vente Sage a été désynchronisé de la commande.', 'egas') . ' [' . $fDocenteteIdentifier["doPiece"] . ']');
+            $wcOrder->add_order_note(__('Le document de vente Sage a été désynchronisé de la commande.', 'egas-data-sync-for-sage') . ' [' . $fDocenteteIdentifier["doPiece"] . ']');
             $wcOrder->delete_meta_data(FDocenteteResource::META_KEY);
             $wcOrder->delete_meta_data('_' . Sage::TOKEN . '_doPiece');
             $wcOrder->delete_meta_data('_' . Sage::TOKEN . '_doType');

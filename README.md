@@ -37,7 +37,7 @@ https://www.elegantthemes.com/blog/tips-tricks/how-to-add-cron-jobs-to-wordpress
 When add a new entity use function `private function settings_fields` with debugger to get all fields to translate.
 
 ```
-./runc wp-content/plugins/egas-data-sync-for-sage/vendor/bin/rector process --config=wp-content/plugins/egas-data-sync-for-sage/rector.php
+./runc vendor/bin/rector process --config=rector.php
 ```
 
 Noter quelque part que l'erreur: Aucune connexion n’a pu être établie car l’ordinateur cible l’a expressément refusée,

@@ -28,7 +28,7 @@ class SageShippingMethod__index__ extends WC_Shipping_Free_Shipping
     public function after_init(): void
     {
         $this->instance_form_fields['title']['default'] = $this->method_title;
-        $this->instance_form_fields['requires']['title'] = $this->method_title . ' ' . __(' requires', 'egas');
+        $this->instance_form_fields['requires']['title'] = $this->method_title . ' ' . __(' requires', 'egas-data-sync-for-sage');
     }
 
     public static function enqueue_admin_js(): void

@@ -24,8 +24,8 @@ class FComptetResource extends Resource
     {
         parent::__construct();
         global $wpdb;
-        $this->title = __("Clients", 'egas');
-        $this->description = __("Gestion des clients.", 'egas');
+        $this->title = __("Clients", 'egas-data-sync-for-sage');
+        $this->description = __("Gestion des clients.", 'egas-data-sync-for-sage');
         $this->entityName = self::ENTITY_NAME;
         $this->typeModel = self::TYPE_MODEL;
         $this->defaultSortField = self::DEFAULT_SORT;
@@ -45,50 +45,50 @@ class FComptetResource extends Resource
         $this->options = fn(): array => [
             [
                 'id' => 'sage_create_new_' . self::ENTITY_NAME,
-                'label' => __("Créer le compte dans Sage.", 'egas'),
-                'description' => __("Créer le compte dans Sage lorsqu'un nouveau utilisateur Wordpress est crée.", 'egas'),
+                'label' => __("Créer le compte dans Sage.", 'egas-data-sync-for-sage'),
+                'description' => __("Créer le compte dans Sage lorsqu'un nouveau utilisateur Wordpress est crée.", 'egas-data-sync-for-sage'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
             [
                 'id' => 'sage_create_old_' . self::ENTITY_NAME,
-                'label' => __("Importe les anciens utilisateurs.", 'egas'),
-                'description' => __("Importe les anciens utilisateurs Woocommerce dans Sage.", 'egas'),
+                'label' => __("Importe les anciens utilisateurs.", 'egas-data-sync-for-sage'),
+                'description' => __("Importe les anciens utilisateurs Woocommerce dans Sage.", 'egas-data-sync-for-sage'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
             [
                 'id' => 'sage_update_' . self::ENTITY_NAME,
-                'label' => __("Met à jour le compte Sage.", 'egas'),
-                'description' => __("Met à jour le compte Sage lorsque l'utilisateur WooCommerce qui lui est lié est modifié.", 'egas'),
+                'label' => __("Met à jour le compte Sage.", 'egas-data-sync-for-sage'),
+                'description' => __("Met à jour le compte Sage lorsque l'utilisateur WooCommerce qui lui est lié est modifié.", 'egas-data-sync-for-sage'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
             [
                 'id' => 'website_create_new_' . self::ENTITY_NAME,
-                'label' => __("Créer l'utilisateur dans Woocommerce.", 'egas'),
-                'description' => __("Créer l'utilisateur dans Woocommerce lorsqu'un nouveau compte Sage est crée.", 'egas'),
+                'label' => __("Créer l'utilisateur dans Woocommerce.", 'egas-data-sync-for-sage'),
+                'description' => __("Créer l'utilisateur dans Woocommerce lorsqu'un nouveau compte Sage est crée.", 'egas-data-sync-for-sage'),
                 'type' => 'resource',
                 'default' => '',
             ],
             [
                 'id' => 'website_create_old_' . self::ENTITY_NAME,
-                'label' => __("Importe les anciens comptes Sage.", 'egas'),
-                'description' => __("Importe les anciens comptes Sage dans Woocommerce.", 'egas'),
+                'label' => __("Importe les anciens comptes Sage.", 'egas-data-sync-for-sage'),
+                'description' => __("Importe les anciens comptes Sage dans Woocommerce.", 'egas-data-sync-for-sage'),
                 'type' => 'resource',
                 'default' => '',
             ],
             [
                 'id' => 'website_update_' . self::ENTITY_NAME,
-                'label' => __("Met à jour l'utilisateur Woocommerce.", 'egas'),
-                'description' => __("Met à jour l'utilisateur Woocommerce lorsque le compte Sage qui lui est lié est modifié.", 'egas'),
+                'label' => __("Met à jour l'utilisateur Woocommerce.", 'egas-data-sync-for-sage'),
+                'description' => __("Met à jour l'utilisateur Woocommerce lorsque le compte Sage qui lui est lié est modifié.", 'egas-data-sync-for-sage'),
                 'type' => 'resource',
                 'default' => '',
             ],
             [
                 'id' => 'mail_website_create_new_' . self::ENTITY_NAME,
-                'label' => __('Envoyer automatiquement le mail pour définir le mot de passe', 'egas'),
-                'description' => __("Lorsqu'un compte Wordpress est créé à partir d'un compte Sage, un mail pour définir le mot de passe du compte Wordpress est automatiquement envoyé à l'utilisateur.", 'egas'),
+                'label' => __('Envoyer automatiquement le mail pour définir le mot de passe', 'egas-data-sync-for-sage'),
+                'description' => __("Lorsqu'un compte Wordpress est créé à partir d'un compte Sage, un mail pour définir le mot de passe du compte Wordpress est automatiquement envoyé à l'utilisateur.", 'egas-data-sync-for-sage'),
                 'type' => 'checkbox',
                 'default' => 'off',
             ],
@@ -120,7 +120,7 @@ class FComptetResource extends Resource
                 field: 'ctType',
                 value: TiersTypeEnum::TiersTypeClient->value,
                 condition: 'eq',
-                message: fn(array $fComptet): string => __("Le compte n'est pas un compte client.", 'egas') . ' [' . $fComptet["ctNum"] . ']'),
+                message: fn(array $fComptet): string => __("Le compte n'est pas un compte client.", 'egas-data-sync-for-sage') . ' [' . $fComptet["ctNum"] . ']'),
         ];
         $this->import = static function (string $identifier) {
             [$response, $responseError, $message, $userId] = SageService::getInstance()->importFComptetFromSage($identifier);

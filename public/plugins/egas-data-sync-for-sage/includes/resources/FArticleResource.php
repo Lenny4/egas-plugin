@@ -28,8 +28,8 @@ class FArticleResource extends Resource
     {
         parent::__construct();
         global $wpdb;
-        $this->title = __("Articles", 'egas');
-        $this->description = __("Gestion des articles", 'egas');
+        $this->title = __("Articles", 'egas-data-sync-for-sage');
+        $this->description = __("Gestion des articles", 'egas-data-sync-for-sage');
         $this->entityName = self::ENTITY_NAME;
         $this->typeModel = self::TYPE_MODEL;
         $this->defaultSortField = self::DEFAULT_SORT;
@@ -51,37 +51,37 @@ class FArticleResource extends Resource
             return [
                 [
                     'id' => 'sage_create_new_' . self::ENTITY_NAME,
-                    'label' => __("Créer l'article dans Sage.", 'egas'),
-                    'description' => __("Créer l'article dans Sage lorsqu'un nouveau produit Woocommerce est crée.", 'egas'),
+                    'label' => __("Créer l'article dans Sage.", 'egas-data-sync-for-sage'),
+                    'description' => __("Créer l'article dans Sage lorsqu'un nouveau produit Woocommerce est crée.", 'egas-data-sync-for-sage'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
 //            [
 //                'id' => 'sage_create_old_' . self::ENTITY_NAME,
-//                'label' => __("Importe les anciens produits.", 'egas'),
-//                'description' => __("Importe les anciens produits Woocommerce dans Sage.", 'egas'),
+//                'label' => __("Importe les anciens produits.", 'egas-data-sync-for-sage'),
+//                'description' => __("Importe les anciens produits Woocommerce dans Sage.", 'egas-data-sync-for-sage'),
 //                'type' => 'checkbox',
 //                'default' => 'off',
 //            ],
                 [
                     'id' => 'sage_update_' . self::ENTITY_NAME,
-                    'label' => __("Met à jour l’article Sage.", 'egas'),
-                    'description' => __("Met à jour l’article Sage lorsque le produit WooCommerce qui lui est lié est modifié.", 'egas'),
+                    'label' => __("Met à jour l’article Sage.", 'egas-data-sync-for-sage'),
+                    'description' => __("Met à jour l’article Sage lorsque le produit WooCommerce qui lui est lié est modifié.", 'egas-data-sync-for-sage'),
                     'type' => 'checkbox',
                     'default' => 'off',
                 ],
                 [
                     'id' => 'website_create_new_' . self::ENTITY_NAME,
-                    'label' => __("Créer le produit dans Woocommerce.", 'egas'),
-                    'description' => __("Créer le produit dans Woocommerce lorsqu'un nouvel article Sage est crée.", 'egas'),
+                    'label' => __("Créer le produit dans Woocommerce.", 'egas-data-sync-for-sage'),
+                    'description' => __("Créer le produit dans Woocommerce lorsqu'un nouvel article Sage est crée.", 'egas-data-sync-for-sage'),
                     'type' => 'resource',
                     'initFilter' => $initFilterJson,
                     'default' => '',
                 ],
                 [
                     'id' => 'website_create_old_' . self::ENTITY_NAME,
-                    'label' => __("Importe les anciens articles.", 'egas'),
-                    'description' => __("Importe les anciens articles Sage dans Woocommerce.", 'egas'),
+                    'label' => __("Importe les anciens articles.", 'egas-data-sync-for-sage'),
+                    'description' => __("Importe les anciens articles Sage dans Woocommerce.", 'egas-data-sync-for-sage'),
                     'type' => 'resource',
                     'initFilter' => json_encode([
                         'values' => [
@@ -97,8 +97,8 @@ class FArticleResource extends Resource
                 ],
                 [
                     'id' => 'website_update_' . self::ENTITY_NAME,
-                    'label' => __("Met à jour le produit Woocommerce.", 'egas'),
-                    'description' => __("Met à jour le produit Woocommerce lorsque l'article Sage qui lui est lié est modifié.", 'egas'),
+                    'label' => __("Met à jour le produit Woocommerce.", 'egas-data-sync-for-sage'),
+                    'description' => __("Met à jour le produit Woocommerce lorsque l'article Sage qui lui est lié est modifié.", 'egas-data-sync-for-sage'),
                     'type' => 'resource',
                     'initFilter' => $initFilterJson,
                     'default' => '',
@@ -138,13 +138,13 @@ class FArticleResource extends Resource
                     ArticleTypeEnum::ArticleTypeStandard->value,
                 ],
                 condition: 'in',
-                message: fn(array $fArticle): string => __("Seuls les articles standard peuvent être importés.", 'egas') . ' [' . $fArticle["arRef"] . ']'
+                message: fn(array $fArticle): string => __("Seuls les articles standard peuvent être importés.", 'egas-data-sync-for-sage') . ' [' . $fArticle["arRef"] . ']'
             ),
             new ImportConditionDto(
                 field: 'arNomencl',
                 value: NomenclatureTypeEnum::NomenclatureTypeAucun->value,
                 condition: 'eq',
-                message: fn(array $fArticle): string => __("Seuls les articles ayant une nomenclature Aucun peuvent être importés.", 'egas') . ' [' . $fArticle["arRef"] . ']'
+                message: fn(array $fArticle): string => __("Seuls les articles ayant une nomenclature Aucun peuvent être importés.", 'egas-data-sync-for-sage') . ' [' . $fArticle["arRef"] . ']'
             ),
         ];
         $this->import = static function (string $identifier) {
