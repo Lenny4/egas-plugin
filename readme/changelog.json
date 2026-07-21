@@ -1,6 +1,16 @@
 {
   "changelog": [
     {
+      "version": "1.0.2",
+      "changes": [
+        {
+          "fixed": [
+            "Use enableReleaseAssets instead of setBranch for updater"
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.1",
       "changes": [
         {
