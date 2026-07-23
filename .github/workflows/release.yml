@@ -78,7 +78,7 @@ jobs:
           rm -f  staging1/egas-data-sync-for-sage/package.json
           rm -f  staging1/egas-data-sync-for-sage/yarn.lock
           rm -f  staging1/egas-data-sync-for-sage/rector.php
-          (cd staging1 && zip -r ../egas-data-sync-for-sage-${{ steps.version.outputs.version }}.zip egas-data-sync-for-sage)
+          (cd staging1 && zip -r ../egas-data-sync-for-sage.zip egas-data-sync-for-sage)
 
       - name: Create git tag
         run: |
@@ -96,6 +96,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
           files: |
-            plugin_extract/egas-data-sync-for-sage-${{ steps.version.outputs.version }}.zip
+            plugin_extract/egas-data-sync-for-sage.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
