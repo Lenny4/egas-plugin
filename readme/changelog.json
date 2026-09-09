@@ -1,6 +1,17 @@
 {
   "changelog": [
     {
+      "version": "1.0.4",
+      "changes": [
+        {
+          "fixed": [
+            "Correction du problème de formatage de la date",
+            "Réduction du per_page pour getFPays (de 300 à 100)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.3",
       "changes": [
         {

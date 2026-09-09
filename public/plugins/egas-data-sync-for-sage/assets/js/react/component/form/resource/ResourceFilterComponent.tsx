@@ -2,12 +2,12 @@
 import {createRoot} from "react-dom/client";
 import React, {RefObject, useImperativeHandle} from "react";
 import Box from "@mui/material/Box";
-import {getTranslations} from "../../../../functions/translations";
-import {InputInterface} from "../../../../interface/InputInterface";
 import {Tooltip} from "@mui/material";
 import {BrowserRouter, useSearchParams} from "react-router-dom";
+import {getTranslations} from "../../../../functions/translations";
+import {InputInterface} from "../../../../interface/InputInterface";
 
-let translations: any = getTranslations();
+const translations: any = getTranslations();
 
 interface AllFilterTypeInterface {
   DateTimeOperationFilterInput: string[];
@@ -59,8 +59,8 @@ export interface FilterInterface {
 
 interface State {
   resourceFilter: ResourceFilterDataInterface;
-  textInput?: HTMLInputElement;
-  checkboxInput?: HTMLInputElement;
+  textInput?: HTMLInputElement | null;
+  checkboxInput?: HTMLInputElement | null;
   withUrl?: boolean;
   allowEditImportCondition?: boolean;
   onDispatch?: () => void;
@@ -112,12 +112,14 @@ const FilterInputComponent = React.forwardRef(
     const getFilterField = (key: string) => {
       return filterFields.find((f) => f.name === key) ?? filterFields[0];
     };
+
     const getFilterType = (key: keyof AllFilterTypeInterface) => {
       return {
         key: key,
-        values: allFilterType[key],
+        values: allFilterType[key] ?? [],
       };
     };
+
     const [filterField, setFilterField] = React.useState<FilterFieldInterface>(
       getFilterField(filterValue.field),
     );
@@ -125,10 +127,11 @@ const FilterInputComponent = React.forwardRef(
       getFilterType(filterField.type),
     );
     const [init, setInit] = React.useState(false);
+
     const getDefaultValue = (): FormState2 => {
       return {
         field: {
-          value: filterField.name,
+          value: filterField?.name ?? "",
           error: "",
         },
         condition: {
@@ -141,6 +144,7 @@ const FilterInputComponent = React.forwardRef(
         },
       };
     };
+
     const [values, setValues] = React.useState<FormState2>(getDefaultValue());
 
     React.useEffect(() => {
@@ -162,7 +166,8 @@ const FilterInputComponent = React.forwardRef(
         if (
           !values.field.value ||
           !values.condition.value ||
-          values.value.value === ""
+          values.value.value === "" ||
+          values.value.value === null
         ) {
           return undefined;
         }
@@ -172,12 +177,13 @@ const FilterInputComponent = React.forwardRef(
           condition: values.condition.value,
           value: values.value.value,
         };
-        delete result.ref;
+        delete (result as any).ref;
         return result;
       },
     }));
 
     const isMultiple = ["in", "nin"].includes(values.condition.value);
+
     return (
       <div
         style={{
@@ -191,17 +197,25 @@ const FilterInputComponent = React.forwardRef(
           <select
             value={values.field.value}
             onChange={(e) => {
-              setValues((v) => {
-                v.field.value = e.target.value;
-                const thisFilterField = getFilterField(e.target.value);
-                setFilterField(thisFilterField);
-                const thisFilterType = getFilterType(thisFilterField.type);
+              const selectedField = e.target.value;
+              const thisFilterField = getFilterField(selectedField);
+              const thisFilterType = getFilterType(thisFilterField.type);
+
+              setFilterField(thisFilterField);
+
+              setValues((prev) => {
+                const updated = {...prev};
+                updated.field = {...updated.field, value: selectedField};
+
                 if (thisFilterType.key !== filterType.key) {
                   setFilterType(thisFilterType);
-                  v.condition.value = thisFilterType.values[0];
-                  v.value.value = "";
+                  updated.condition = {
+                    ...updated.condition,
+                    value: thisFilterType.values[0] ?? "",
+                  };
+                  updated.value = {...updated.value, value: ""};
                 }
-                return {...v};
+                return updated;
               });
             }}
           >
@@ -209,7 +223,7 @@ const FilterInputComponent = React.forwardRef(
               {translations.words.selectOption}
             </option>
             {filterFields.map((option) => {
-              let label = translations[option.transDomain][option.name];
+              let label = translations[option.transDomain]?.[option.name] ?? option.name;
               if (typeof label === "object") {
                 label = label.label;
               }
@@ -232,12 +246,14 @@ const FilterInputComponent = React.forwardRef(
           <select
             value={values.condition.value}
             onChange={(e) => {
-              setValues((v) => {
-                v.condition.value = e.target.value;
+              const newCondition = e.target.value;
+              setValues((prev) => {
+                const updated = {...prev};
+                updated.condition = {...updated.condition, value: newCondition};
                 if (filterType.key !== "DateTimeOperationFilterInput") {
-                  v.value.value = "";
+                  updated.value = {...updated.value, value: ""};
                 }
-                return {...v};
+                return updated;
               });
             }}
           >
@@ -254,7 +270,7 @@ const FilterInputComponent = React.forwardRef(
                     option !== values.condition.value
                   }
                 >
-                  {translations.words[option]}
+                  {translations.words[option] ?? option}
                 </option>
               );
             })}
@@ -272,7 +288,7 @@ const FilterInputComponent = React.forwardRef(
               placement="top"
             >
               <select
-                value={values.value.value}
+                value={values.value.value as any}
                 multiple={isMultiple}
                 className={isMultiple ? "resize-select" : ""}
                 onChange={(e) => {
@@ -286,14 +302,13 @@ const FilterInputComponent = React.forwardRef(
                       selected.push(Number(options[i].value));
                     }
                   }
-                  setValues((v) => {
-                    if (isMultiple) {
-                      v.value.value = selected;
-                    } else {
-                      v.value.value = selected[0];
-                    }
-                    return {...v};
-                  });
+                  setValues((prev) => ({
+                    ...prev,
+                    value: {
+                      ...prev.value,
+                      value: isMultiple ? selected : selected[0],
+                    },
+                  }));
                 }}
               >
                 <option value="" disabled={true}>
@@ -304,11 +319,11 @@ const FilterInputComponent = React.forwardRef(
                     : Object.entries(filterField.values)
                 ).map(([keyOption, option]) => {
                   let disabled = filterValue.editable === false;
-                  if (isMultiple) {
+                  if (isMultiple && Array.isArray(values.value.value)) {
                     disabled =
-                      disabled && !values.value.value.includes(keyOption);
+                      disabled && !values.value.value.includes(Number(keyOption));
                   } else {
-                    disabled = disabled && keyOption !== values.value.value;
+                    disabled = disabled && String(keyOption) !== String(values.value.value);
                   }
                   return (
                     <option
@@ -323,51 +338,55 @@ const FilterInputComponent = React.forwardRef(
               </select>
             </Tooltip>
           ) : filterType.key === "BooleanOperationFilterInput" ? (
-            <>
-              <select
-                value={
-                  values.value.value
-                    ? "1"
-                    : values.value.value === false
-                      ? "0"
-                      : ""
+            <select
+              value={
+                values.value.value === true || values.value.value === "true"
+                  ? "1"
+                  : values.value.value === false || values.value.value === "false"
+                    ? "0"
+                    : ""
+              }
+              onChange={(e) => {
+                if (filterValue.editable === false) {
+                  return;
                 }
-                onChange={(e) => {
-                  setValues((v) => {
-                    if (filterValue.editable === false) {
-                      return v;
-                    }
-                    v.value.value = e.target.value === "1";
-                    return {...v};
-                  });
-                }}
+                const val = e.target.value === "1";
+                setValues((prev) => ({
+                  ...prev,
+                  value: {...prev.value, value: val},
+                }));
+              }}
+            >
+              <option value="" disabled={true}>
+                {translations.words.selectOption}
+              </option>
+              <option
+                value={"1"}
+                disabled={
+                  filterValue.editable === false &&
+                  (values.value.value ? 1 : 0) !== 1
+                }
               >
-                <option value="" disabled={true}>
-                  {translations.words.selectOption}
-                </option>
-                <option
-                  value={"1"}
-                  disabled={
-                    filterValue.editable === false &&
-                    (values.value.value ? 1 : 0) !== 1
-                  }
-                >
-                  {translations.words.yes}
-                </option>
-                <option
-                  value={"0"}
-                  disabled={
-                    filterValue.editable === false &&
-                    (values.value.value ? 1 : 0) !== 0
-                  }
-                >
-                  {translations.words.no}
-                </option>
-              </select>
-            </>
+                {translations.words.yes}
+              </option>
+              <option
+                value={"0"}
+                disabled={
+                  filterValue.editable === false &&
+                  (values.value.value ? 1 : 0) !== 0
+                }
+              >
+                {translations.words.no}
+              </option>
+            </select>
           ) : (
             <input
-              value={values.value.value}
+              value={
+                filterType.key === "DateTimeOperationFilterInput" &&
+                typeof values.value.value === "string"
+                  ? values.value.value.split("T")[0]
+                  : (values.value.value as string) ?? ""
+              }
               type={
                 filterType.key === "DateTimeOperationFilterInput"
                   ? "date"
@@ -375,13 +394,18 @@ const FilterInputComponent = React.forwardRef(
               }
               readOnly={filterValue.editable === false}
               onChange={(e) => {
-                setValues((v) => {
-                  if (filterValue.editable === false) {
-                    return v;
-                  }
-                  v.value.value = e.target.value;
-                  return {...v};
-                });
+                if (filterValue.editable === false) {
+                  return;
+                }
+                let rawValue = e.target.value;
+                if (filterType.key === "DateTimeOperationFilterInput" && rawValue) {
+                  // Format standard ISO-8601 avec specifier Z pour compatibilite Hot Chocolate
+                  rawValue = `${rawValue}T00:00:00Z`;
+                }
+                setValues((prev) => ({
+                  ...prev,
+                  value: {...prev.value, value: rawValue},
+                }));
               }}
             />
           )}
@@ -404,6 +428,7 @@ const FilterInputComponent = React.forwardRef(
                 style={{
                   paddingRight: "22px",
                   marginLeft: "1rem",
+                  cursor: "pointer",
                 }}
               ></span>
             </Tooltip>
@@ -427,7 +452,7 @@ const _ResourceFilterComponent = React.forwardRef(
     ref,
   ) => {
     const getDefaultValue = (): FormState => {
-      const availableFields = filterFields.map(f => f.name);
+      const availableFields = filterFields.map((f) => f.name);
       return {
         condition: {
           value: filter.condition,
@@ -446,7 +471,7 @@ const _ResourceFilterComponent = React.forwardRef(
               ?.map((filterValue) => {
                 return {
                   ...filterValue,
-                  ref: React.createRef(),
+                  ref: filterValue.ref ?? React.createRef(),
                 };
               }) ?? []),
           ],
@@ -454,12 +479,13 @@ const _ResourceFilterComponent = React.forwardRef(
         },
         subFilter: {
           value: filter.subFilter
-            ? {...filter.subFilter, ref: React.createRef()}
+            ? {...filter.subFilter, ref: filter.subFilter.ref ?? React.createRef()}
             : null,
           error: "",
         },
       };
     };
+
     const [values, setValues] = React.useState<FormState>(getDefaultValue());
     const [oldSubFilter, setOldSubFilter] = React.useState<FormState>(
       values.subFilter.value,
@@ -476,14 +502,18 @@ const _ResourceFilterComponent = React.forwardRef(
         values.values.value.filter((x: FilterValueInterface) => x !== undefined)
           .length === 1
       ) {
-        setParentValues((v) => {
-          v.subFilter.value = undefined;
-          return {...v};
-        });
+        setParentValues((prev) => ({
+          ...prev,
+          subFilter: {...prev.subFilter, value: undefined},
+        }));
       } else {
-        setValues((v) => {
-          v.values.value[index] = undefined;
-          return {...v};
+        setValues((prev) => {
+          const updatedValues = [...prev.values.value];
+          updatedValues[index] = undefined;
+          return {
+            ...prev,
+            values: {...prev.values, value: updatedValues},
+          };
         });
       }
     };
@@ -498,21 +528,27 @@ const _ResourceFilterComponent = React.forwardRef(
     };
 
     const addFilterValue = () => {
-      setValues((v) => {
-        v.values.value.push(getNewFilterValue());
-        return {...v};
-      });
+      setValues((prev) => ({
+        ...prev,
+        values: {
+          ...prev.values,
+          value: [...prev.values.value, getNewFilterValue()],
+        },
+      }));
     };
 
     const addFilter = () => {
-      setValues((v) => {
-        v.subFilter.value = {
-          condition: "and",
-          values: [getNewFilterValue()],
-          ref: React.createRef(),
-        } as FilterInterface;
-        return {...v};
-      });
+      setValues((prev) => ({
+        ...prev,
+        subFilter: {
+          ...prev.subFilter,
+          value: {
+            condition: "and",
+            values: [getNewFilterValue()],
+            ref: React.createRef(),
+          } as FilterInterface,
+        },
+      }));
     };
 
     React.useEffect(() => {
@@ -553,16 +589,18 @@ const _ResourceFilterComponent = React.forwardRef(
     }, [values.conditionValues.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useImperativeHandle(ref, () => ({
-      getValue(): FilterInterface {
+      getValue(): FilterInterface | undefined {
         const filterValues: FilterValueInterface[] = values.values.value
-          .filter((filterValue: FilterValueInterface) => filterValue)
+          .filter((filterValue: FilterValueInterface) => Boolean(filterValue))
           .map((filterValue: FilterValueInterface) => {
-            return filterValue.ref.current.getValue();
+            return filterValue.ref.current?.getValue();
           })
           .filter((x: any) => x);
+
         if (filterValues.length === 0) {
           return undefined;
         }
+
         const result: FilterInterface = {
           ...filter,
           condition: values.condition.value,
@@ -570,172 +608,174 @@ const _ResourceFilterComponent = React.forwardRef(
           values: filterValues,
           subFilter: undefined,
         };
+
         if (values.subFilter.value) {
-          result.subFilter = values.subFilter.value.ref.current.getValue();
+          result.subFilter = values.subFilter.value.ref.current?.getValue();
         }
-        delete result.ref;
+
+        delete (result as any).ref;
         return result;
       },
     }));
 
     return (
-      <>
-        <div
-          style={{display: "flex", alignItems: "stretch", marginTop: "1rem"}}
-        >
-          {values.subFilter.value && (
-            <div
-              style={{
-                borderRight: "1px solid",
-                paddingRight: "1rem",
-                marginRight: "1rem",
-                display: "flex",
-                alignItems: "center",
+      <div style={{display: "flex", alignItems: "stretch", marginTop: "1rem"}}>
+        {values.subFilter.value && (
+          <div
+            style={{
+              borderRight: "1px solid",
+              paddingRight: "1rem",
+              marginRight: "1rem",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <select
+              value={values.condition.value}
+              onChange={(e) => {
+                const val = e.target.value;
+                setValues((prev) => ({
+                  ...prev,
+                  condition: {...prev.condition, value: val},
+                }));
               }}
             >
-              <select
-                value={values.condition.value}
-                onChange={(e) => {
-                  setValues((v) => {
-                    v.condition.value = e.target.value;
-                    return {...v};
-                  });
-                }}
-              >
-                {["or", "and"].map((c, cIndex) => (
-                  <option
-                    key={cIndex}
-                    disabled={
-                      filter.allowCondition === false &&
-                      values.condition.value !== c
-                    }
-                    value={c}
+              {["or", "and"].map((c, cIndex) => (
+                <option
+                  key={cIndex}
+                  disabled={
+                    filter.allowCondition === false &&
+                    values.condition.value !== c
+                  }
+                  value={c}
+                >
+                  {translations.words[c] ?? c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div>
+          <div style={{display: "flex"}}>
+            <div>
+              {values.values.value.map(
+                (
+                  filterValue: FilterValueInterface | undefined,
+                  indexValue: number,
+                ) => (
+                  <React.Fragment key={indexValue}>
+                    {filterValue && (
+                      <FilterInputComponent
+                        filterValue={filterValue}
+                        ref={filterValue.ref}
+                        allFilterType={allFilterType}
+                        filterFields={filterFields}
+                        index={indexValue}
+                        removeFilterValue={removeFilterValue}
+                        dispatch={dispatch}
+                      />
+                    )}
+                  </React.Fragment>
+                ),
+              )}
+              <div style={{textAlign: "center", marginBottom: "0.5rem"}}>
+                {values.values.value.filter(
+                  (filterValue: FilterValueInterface) => filterValue,
+                ).length > 0 ? (
+                  <Tooltip
+                    title={translations.words.addFilter}
+                    arrow
+                    placement="top"
                   >
-                    {translations.words[c]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-          <div>
-            <div style={{display: "flex"}}>
-              <div>
-                {values.values.value.map(
-                  (
-                    filterValue: FilterValueInterface | undefined,
-                    indexValue: number,
-                  ) => (
-                    <React.Fragment key={indexValue}>
-                      {filterValue && (
-                        <FilterInputComponent
-                          filterValue={filterValue}
-                          ref={filterValue.ref}
-                          allFilterType={allFilterType}
-                          filterFields={filterFields}
-                          index={indexValue}
-                          removeFilterValue={removeFilterValue}
-                          dispatch={dispatch}
-                        />
-                      )}
-                    </React.Fragment>
-                  ),
+                    <span
+                      onClick={addFilterValue}
+                      className="dashicons dashicons-plus button"
+                      style={{
+                        paddingRight: "22px",
+                        marginLeft: "1rem",
+                        cursor: "pointer",
+                      }}
+                    ></span>
+                  </Tooltip>
+                ) : (
+                  <button className="button-primary" onClick={addFilterValue}>
+                    {translations.words.addFilter}
+                  </button>
                 )}
-                <div style={{textAlign: "center", marginBottom: "0.5rem"}}>
-                  {values.values.value.filter(
+                {!values.subFilter.value &&
+                  values.values.value.filter(
                     (filterValue: FilterValueInterface) => filterValue,
-                  ).length > 0 ? (
+                  ).length > 0 && (
                     <Tooltip
-                      title={translations.words.addFilter}
+                      title={translations.words.addSubFilter}
                       arrow
                       placement="top"
                     >
                       <span
-                        onClick={addFilterValue}
-                        className="dashicons dashicons-plus button"
+                        onClick={addFilter}
+                        className="dashicons dashicons-welcome-add-page button"
                         style={{
                           paddingRight: "22px",
                           marginLeft: "1rem",
+                          cursor: "pointer",
                         }}
                       ></span>
                     </Tooltip>
-                  ) : (
-                    <button className="button-primary" onClick={addFilterValue}>
-                      {translations.words.addFilter}
-                    </button>
                   )}
-                  {!values.subFilter.value &&
-                    values.values.value.filter(
-                      (filterValue: FilterValueInterface) => filterValue,
-                    ).length > 0 && (
-                      <Tooltip
-                        title={translations.words.addSubFilter}
-                        arrow
-                        placement="top"
-                      >
-                        <span
-                          onClick={addFilter}
-                          className="dashicons dashicons-welcome-add-page button"
-                          style={{
-                            paddingRight: "22px",
-                            marginLeft: "1rem",
-                          }}
-                        ></span>
-                      </Tooltip>
-                    )}
-                </div>
               </div>
-              {values.values.value &&
-                values.values.value.filter(
-                  (value: FilterValueInterface | undefined) => value,
-                ).length > 1 && (
-                  <div
-                    style={{
-                      borderLeft: "1px solid",
-                      paddingLeft: "1rem",
-                      marginLeft: "1rem",
-                      display: "flex",
-                      alignItems: "center",
+            </div>
+            {values.values.value &&
+              values.values.value.filter(
+                (value: FilterValueInterface | undefined) => value,
+              ).length > 1 && (
+                <div
+                  style={{
+                    borderLeft: "1px solid",
+                    paddingLeft: "1rem",
+                    marginLeft: "1rem",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <select
+                    value={values.conditionValues.value}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setValues((prev) => ({
+                        ...prev,
+                        conditionValues: {...prev.conditionValues, value: val},
+                      }));
                     }}
                   >
-                    <select
-                      value={values.conditionValues.value}
-                      onChange={(e) => {
-                        setValues((v) => {
-                          v.conditionValues.value = e.target.value;
-                          return {...v};
-                        });
-                      }}
-                    >
-                      {["or", "and"].map((c, cIndex) => (
-                        <option
-                          key={cIndex}
-                          disabled={
-                            filter.allowConditionValues === false &&
-                            values.conditionValues.value !== c
-                          }
-                          value={c}
-                        >
-                          {translations.words[c]}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-            </div>
-            {values.subFilter.value && (
-              <_ResourceFilterComponent
-                ref={values.subFilter.value.ref}
-                filter={values.subFilter.value}
-                allFilterType={allFilterType}
-                depth={depth + 1}
-                filterFields={filterFields}
-                dispatch={dispatch}
-                setParentValues={setValues}
-              />
-            )}
+                    {["or", "and"].map((c, cIndex) => (
+                      <option
+                        key={cIndex}
+                        disabled={
+                          filter.allowConditionValues === false &&
+                          values.conditionValues.value !== c
+                        }
+                        value={c}
+                      >
+                        {translations.words[c] ?? c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
           </div>
+          {values.subFilter.value && (
+            <_ResourceFilterComponent
+              ref={values.subFilter.value.ref}
+              filter={values.subFilter.value}
+              allFilterType={allFilterType}
+              depth={depth + 1}
+              filterFields={filterFields}
+              dispatch={dispatch}
+              setParentValues={setValues}
+            />
+          )}
         </div>
-      </>
+      </div>
     );
   },
 );
@@ -752,11 +792,12 @@ export const ResourceFilterComponent: React.FC<State> = ({
   const [show, setShow] = React.useState<boolean>(
     checkboxInput?.checked ?? true,
   );
+
   const getDefaultFilter = () => {
     if (!show) {
       return null;
     }
-    const refFilterForm = React.createRef();
+    const refFilterForm = React.createRef<any>();
     let newFilter: FilterInterface = {
       condition: "and",
       allowCondition: !!allowEditImportCondition,
@@ -788,7 +829,10 @@ export const ResourceFilterComponent: React.FC<State> = ({
     }
     if (textInput) {
       try {
-        initFilter = JSON.parse($(textInput).attr("data-init-filter"));
+        const rawAttr = textInput.getAttribute("data-init-filter");
+        if (rawAttr) {
+          initFilter = JSON.parse(rawAttr);
+        }
       } catch (e) {
         // console.error(e);
       }
@@ -816,14 +860,14 @@ export const ResourceFilterComponent: React.FC<State> = ({
     }
     return newFilter;
   };
+
   const [filter, setFilter] = React.useState<FilterInterface | null>(null);
-  const [filterUrl, setFilterUrl] = React.useState<FilterInterface | null>(
-    null,
-  );
+  const [filterUrl, setFilterUrl] = React.useState<FilterInterface | null>(null);
 
   const dispatch = () => {
+    if (!filter?.ref?.current) return;
     const newFilter: FilterInterface = filter.ref.current.getValue();
-    if (textInput) {
+    if (textInput && newFilter) {
       textInput.value = JSON.stringify(newFilter);
     }
     if (withUrl) {
@@ -835,7 +879,7 @@ export const ResourceFilterComponent: React.FC<State> = ({
     const handleChange = (event: Event) => {
       const newShow = (event.target as HTMLInputElement).checked;
       setShow(newShow);
-      if (!newShow) {
+      if (!newShow && textInput) {
         textInput.value = "";
       }
     };
@@ -843,7 +887,7 @@ export const ResourceFilterComponent: React.FC<State> = ({
     return () => {
       checkboxInput?.removeEventListener("change", handleChange);
     };
-  }, []);
+  }, [checkboxInput, textInput]);
 
   React.useEffect(() => {
     setFilter(getDefaultFilter());
@@ -894,15 +938,18 @@ export const ResourceFilterComponent: React.FC<State> = ({
 };
 
 document.querySelectorAll("[data-resource-filter]").forEach((dom) => {
-  const root = createRoot(dom.querySelector("[data-react-resource]"));
+  const reactDomNode = dom.querySelector("[data-react-resource]");
+  if (!reactDomNode) return;
+
+  const root = createRoot(reactDomNode);
+  const rawData = dom.getAttribute("data-resource-filter");
+
   root.render(
     <BrowserRouter>
       <ResourceFilterComponent
-        resourceFilter={JSON.parse($(dom).attr("data-resource-filter"))}
-        textInput={dom.querySelector("input[type='text']")}
-        checkboxInput={dom.querySelector<HTMLInputElement>(
-          "input[type='checkbox']",
-        )}
+        resourceFilter={rawData ? JSON.parse(rawData) : {allFilterType: {}, filterFields: [], importCondition: []}}
+        textInput={dom.querySelector<HTMLInputElement>("input[type='text']")}
+        checkboxInput={dom.querySelector<HTMLInputElement>("input[type='checkbox']")}
       />
     </BrowserRouter>,
   );

@@ -89,7 +89,7 @@ class FArticleResource extends Resource
                             [
                                 'field' => 'cbCreation',
                                 'condition' => 'gte',
-                                'value' => '2000-01-01'
+                                'value' => '2000-01-01T00:00:00Z'
                             ]
                         ]
                     ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE),

@@ -769,7 +769,23 @@ class GraphqlService
             ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
                 'eIntitule',
             ]),
-            'arRefNavigation' => $this->_getFArticleSelectionSet(),
+//            'arRefNavigation' => $this->_getFArticleSelectionSet(), // {"message":"The maximum allowed field cost was exceeded.","extensions":{"code":"HC0047","fieldCost":5963,"maxFieldCost":1000}}
+            'arRefNavigation' => [
+                ...[
+                    ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
+                        'arRef',
+                    ]),
+                ],
+                'prices' => [
+                    ...$this->_getPriceSelectionSet(),
+                    'nCatTarif' => [
+                        ...$this->_getNCatTarifSelectionSet(),
+                    ],
+                    'nCatCompta' => [
+                        ...$this->_getNCatComptaSelectionSet(),
+                    ],
+                ],
+            ],
             'fExpeditiongrilles' => $this->_getFExpeditiongrilles(),
         ];
     }
@@ -1907,7 +1923,7 @@ class GraphqlService
         $cacheName = $useCache ? Sage::TOKEN . '_' . $entityName : null;
         $queryParams = [
             "paged" => "1",
-            "per_page" => "300" // 197 countries exists
+            "per_page" => "100",
         ];
         $selectionSets = $this->_getFPaySelectionSet();
         $this->fPays = $this->getEntitiesAndSaveInOption(
@@ -1917,6 +1933,7 @@ class GraphqlService
             $queryParams,
             $selectionSets,
             $getError,
+            allPages: true,
         );
         return $this->fPays;
     }
