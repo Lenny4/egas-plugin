@@ -14,6 +14,7 @@ use Egas\enum\Sage\TaxeTauxType;
 use Egas\resources\FArticleResource;
 use Egas\resources\FComptetResource;
 use Egas\resources\FDocenteteResource;
+use Egas\resources\ImportResourceResult;
 use Egas\resources\Resource;
 use Egas\Sage;
 use Egas\utils\OrderUtils;
@@ -75,7 +76,7 @@ class WoocommerceService
         }
         $meta = [];
         $fComptetResource = FComptetResource::getInstance();
-        foreach ($fComptetResource->getMetadata()() as $metadata) {
+        foreach ($fComptetResource->metadata() as $metadata) {
             $value = $metadata->getValue();
             if (!is_null($value)) {
                 $meta['_' . Sage::TOKEN . $metadata->getField()] = $value($stdClass);
@@ -157,31 +158,18 @@ class WoocommerceService
             $doType = isset($_POST[Sage::TOKEN . '-fdocentete-dotype'])
                 ? (int)sanitize_text_field(wp_unslash($_POST[Sage::TOKEN . '-fdocentete-dotype']))
                 : 0;
-            $this->importFDocenteteFromSage($doPiece, $doType, $wcOrder);
+            $this->importFDocenteteIntoOrder($doPiece, $doType, $wcOrder);
         }
     }
 
-    public function importFDocenteteFromSage(string $doPiece, string|int $doType, WC_Order|null $order = null, ?string $origin = null): array
+    /**
+     * Low-level import used both by {@see FDocenteteResource::import()} (which resolves/creates the WC_Order
+     * itself from $doPiece/$doType) and by call sites that already have a specific WC_Order to target.
+     */
+    public function importFDocenteteIntoOrder(string $doPiece, string|int $doType, WC_Order $order, ?string $origin = null): ImportResourceResult
     {
         // if the document is big it can take quite some time
         set_time_limit(60 * 10);
-        if (is_null($order)) {
-            $orders = wc_get_orders([
-                'limit' => 1,
-                'meta_query' => [
-                    'relation' => 'AND',
-                    [
-                        'key' => '_' . Sage::TOKEN . '_doPiece',
-                        'value' => $doPiece,
-                    ],
-                    [
-                        'key' => '_' . Sage::TOKEN . '_doType',
-                        'value' => $doType,
-                    ]
-                ]
-            ]);
-            $order = empty($orders) ? new WC_Order() : $orders[0];
-        }
         $graphqlService = GraphqlService::getInstance();
         $extendedFDocentetes = $graphqlService->getFDocentetes(
             $doPiece,
@@ -199,7 +187,7 @@ class WoocommerceService
             getFDocregls: true,
         );
         if (!is_array($extendedFDocentetes)) {
-            return [null, null, $extendedFDocentetes, 0];
+            return ImportResourceResult::failure((string)$extendedFDocentetes);
         }
         $fDocentete = null;
         if (!empty($extendedFDocentetes)) {
@@ -207,16 +195,17 @@ class WoocommerceService
             if (!empty($fDocentete)) {
                 $fDocentete = $fDocentete[0];
             } else {
-                return [null, null, $extendedFDocentetes, 0];
+                return ImportResourceResult::failure(is_string($extendedFDocentetes) ? $extendedFDocentetes : '');
             }
         }
-        $resource = SageService::getInstance()->getResource(FDocenteteResource::ENTITY_NAME);
+        $resource = FDocenteteResource::getInstance();
         foreach ($extendedFDocentetes as $extendedFDocentete) {
-            $canImportFDocentete = $resource->getCanImport()($extendedFDocentete);
+            $canImportFDocentete = $resource->canImport($extendedFDocentete);
             if (!empty($canImportFDocentete)) {
-                return [Response::HTTP_CONFLICT, null, "<div class='error'>
-                        " . implode(' ', $canImportFDocentete) . "
-                                </div>", 0];
+                return ImportResourceResult::failure(
+                    "<div class='error'>" . implode(' ', $canImportFDocentete) . "</div>",
+                    status: Response::HTTP_CONFLICT,
+                );
             }
         }
         if (!empty($origin) && empty($order->get_created_via())) {
@@ -231,7 +220,8 @@ class WoocommerceService
         $order->update_meta_data('_' . Sage::TOKEN . '_doType', $fDocentete->doType);
         $order->save();
         $tasksSynchronizeOrder = $this->getTasksSynchronizeOrder($order, $extendedFDocentetes);
-        return $this->applyTasksSynchronizeOrder($order, $tasksSynchronizeOrder);
+        [, , $message, $wcOrder] = $this->applyTasksSynchronizeOrder($order, $tasksSynchronizeOrder);
+        return ImportResourceResult::success($wcOrder->get_id(), $message);
     }
 
     public function getTasksSynchronizeOrder(
@@ -334,9 +324,9 @@ class WoocommerceService
                     case OrderUtils::ADD_PRODUCT_ACTION:
                     case OrderUtils::REPLACE_PRODUCT_ACTION:
                         if (is_null($syncChange["new"]->postId)) {
-                            [$response, $responseError, $message2, $postId] = $this->importFArticleFromSage($syncChange["new"]->arRef);
-                            $tasksSynchronizeOrder["syncChanges"][$i]["new"]->postId = $postId;
-                            $message .= $message2;
+                            $result = FArticleResource::getInstance()->import($syncChange["new"]->arRef);
+                            $tasksSynchronizeOrder["syncChanges"][$i]["new"]->postId = $result->getId();
+                            $message .= $result->getMessage();
                         }
                         break;
                 }
@@ -421,94 +411,6 @@ class WoocommerceService
         return [null, "", $message, $wcOrder];
     }
 
-    public function importFArticleFromSage(
-        string        $arRef,
-        stdClass|null $fArticle = null,
-        bool          $showSuccessMessage = true,
-    ): array
-    {
-        if (is_null($fArticle)) {
-            $fArticle = GraphqlService::getInstance()->getFArticle($arRef);
-        }
-        if (is_null($fArticle)) {
-            return [null, null, "<div class='error'>
-                    " . __("L'article n'a pas pu être importé", 'egas-data-sync-for-sage') . "
-                            </div>", 0];
-        }
-        $resource = SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME);
-        $canImportFArticle = $resource->getCanImport()($fArticle);
-        if (!empty($canImportFArticle)) {
-            return [Response::HTTP_CONFLICT, null, "<div class='error'>
-                    " . implode(' ', $canImportFArticle) . "
-                            </div>", 0];
-        }
-        $articlePostId = $this->getWooCommerceIdArticle($arRef);
-        $article = $this->convertSageArticleToWoocommerce($fArticle, SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME), $articlePostId);
-        $dismissNotice = "<button type='button' class='notice-dismiss " . Sage::TOKEN . "-notice-dismiss'><span class='screen-reader-text'>" . __('Ignorer cet avis.', 'egas-data-sync-for-sage') . "</span></button>";
-        $urlArticle = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "post.php?post=%id%&action=edit'>" . __("Voir l'article", 'egas-data-sync-for-sage') . "</a></span></strong>";
-        $message = '';
-        if (is_null($articlePostId)) {
-            // cannot create an article without request
-            // ========================================
-            // created with: (new WC_REST_Products_Controller())->create_item($request);
-            // woocommerce/includes/rest-api/Controllers/Version3/class-wc-rest-crud-controller.php : public function create_item( $request )
-            // which extends
-            // woocommerce/includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-            $postArticle = $article;
-            $postArticle["categories"] = array_map(fn(int $categoryId): array => ['id' => $categoryId], $postArticle["categories"]);
-            [$response, $responseError] = SageService::getInstance()->createResource(
-                '/wc/v3/products',
-                'POST',
-                $postArticle,
-                FArticleResource::META_KEY,
-                $arRef,
-            );
-            if (is_string($responseError)) {
-                $message = $responseError;
-            } elseif ($response->get_status() === 201) {
-                $body = $response->get_data();
-                $urlArticle = str_replace('%id%', (string)$body['id'], $urlArticle);
-                $articlePostId = $body['id'];
-                if ($showSuccessMessage) {
-                    $message = "<div class='notice notice-success is-dismissible'>
-                <p>" . __('Article créé: ', 'egas-data-sync-for-sage') . $body['name'] . "</p>" . $urlArticle . "
-                {$dismissNotice}
-                        </div>";
-                }
-            } else {
-                $message = json_encode($response->get_data(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-            }
-        } else {
-            $oldMetadata = SageService::getInstance()->get_post_meta_single($articlePostId);
-            $allMetadataNames = array_map(static fn(array $meta) => $meta['key'], $article["meta_data"]);
-            foreach ($oldMetadata as $key => $value) {
-                if (!in_array($key, $allMetadataNames, true) && str_starts_with((string)$key, '_' . Sage::TOKEN)) {
-                    delete_post_meta($articlePostId, $key);
-                }
-            }
-            foreach ($article["meta_data"] as $meta) {
-                update_post_meta($articlePostId, $meta['key'], $meta['value']);
-            }
-            $wprestResponse = new WP_REST_Response(['id' => $articlePostId], 200);
-            $responseError = null;
-            $urlArticle = str_replace('%id%', (string)$articlePostId, $urlArticle);
-            if ($showSuccessMessage) {
-                $message = "<div class='notice notice-success is-dismissible'>
-                <p>" . __('Article mis à jour: ', 'egas-data-sync-for-sage') . $article["name"] . "</p>" . $urlArticle . "
-                {$dismissNotice}
-                        </div>";
-            }
-        }
-        if (!empty($articlePostId)) {
-            /** @var WC_Product $wcProduct */
-            $wcProduct = wc_get_product($articlePostId);
-            $wcProduct->set_category_ids($article["categories"]);
-            $wcProduct->set_sku($arRef); // for woocommerce to able to search the product
-            $wcProduct->save();
-        }
-        return [$wprestResponse, $responseError, $message, $articlePostId];
-    }
-
     public function getWooCommerceIdArticle(string $arRef): ?int
     {
         global $wpdb;
@@ -543,7 +445,7 @@ class WoocommerceService
             'categories' => array_map(fn(stdClass $fCatalogue) => $fCatalogue->websiteId, $fCatalogues),
             'meta_data' => [],
         ];
-        foreach ($resource->getMetadata()($stdClass) as $metadata) {
+        foreach ($resource->metadata($stdClass) as $metadata) {
             $value = $metadata->getValue();
             $optionName = '_' . Sage::TOKEN . $metadata->getField();
             if (!is_null($value)) {
@@ -616,11 +518,11 @@ class WoocommerceService
         }
         $qty = wc_stock_amount($quantity);
         if (is_null($new->postId)) {
-            [$response, $responseError, $message2, $postId] = $this->importFArticleFromSage($new->arRef);
-            if ($response->get_status() !== 201 && $response->get_status() !== 200) {
-                return $message2;
+            $result = FArticleResource::getInstance()->import($new->arRef);
+            if (!$result->isSuccess()) {
+                return $result->getMessage();
             }
-            $productId = $response->get_data()['id'];
+            $productId = $result->getId();
         }
 
         $product = wc_get_product($productId);
@@ -978,10 +880,11 @@ class WoocommerceService
         $message = '';
         $userId = $new->userId;
         if (is_null($userId)) {
-            [$response, $responseError, $message, $userId] = SageService::getInstance()->importFComptetFromSage($new->ctNum);
-            if (!is_numeric($userId)) {
-                return $message;
+            $result = FComptetResource::getInstance()->import($new->ctNum);
+            if (!$result->isSuccess()) {
+                return $result->getMessage();
             }
+            $userId = $result->getId();
         }
         $wcOrder->set_customer_id($userId);
         $wcOrder->save();

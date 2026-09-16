@@ -394,14 +394,19 @@ $(() => {
     const orderId = $(target).attr("data-order-id");
     const wpnonce = $(target).attr("data-nonce");
 
+    await fetch(
+      siteUrl +
+        "/index.php?rest_route=" +
+        encodeURIComponent(`/${TOKEN}/v1/import/fArticles/` + arRef) +
+        "&_wpnonce=" +
+        wpnonce,
+    );
     const response = await fetch(
       siteUrl +
         "/index.php?rest_route=" +
-        encodeURIComponent(`/${TOKEN}/v1/farticles/` + arRef + "/import") +
+        encodeURIComponent(`/${TOKEN}/v1/orders/` + orderId + "/sync") +
         "&_wpnonce=" +
-        wpnonce +
-        "&orderId=" +
-        orderId,
+        wpnonce,
     );
     // @ts-ignore
     $(blockDom).unblock();

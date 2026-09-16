@@ -67,7 +67,7 @@ class WordpressService
     {
         $optionNames = [];
         foreach (SageService::getInstance()->getResources() as $resource) {
-            foreach ($resource->getOptions()() as $option) {
+            foreach ($resource->options() as $option) {
                 $optionNames[Sage::TOKEN . '_' . $option['id']] = $option['default'];
             }
         }
@@ -314,7 +314,7 @@ class WordpressService
             $resource = SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME);
             $metadataToKeep = [
                 FArticleResource::META_KEY,
-                ...array_map(fn(SageEntityMetadata $sageEntityMetadata): string => '_' . Sage::TOKEN . $sageEntityMetadata->getField(), $resource->getMetadata()()),
+                ...array_map(fn(SageEntityMetadata $sageEntityMetadata): string => '_' . Sage::TOKEN . $sageEntityMetadata->getField(), $resource->metadata()),
             ];
             $meta = get_post_meta($postId);
             foreach ($meta as $key => $values) {

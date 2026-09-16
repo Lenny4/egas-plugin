@@ -414,7 +414,7 @@ class GraphqlService
             "per_page" => "1",
             "sort" => '{"cbMarq": "asc"}',
         ];
-        $selectionSets = $this->_getPDossierSelectionSet();
+        $selectionSets = PDossierResource::getInstance()->selectionSet();
         $pDossier = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -430,23 +430,6 @@ class GraphqlService
         return $this->pDossier;
     }
 
-    public function _getPDossierSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", ['dRaisonSoc']),
-            'nDeviseCompteNavigation' => [
-                ...$this->_formatOperationFilterInput("StringOperationFilterInput", ['dCodeIso']),
-            ],
-        ];
-    }
-
-    private function _formatOperationFilterInput(string $type, array $fields): array
-    {
-        return array_map(static fn(string $field): array => [
-            "name" => $field,
-            "type" => $type,
-        ], $fields);
-    }
 
     private function getEntitiesAndSaveInOption(
         ?string $cacheName,
@@ -737,7 +720,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "50"
         ];
-        $selectionSets = $this->_getPExpeditionSelectionSet();
+        $selectionSets = PExpeditionResource::getInstance()->selectionSet();
         $pExpeditions = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -754,271 +737,6 @@ class GraphqlService
         }
         $this->pExpeditions = $pExpeditions;
         return $this->pExpeditions;
-    }
-
-    public function _getPExpeditionSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'cbIndice',
-                'eTypeFrais', // Base de calcul (Montant forfaitaire, quantité DocumentFraisType) // Type des frais d'expédition
-                'eTypeCalcul', // Valeur, Grille frais fixe, grille frais variable)
-                'eValFrais', // valeur quand eTypeCalcul == 'Valeur'
-                'eTypeLigneFrais', // indique si le prix est en HT ou TTC (HT == 0)
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'eIntitule',
-            ]),
-//            'arRefNavigation' => $this->_getFArticleSelectionSet(), // {"message":"The maximum allowed field cost was exceeded.","extensions":{"code":"HC0047","fieldCost":5963,"maxFieldCost":1000}}
-            'arRefNavigation' => [
-                ...[
-                    ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                        'arRef',
-                    ]),
-                ],
-                'prices' => [
-                    ...$this->_getPriceSelectionSet(),
-                    'nCatTarif' => [
-                        ...$this->_getNCatTarifSelectionSet(),
-                    ],
-                    'nCatCompta' => [
-                        ...$this->_getNCatComptaSelectionSet(),
-                    ],
-                ],
-            ],
-            'fExpeditiongrilles' => $this->_getFExpeditiongrilles(),
-        ];
-    }
-
-    public function _getFArticleSelectionSet(bool $checkIfExists = false): array
-    {
-        if ($checkIfExists) {
-            return [
-                ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                    'arRef',
-                ]),
-            ];
-        }
-        $result = [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'arType',
-                'arPoidsNet',
-                'arPoidsBrut',
-                'arNomencl', // enum
-                'arSuiviStock', // enum
-                'arCondition', // enum U. Vente
-                'arPrixTtc',
-                'arUniteVen', // Unité de vente
-                'canEditArSuiviStock',
-                'clNo1',
-                'clNo2',
-                'clNo3',
-                'clNo4',
-                'arSommeil',
-                'arEscompte',
-                'arVteDebit',
-                'arSommeil',
-                'arContremarque',
-                'arFactPoids',
-                'arPublie',
-                'arHorsStat',
-                'arNotImp',
-                'arFactForfait',
-                'arUnitePoids', // enum UnitePoidsType 0 = tonne, 1 = quintal, 2 = kilogramme, 3 = gramme, 4 =  milligrame
-                'arPoidsNet',
-                'arPoidsBrut',
-                'arCodeBarre',
-            ]),
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'arPrixAch',
-                'arCoef',
-                'arPrixVen',
-                'arPunet', // dernier prix d'achat
-                'arCoutStd',
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'arRef',
-                'arDesign',
-                'faCodeFamille',
-                'arCodeFiscal',
-                'arEdiCode',
-                'arPays',
-                'arRaccourci',
-                'arLangue1',
-                'arLangue2',
-            ]),
-            'fArtclients' => new ArgumentSelectionSetDto($this->_getFArtclientsSelectionSet(), 'acCategorie', [
-                'where' => new RawObject('{ ctNum: { eq: null } }'),
-            ]),
-            'fArtfournisses' => new ArgumentSelectionSetDto($this->_getFArtfournisseSelectionSet(), 'ctNum'),
-            'fArtglosses' => new ArgumentSelectionSetDto($this->_getFArtglossesSelectionSet(), 'glNo'),
-            'fArtstocks' => new ArgumentSelectionSetDto($this->_getFArtstocksSelectionSet(), 'deNo'),
-            'prices' => [
-                ...$this->_getPriceSelectionSet(),
-                'nCatTarif' => [
-                    ...$this->_getNCatTarifSelectionSet(),
-                ],
-                'nCatCompta' => [
-                    ...$this->_getNCatComptaSelectionSet(),
-                ],
-            ],
-        ];
-        for ($i = 1; $i <= 4; $i++) {
-            $result['clNo' . $i . 'Navigation'] = $this->_getFCatalogueSelectionSet();
-        }
-        return $result;
-    }
-
-    public function _getFArtclientsSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'acCategorie',
-                'acPrixVen',
-                'acCoef',
-                'acPrixTtc',
-                'acRemise',
-                'acTypeRem',
-                'acQteMont',
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'ctNum',
-            ]),
-        ];
-    }
-
-    public function _getFArtfournisseSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'afRefFourniss',
-                'afPrincipal',
-                'afPrixAch',
-                'ctNum'
-            ]),
-            'ctNumNavigation' => [
-                ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                    'ctNum',
-                    'ctIntitule',
-                ]),
-            ],
-        ];
-    }
-
-    public function _getFArtglossesSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'glNo',
-            ]),
-            'glNoNavigation' => $this->_getFGlossaireSelectionSet()
-        ];
-    }
-
-    public function _getFGlossaireSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'glNo',
-                'glDomaine', // 0 -> Article, 1 => document
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'glIntitule',
-                'glText',
-            ]),
-        ];
-    }
-
-    public function _getFArtstocksSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'deNo',
-                'asQteMini',
-                'asQteMaxi',
-                'asPrincipal',
-            ]),
-        ];
-    }
-
-    public function _getPriceSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'priceHt',
-                'priceTtc',
-            ]),
-            'taxes' => [
-                ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                    'amount',
-                ]),
-                ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                    'taxeNumber',
-                ]),
-                'fTaxe' => $this->_getFTaxeSelectionSet(),
-            ],
-        ];
-    }
-
-    public function _getFTaxeSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'taIntitule',
-                'taCode',
-            ]),
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'taTaux',
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'taTtaux',
-                'taNp',
-            ]),
-        ];
-    }
-
-    public function _getNCatTarifSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'cbIndice',
-                'ctPrixTtc',
-            ]),
-        ];
-    }
-
-    public function _getNCatComptaSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'cbIndice',
-            ]),
-        ];
-    }
-
-    public function _getFCatalogueSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'clNo',
-                'clNoParent',
-                'clNiveau',
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'clIntitule',
-                'clCode',
-            ]),
-        ];
-    }
-
-    public function _getFExpeditiongrilles(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'egBorne',
-                'egFrais',
-            ]),
-        ];
     }
 
     public function getFJournauxs(
@@ -1047,7 +765,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "50"
         ];
-        $selectionSets = $this->_getFJournauxsSelectionSet();
+        $selectionSets = FJournauxsResource::getInstance()->selectionSet();
         $fJournauxs = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1058,17 +776,6 @@ class GraphqlService
         );
         $this->fJournauxs = $fJournauxs;
         return $this->fJournauxs;
-    }
-
-    public function _getFJournauxsSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'joNum',
-                'joIntitule',
-                'joType',
-            ]),
-        ];
     }
 
     public function getPReglements(
@@ -1097,7 +804,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "50"
         ];
-        $selectionSets = $this->_getPReglementSelectionSet();
+        $selectionSets = PReglementResource::getInstance()->selectionSet();
         $pReglements = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1108,18 +815,6 @@ class GraphqlService
         );
         $this->pReglements = $pReglements;
         return $this->pReglements;
-    }
-
-    public function _getPReglementSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'rIntitule',
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'cbIndice',
-            ]),
-        ];
     }
 
     public function getPUnites(
@@ -1149,7 +844,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "50"
         ];
-        $selectionSets = $this->_getPUniteSelectionSet();
+        $selectionSets = PUniteResource::getInstance()->selectionSet();
         $this->pUnites = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1159,16 +854,6 @@ class GraphqlService
             $getError,
         );
         return $this->pUnites;
-    }
-
-    public function _getPUniteSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'cbIndice',
-                'uIntitule',
-            ]),
-        ];
     }
 
     public function getFDepots(
@@ -1188,7 +873,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "50"
         ];
-        $selectionSets = $this->_getFDepotSelectionSet();
+        $selectionSets = FDepotResource::getInstance()->selectionSet();
         $this->fDepots = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1200,17 +885,6 @@ class GraphqlService
         return $this->fDepots;
     }
 
-    public function _getFDepotSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'deIntitule',
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'deNo',
-            ]),
-        ];
-    }
 
     public function getFFamilles(
         bool  $useCache = true,
@@ -1243,7 +917,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "100"
         ];
-        $selectionSets = $this->_getFFamilleSelectionSet();
+        $selectionSets = FFamilleResource::getInstance()->selectionSet();
         $this->fFamilles = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1256,15 +930,6 @@ class GraphqlService
         return $this->fFamilles;
     }
 
-    public function _getFFamilleSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'faCodeFamille',
-                'faIntitule',
-            ]),
-        ];
-    }
 
     public function getFArticle(
         string $arRef,
@@ -1287,7 +952,7 @@ class GraphqlService
                 "paged" => "1",
                 "per_page" => "1"
             ],
-            $this->_getFArticleSelectionSet(checkIfExists: $checkIfExists),
+            FArticleResource::getInstance()->selectionSet(['checkIfExists' => $checkIfExists]),
         );
         if (is_null($fArticle) || $fArticle->data->fArticles->totalCount !== 1) {
             return null;
@@ -1373,14 +1038,14 @@ class GraphqlService
                 "paged" => "1",
                 "per_page" => $single ? "1" : "20"
             ],
-            $this->_getFDocenteteSelectionSet(
-                getFDoclignes: $getFDoclignes,
-                getExpedition: $getExpedition,
-                getUser: $getUser,
-                getLivraison: $getLivraison,
-                getLotSerie: $getLotSerie,
-                getFDocregls: $getFDocregls,
-            ),
+            FDocenteteResource::getInstance()->selectionSet([
+                'getFDoclignes' => $getFDoclignes,
+                'getExpedition' => $getExpedition,
+                'getUser' => $getUser,
+                'getLivraison' => $getLivraison,
+                'getLotSerie' => $getLotSerie,
+                'getFDocregls' => $getFDocregls,
+            ]),
             getError: $getError,
         );
         if (is_null($fDocentetes) || is_string($fDocentetes)) {
@@ -1438,192 +1103,6 @@ class GraphqlService
             return $fDocentetes[0];
         }
         return $fDocentetes;
-    }
-
-    public function _getFDocenteteSelectionSet(
-        bool $getFDoclignes = false,
-        bool $getExpedition = false,
-        bool $getUser = false,
-        bool $getLivraison = false,
-        bool $getLotSerie = false,
-        bool $getFDocregls = false,
-    ): array
-    {
-        $result = [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", ['doType', 'doDomaine']),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'doPiece',
-                'doTiers',
-                'doStatut',
-                'doStatutString',
-                'doRef',
-                'nCatCompta', // catégorie comptable
-                'doTarif', // catégorie tarifaire
-            ]),
-        ];
-        if ($getExpedition) {
-            $result['doExpeditNavigation'] = $this->_getPExpeditionSelectionSet();
-            $result['fraisExpedition'] = $this->_getFraisExpeditionSelectionSet();
-        }
-        if ($getFDoclignes) {
-            $result['fDoclignes'] = new ArgumentSelectionSetDto($this->_getFDocligneSelectionSet($getLotSerie), 'dlNo');
-        }
-        if ($getUser) {
-            $result['doTiersNavigation'] = $this->_getFComptetSelectionSet();
-        }
-        if ($getLivraison) {
-            $result['liNoNavigation'] = $this->_getFLivraisonSelectionSet();
-        }
-        if ($getFDocregls) {
-            $result['fDocregls'] = $this->_getFDocreglSelectionSet();
-        }
-        return $result;
-    }
-
-    public function _getFraisExpeditionSelectionSet(): array
-    {
-        return [
-            ...$this->_getPriceSelectionSet(),
-        ];
-    }
-
-    public function _getFDocligneSelectionSet(
-        bool $getLotSerie = false,
-    ): array
-    {
-        $mandatoryFields = SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME)->getMandatoryFields();
-        $fArticleSelectionSet = array_filter($this->_getFArticleSelectionSet(), fn(array|ArgumentSelectionSetDto $selectionSet): bool => is_array($selectionSet) && array_key_exists('name', $selectionSet) && in_array($selectionSet['name'], $mandatoryFields));
-        $r = [
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'dlMontantHt',
-                // 'dlMontantTtc', // don't use dlMontantTtc because it applies ignored taxe
-            ]),
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                ...array_map(static fn(string $field): string => 'dlCodeTaxe' . $field, FDocenteteUtils::ALL_TAXES),
-                ...array_map(static fn(string $field): string => 'dlMontantTaxe' . $field, FDocenteteUtils::ALL_TAXES),
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'dlNo',
-                'dlLigne',
-                'doType',
-                'dlQte',
-                ...array_map(static fn(string $field): string => 'dlQte' . $field, FDocenteteUtils::FDOCLIGNE_MAPPING_DO_TYPE),
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'doPiece',
-                'arRef',
-                'dlDesign',
-                ...array_map(static fn(string $field): string => 'dlPiece' . $field, FDocenteteUtils::FDOCLIGNE_MAPPING_DO_TYPE),
-            ]),
-            'arRefNavigation' => $fArticleSelectionSet,
-        ];
-        if ($getLotSerie) {
-            $r['fLotseriesOut'] = [
-                ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                    'lsNoSerie',
-                ]),
-                ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                    'cbMarq',
-                    'dlNoIn',
-                    'dlNoOut',
-                    'lsQte',
-                ]),
-            ];
-        }
-        return $r;
-    }
-
-    public function _getFComptetSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'ctNum',
-                'ctIntitule',
-                'ctEmail',
-                'ctContact',
-                'ctAdresse',
-                'ctComplement',
-                'ctVille',
-                'ctCodePostal',
-                'ctPays',
-                'ctPaysCode',
-                'ctTelephone',
-                'ctCodeRegion',
-                'nCatTarif',
-                'nCatCompta',
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'ctType',
-            ]),
-            'fLivraisons' => new ArgumentSelectionSetDto($this->_getFLivraisonSelectionSet(), 'liNo'),
-        ];
-    }
-
-    public function _getFLivraisonSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'liNo',
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'liIntitule',
-                'liAdresse',
-                'liComplement',
-                'liCodePostal',
-                'liPrincipal',
-                'liVille',
-                'liPays',
-                'liPaysCode',
-                'liContact',
-                'liTelephone',
-                'liEmail',
-                'liAdresseFact',
-                'liCodeRegion',
-            ]),
-        ];
-    }
-
-    public function _getFDocreglSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'drNo',
-            ]),
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'drMontant',
-            ]),
-            'fRegleches' => $this->_getFReglecheSelectionSet(),
-        ];
-    }
-
-    public function _getFReglecheSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'rcMontant',
-            ]),
-            'fCreglement' => $this->_getFCreglementSelectionSet(),
-        ];
-    }
-
-    public function _getFCreglementSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'rgNo',
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'ctNumPayeur',
-                'rgDate',
-                'rgReference',
-                'rgLibelle',
-                'joNum',
-                'cgNum',
-            ]),
-            ...$this->_formatOperationFilterInput("DecimalOperationFilterInput", [
-                'rgMontant',
-            ]),
-        ];
     }
 
     private function addWordpressUserId(array $fDocentetes): array
@@ -1705,7 +1184,7 @@ class GraphqlService
                 "paged" => "1",
                 "per_page" => "1"
             ],
-            $this->_getFComptetSelectionSet(),
+            FComptetResource::getInstance()->selectionSet(),
         );
         if (is_null($fComptet) || $fComptet->data->fComptets->totalCount !== 1) {
             return null;
@@ -1732,7 +1211,7 @@ class GraphqlService
                 "paged" => "1",
                 "per_page" => "1"
             ],
-            $this->_getWebsiteSelectionSet(),
+            WebsiteResource::getInstance()->selectionSet(),
         );
         if (is_null($website) || $website->data->websites->totalCount !== 1) {
             return null;
@@ -1741,22 +1220,6 @@ class GraphqlService
         return $website->data->websites->items[0];
     }
 
-    public function _getWebsiteSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'idNewOrder',
-                'idNewProduct',
-                'idNewUser',
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'id',
-                'cbMarqNewFArticle',
-                'cbMarqNewFDocentete',
-                'cbMarqNewFComptet',
-            ]),
-        ];
-    }
 
     public function getPCattarifs(
         bool  $useCache = true,
@@ -1784,7 +1247,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "100"
         ];
-        $selectionSets = $this->_getPCattarifSelectionSet();
+        $selectionSets = PCattarifResource::getInstance()->selectionSet();
         $this->pCattarifs = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1797,17 +1260,6 @@ class GraphqlService
         return $this->pCattarifs;
     }
 
-    public function _getPCattarifSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'cbIndice',
-            ]),
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'ctIntitule',
-            ]),
-        ];
-    }
 
     public function getFGlossaires(
         bool  $useCache = true,
@@ -1825,7 +1277,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "100"
         ];
-        $selectionSets = $this->_getFGlossaireSelectionSet();
+        $selectionSets = FGlossaireResource::getInstance()->selectionSet();
         $this->fGlossaires = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1854,7 +1306,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "100"
         ];
-        $selectionSets = $this->_getFCatalogueSelectionSet();
+        $selectionSets = FCatalogueResource::getInstance()->selectionSet();
         $this->fCatalogues = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1883,7 +1335,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "100"
         ];
-        $selectionSets = $this->_getCbSysLibreSelectionSet();
+        $selectionSets = CbSyslibreResource::getInstance()->selectionSet();
         $this->cbSysLibres = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1896,19 +1348,6 @@ class GraphqlService
         return $this->cbSysLibres;
     }
 
-    public function _getCbSysLibreSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'cbFile',
-                'cbName',
-            ]),
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'cbLen',
-                'cbType',
-            ]),
-        ];
-    }
 
     public function getFPays(
         bool  $useCache = true,
@@ -1925,7 +1364,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "100",
         ];
-        $selectionSets = $this->_getFPaySelectionSet();
+        $selectionSets = FPaysResource::getInstance()->selectionSet();
         $this->fPays = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1938,15 +1377,6 @@ class GraphqlService
         return $this->fPays;
     }
 
-    public function _getFPaySelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                'paIntitule',
-                'paCode',
-            ]),
-        ];
-    }
 
     public function getFTaxes(
         bool  $useCache = true,
@@ -1963,7 +1393,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "100",
         ];
-        $selectionSets = $this->_getFTaxeSelectionSet();
+        $selectionSets = FTaxeResource::getInstance()->selectionSet();
         $this->fTaxes = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -1992,7 +1422,7 @@ class GraphqlService
             "paged" => "1",
             "per_page" => "1"
         ];
-        $selectionSets = $this->_getPCatComptaSelectionSet();
+        $selectionSets = PCatcomptaResource::getInstance()->selectionSet();
         $pCatComptas = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -2021,19 +1451,6 @@ class GraphqlService
         return $this->pCatComptas;
     }
 
-    public function _getPCatComptaSelectionSet(): array
-    {
-        $result = [];
-        foreach (PCatComptaUtils::ALL_TIERS_TYPE as $t) {
-            $result = [
-                ...$result,
-                ...$this->_formatOperationFilterInput("StringOperationFilterInput", [
-                    ...array_map(static fn(int $number): string => 'caCompta' . $t . str_pad((string)$number, 2, '0', STR_PAD_LEFT), range(1, PCatComptaUtils::NB_TIERS_TYPE)),
-                ]),
-            ];
-        }
-        return $result;
-    }
 
     public function updateAllSageEntitiesInOption(array $ignores = []): void
     {
@@ -2090,7 +1507,7 @@ class GraphqlService
             "per_page" => "1",
             "sort" => '{"cbMarq": "asc"}',
         ];
-        $selectionSets = $this->_getPPreferenceSelectionSet();
+        $selectionSets = PPreferenceResource::getInstance()->selectionSet();
         $pPreference = $this->getEntitiesAndSaveInOption(
             $cacheName,
             $getFromSage,
@@ -2106,14 +1523,6 @@ class GraphqlService
         return $this->pPreference;
     }
 
-    public function _getPPreferenceSelectionSet(): array
-    {
-        return [
-            ...$this->_formatOperationFilterInput("IntOperationFilterInput", [
-                'prUnitePoids',
-            ]),
-        ];
-    }
 
     public function getResourceWithQuery(Resource $resource, bool $getData = true, bool $allFilterField = false, bool $withMetadata = true): array
     {
@@ -2141,7 +1550,7 @@ class GraphqlService
         $transDomain = $resource->getTransDomain();
         $trans = SageTranslationUtils::getTranslations();
         $selectionSets = [];
-        foreach ($resource->getSelectionSet()() as $selectionSet) {
+        foreach ($resource->selectionSet() as $selectionSet) {
             if (is_array($selectionSet) && array_key_exists('name', $selectionSet)) {
                 $selectionSets[$selectionSet['name']] = $selectionSet['type'];
             }

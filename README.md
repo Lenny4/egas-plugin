@@ -3,6 +3,8 @@ Api host url: https://192.168.0.35
 Wordpress host url: https://caddy
 Wordpress db host: 192.168.0.31
 
+docker compose -f compose.yaml -f compose-windows.yaml up
+
 rector:
 ./runc php vendor/bin/rector process --debug --clear-cache
 rector specific folder:
@@ -19,8 +21,6 @@ car ça bloque rector, peut être le rajouter dans le build
 launch chrome this way: `google-chrome --ignore-certificate-errors`
 
 Plugin Check pour vérifier si le plugin est conforme
-
-docker compose -f compose.yaml -f compose-windows.yaml up
 
 https://trello.com/b/t64T4Swz/sage-api
 

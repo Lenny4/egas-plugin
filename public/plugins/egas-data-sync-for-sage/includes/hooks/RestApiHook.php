@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Egas\hooks;
 
-use Automattic\WooCommerce\Admin\Overrides\Order;
 use Egas\controllers\WoocommerceController;
 use Egas\enum\Sage\DocumentProvenanceTypeEnum;
 use Egas\enum\Sage\DomaineTypeEnum;
@@ -118,62 +117,11 @@ class RestApiHook
                     $order = new WC_Order($wprestRequest['id']);
                     $woocommerceService = WoocommerceService::getInstance();
                     $fDocenteteIdentifier = $woocommerceService->getFDocenteteIdentifierFromOrder($order);
-                    [$response, $responseError, $message, $order] = WoocommerceService::getInstance()->importFDocenteteFromSage($fDocenteteIdentifier["doPiece"], $fDocenteteIdentifier["doType"], $order);
+                    $result = $woocommerceService->importFDocenteteIntoOrder($fDocenteteIdentifier["doPiece"], $fDocenteteIdentifier["doType"], $order);
                     return new WP_REST_Response([
                         // we create a new order here to be sure to refresh all data from bdd
-                        'html' => WoocommerceController::getMetaboxFDocentete($order, message: $message),
+                        'html' => WoocommerceController::getMetaboxFDocentete(new WC_Order($result->getId() ?? $order->get_id()), message: $result->getMessage()),
                     ], Response::HTTP_OK);
-                },
-                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
-            ]);
-            register_rest_route(Sage::TOKEN . '/v1', '/farticles/(?P<arRef>([^&]*))/import', args: [ // https://stackoverflow.com/a/10126995/6824121
-                'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
-                    $arRef = $wprestRequest['arRef'];
-                    [$response, $responseError, $message, $postId] = WoocommerceService::getInstance()->importFArticleFromSage(
-                        $arRef,
-                    );
-                    if ($wprestRequest->get_param('json') === '1') {
-                        if ($response instanceof WP_REST_Response && $response->is_error()) {
-                            $error = $response->as_error();
-                            $body = json_encode($error->get_error_messages(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-                            $code = $error->get_error_code();
-                            if (!is_numeric($code)) {
-                                $code = 500;
-                            }
-                        } elseif (is_null($response) || is_int($response)) {
-                            return new WP_REST_Response(json_encode([
-                                'responseError' => $responseError,
-                                'message' => $message,
-                            ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), is_int($response) ? $response : Response::HTTP_INTERNAL_SERVER_ERROR);
-                        } else {
-                            // $response est un WP_REST_Response valide (succès ou erreur HTTP non-WP_Error)
-                            $body = $response->get_data();
-                            $code = $response->get_status();
-                        }
-                        return new WP_REST_Response($body, $code);
-                    }
-                    $order = new Order($wprestRequest['orderId']);
-                    return new WP_REST_Response([
-                        'html' => WoocommerceController::getMetaboxFDocentete(
-                            $order,
-                            message: $message,
-                        )
-                    ], is_int($response) ? $response : $response->get_status());
-                },
-                'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
-            ]);
-            register_rest_route(Sage::TOKEN . '/v1', '/fdocentetes/(?P<doPiece>[A-Za-z0-9]+)/(?P<doType>\d+)/import', args: [
-                'methods' => 'GET',
-                'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
-                    $doPiece = $wprestRequest['doPiece'];
-                    $doType = $wprestRequest['doType'];
-                    $orderId = $wprestRequest->get_param('orderId');
-                    [$response, $responseError, $message, $order] = WoocommerceService::getInstance()->importFDocenteteFromSage($doPiece, $doType, new WC_Order($orderId), $wprestRequest->get_param('origin'));
-                    return new WP_REST_Response([
-                        'id' => is_int($order) ? $order : $order->get_id(),
-                        'message' => $message,
-                    ], is_int($response) ? $response : Response::HTTP_OK);
                 },
                 'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);
@@ -233,10 +181,11 @@ class RestApiHook
                     $body = json_decode($wprestRequest->get_body(), false, 512, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
                     $doPiece = $body->{Sage::TOKEN . "-fdocentete-dopiece"};
                     $doType = (int)$body->{Sage::TOKEN . "-fdocentete-dotype"};
-                    [$order, $extendedFDocentetes] = WoocommerceService::getInstance()->importFDocenteteFromSage($doPiece, $doType, new WC_Order($wprestRequest['id']));
+                    $order = new WC_Order($wprestRequest['id']);
+                    $result = WoocommerceService::getInstance()->importFDocenteteIntoOrder($doPiece, $doType, $order);
                     return new WP_REST_Response([
                         // we create a new order here to be sure to refresh all data from bdd
-                        'html' => WoocommerceController::getMetaboxFDocentete($order)
+                        'html' => WoocommerceController::getMetaboxFDocentete(new WC_Order($result->getId() ?? $order->get_id()))
                     ], Response::HTTP_OK);
                 },
                 'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
@@ -312,10 +261,16 @@ class RestApiHook
                 'methods' => 'GET',
                 'callback' => static function (WP_REST_Request $wprestRequest): WP_REST_Response {
                     $resource = SageService::getInstance()->getResource($wprestRequest['entityName']);
-                    $postId = $resource->getImport()($wprestRequest['identifier']);
+                    if ($resource === null) {
+                        return new WP_REST_Response([
+                            'message' => __('Ressource inconnue', 'egas-data-sync-for-sage'),
+                        ], Response::HTTP_NOT_FOUND);
+                    }
+                    $result = $resource->import($wprestRequest['identifier']);
                     return new WP_REST_Response([
-                        'id' => $postId,
-                    ], Response::HTTP_OK);
+                        'id' => $result->getId(),
+                        'message' => $result->getMessage(),
+                    ], $result->getStatus() ?? ($result->isSuccess() ? Response::HTTP_OK : Response::HTTP_INTERNAL_SERVER_ERROR));
                 },
                 'permission_callback' => static fn(WP_REST_Request $wprestRequest) => current_user_can('manage_options'),
             ]);

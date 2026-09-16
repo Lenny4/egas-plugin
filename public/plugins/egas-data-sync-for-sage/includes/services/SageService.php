@@ -99,7 +99,7 @@ WHERE user_login LIKE %s
         }
         $resource = SageService::getInstance()->getResource(FArticleResource::ENTITY_NAME);
         foreach ($fDoclignes as $fDocligne) {
-            $fDocligne->canImport = $resource->getCanImport()($fDocligne->arRefNavigation);
+            $fDocligne->canImport = $resource->canImport($fDocligne->arRefNavigation);
         }
         usort($fDoclignes, static function (stdClass $a, stdClass $b): int {
             foreach (FDocenteteUtils::FDOCLIGNE_MAPPING_DO_TYPE as $suffix) {
@@ -139,10 +139,12 @@ WHERE user_login LIKE %s
             $resources = [];
             $files = glob(__DIR__ . '/../resources' . '/*.php');
             foreach ($files as $file) {
-                if (str_ends_with($file, '/Resource.php')) {
-                    continue;
-                }
-                if (str_ends_with($file, '/ImportConditionDto.php')) {
+                if (
+                    str_ends_with($file, '/Resource.php') ||
+                    str_ends_with($file, '/ResourceTrait.php') ||
+                    str_ends_with($file, '/ImportConditionDto.php') ||
+                    str_ends_with($file, '/ImportResourceResult.php')
+                ) {
                     continue;
                 }
                 $hookClass = 'Egas\\resources\\' . basename($file, '.php');
@@ -702,71 +704,6 @@ WHERE user_login LIKE %s
         return [$wprestResponse, $responseError];
     }
 
-    /**
-     * If fComptet is more up to date than user -> update user in wordpress
-     * If user is more up to date than fComptet -> update fComptet in sage
-     */
-    public function importFComptetFromSage(
-        ?string              $ctNum,
-        stdClass|string|null $fComptet = null,
-        bool                 $showSuccessMessage = true,
-    ): array
-    {
-        if (is_null($ctNum)) {
-            return [null, null, "<div class='error'>
-                    " . __("Vous devez spécifier le numéro de compte Sage", 'egas-data-sync-for-sage') . "
-                            </div>", 0];
-        }
-        $fComptet ??= GraphqlService::getInstance()->getFComptet($ctNum);
-        if (is_null($fComptet)) {
-            return [null, null, "<div class='error'>
-                    " . __("Le compte Sage n'a pas pu être importé", 'egas-data-sync-for-sage') . "
-                            </div>", 0];
-        }
-        $sageService = SageService::getInstance();
-        $resource = $sageService->getResource(FComptetResource::ENTITY_NAME);
-        $canImportFComptet = $resource->getCanImport()($fComptet);
-        if (!empty($canImportFComptet)) {
-            return [null, null, "<div class='error'>
-                        " . implode(' ', $canImportFComptet) . "
-                                </div>", 0];
-        }
-        $ctNum = $fComptet->ctNum;
-        $userId = WordpressService::getInstance()->getUserIdWithCtNum($ctNum);
-        [$userId, $wpUser, $metadata] = WoocommerceService::getInstance()->convertFComptetToUser(
-            $fComptet,
-            $userId,
-        );
-        if (is_string($wpUser)) {
-            return [null, null, $wpUser, $userId];
-        }
-        $newUser = is_null($userId);
-        if ($newUser) {
-            $userId = wp_create_user($wpUser->user_login, $wpUser->user_pass, $wpUser->user_email);
-        }
-        if ($userId instanceof WP_Error) {
-            return [null, null, "<div class='notice notice-error is-dismissible'>
-                                <pre>" . $userId->get_error_code() . "</pre>
-                                <pre>" . $userId->get_error_message() . "</pre>
-                                </div>", $userId];
-        }
-        $wpUser = new WP_User($userId);
-        $wpUser->user_email = $sageService->getEmailFromFComptet($fComptet);
-        wp_update_user($wpUser);
-        foreach ($metadata as $key => $value) {
-            update_user_meta($userId, $key, $value);
-        }
-        $url = "<strong><span style='display: block; clear: both;'><a href='" . get_admin_url() . "user-edit.php?user_id=" . $userId . "'>" . __("Voir l'utilisateur", 'egas-data-sync-for-sage') . "</a></span></strong>";
-        if (!$newUser) {
-            return [true, null, $showSuccessMessage ? "<div class='notice notice-success is-dismissible'>
-                        " . __('L\'utilisateur a été modifié', 'egas-data-sync-for-sage') . $url . "
-                                </div>" : "", $userId];
-        }
-        return [true, null, $showSuccessMessage ? "<div class='notice notice-success is-dismissible'>
-                        " . __('L\'utilisateur a été créé', 'egas-data-sync-for-sage') . $url . "
-                                </div>" : "", $userId];
-    }
-
     public function getEmailFromFComptet(stdClass $fComptet): string
     {
         $email = explode(';', $fComptet->ctEmail ?? '')[0];
@@ -804,7 +741,7 @@ WHERE user_login LIKE %s
         }
         // region custom meta fields
         if ($withMetadata) {
-            foreach ($resource->getMetadata()() as $metadata) {
+            foreach ($resource->metadata() as $metadata) {
                 if (!$metadata->getShowInOptions()) {
                     continue;
                 }
@@ -848,11 +785,7 @@ WHERE user_login LIKE %s
         $entityName = $resource->getEntityName();
         $fieldNames = array_map(static fn(array $field): string|array => str_replace(Sage::PREFIX_META_DATA, '', $field['name']), array_filter($fields, static fn(array $field): bool => str_starts_with((string)$field['name'], Sage::PREFIX_META_DATA)));
         $mandatoryField = $resource->getMandatoryFields()[0];
-        $getIdentifier = $resource->getGetIdentifier();
-        if (is_null($getIdentifier)) {
-            $getIdentifier = static fn(array $entity) => $entity[$mandatoryField];
-        }
-        $ids = array_map($getIdentifier, $data["data"][$entityName]["items"]);
+        $ids = array_map(static fn(array $entity): string => $resource->getIdentifier($entity), $data["data"][$entityName]["items"]);
 
         $metaKeyIdentifier = $resource->getMetaKeyIdentifier();
         $metaTable = $resource->getMetaTable();
@@ -889,16 +822,6 @@ ORDER BY {$metaTable2}.meta_key = %s DESC
 
         $includePostId = array_filter($fields, static fn(array $field): bool => $field['name'] === Sage::META_DATA_PREFIX . '_postId') !== [];
         $mapping = array_flip($mapping);
-        $canImport = $resource->getCanImport();
-        $postUrl = $resource->getPostUrl();
-        if (is_null($postUrl)) {
-            $postUrl = static function (array $entity): ?string {
-                if (!empty($entity["_" . Sage::TOKEN . "_postId"])) {
-                    return admin_url('post.php?post=' . $entity["_" . Sage::TOKEN . "_postId"]) . '&action=edit';
-                }
-                return null;
-            };
-        }
         foreach ($data["data"][$entityName]["items"] as $i => &$item) {
             foreach ($fieldNames as $fieldName) {
                 if (isset($results[$item[$mandatoryField]][$fieldName])) {
@@ -909,13 +832,13 @@ ORDER BY {$metaTable2}.meta_key = %s DESC
             }
             if ($includePostId) {
                 $item['_' . Sage::TOKEN . '_postId'] = null;
-                $key = $getIdentifier($item);
+                $key = $resource->getIdentifier($item);
                 if (array_key_exists($key, $mapping)) {
                     $item['_' . Sage::TOKEN . '_postId'] = $mapping[$key];
                 }
             }
-            $item['_' . Sage::TOKEN . '_can_import'] = $canImport($item);
-            $item['_' . Sage::TOKEN . '_post_url'] = $postUrl($item);
+            $item['_' . Sage::TOKEN . '_can_import'] = $resource->canImport($item);
+            $item['_' . Sage::TOKEN . '_post_url'] = $resource->postUrl($item);
             $item['_' . Sage::TOKEN . '_identifier'] = $ids[$i];
         }
         return $data;
@@ -949,7 +872,7 @@ ORDER BY {$metaTable2}.meta_key = %s DESC
 
     public function importFromSageIfUpdateApi(Resource $resource, int $wpIdentifier): array
     {
-        $oldMetaData = $resource->getBddMetadata()($wpIdentifier);
+        $oldMetaData = $resource->bddMetadata($wpIdentifier);
         $sageIdentifier = $oldMetaData[$resource::META_KEY] ?? null;
         $hasChanges = false;
         $meta = [
@@ -960,7 +883,7 @@ ORDER BY {$metaTable2}.meta_key = %s DESC
         $messages = [];
         $updateApi = $oldMetaData['_' . Sage::TOKEN . '_updateApi'] ?? null;
         $changeTypes = [];
-        $sageEntity = $sageIdentifier ? $resource->getSageEntity()($sageIdentifier) : null;
+        $sageEntity = $sageIdentifier ? $resource->sageEntity($sageIdentifier) : null;
         if (
             !empty($sageIdentifier)
             && empty($updateApi)
@@ -969,10 +892,10 @@ ORDER BY {$metaTable2}.meta_key = %s DESC
                 FILTER_VALIDATE_BOOLEAN
             )
         ) {
-            [$response, $responseError, $message, $postId] = $resource->getImportFromSage()($sageIdentifier, $sageEntity, false);
-            $messages = array_values(array_unique([$responseError, $message]));
-            if (!is_null($response)) {
-                $meta['new'] = $resource->getBddMetadata()($wpIdentifier, true);
+            $result = $resource->import($sageIdentifier, $sageEntity);
+            $messages = array_values(array_filter(array_unique([$result->getError()?->get_error_message(), $result->getMessage()])));
+            if ($result->isSuccess()) {
+                $meta['new'] = $resource->bddMetadata($wpIdentifier, true);
                 foreach (['new', 'old'] as $key) {
                     $meta[$key] = array_filter(
                         $meta[$key],

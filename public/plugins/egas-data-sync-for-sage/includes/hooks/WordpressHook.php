@@ -232,7 +232,7 @@ LIMIT 1
             $sageService = SageService::getInstance();
             $metadata = $sageService->get_user_meta_single($wpUser->ID);
             if (array_key_exists(FComptetResource::META_KEY, $metadata)) {
-                $sageService->importFComptetFromSage($metadata[FComptetResource::META_KEY], showSuccessMessage: false);
+                FComptetResource::getInstance()->import($metadata[FComptetResource::META_KEY]);
             }
             if (
                 $creating &&

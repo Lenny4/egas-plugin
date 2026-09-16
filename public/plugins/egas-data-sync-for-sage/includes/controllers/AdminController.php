@@ -219,9 +219,8 @@ class AdminController
                         'options' => array_combine(Sage::$paginationRange, Sage::$paginationRange),
                         'default' => (string)Sage::$defaultPagination,
                     ],
-                    ...$resource->getOptions()(),
+                    ...$resource->options(),
                 ];
-                $resource->setOptions(fn(): array => $options);
                 $settings[$resource->getEntityName()] = [
                     'title' => $resource->getTitle(),
                     'description' => $resource->getDescription(),

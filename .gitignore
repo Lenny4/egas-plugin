@@ -20,3 +20,4 @@ cache
 public/object-cache.php
 public/wflogs
 public/plugins/egas-data-sync-for-sage/readme.txt
+.mcp.json
